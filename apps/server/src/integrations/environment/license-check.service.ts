@@ -1,6 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { EnvironmentService } from './environment.service';
+import { Feature } from '../../common/features';
+
+/**
+ * Features that are available on self-hosted instances even without a bundled
+ * enterprise license module. These are backed by first-party (non-EE)
+ * implementations shipped in this build (e.g. custom OIDC SSO).
+ */
+const SELF_HOSTED_FALLBACK_FEATURES: string[] = [
+  Feature.SSO_CUSTOM,
+  Feature.SECURITY_SETTINGS,
+];
 
 @Injectable()
 export class LicenseCheckService {
@@ -43,9 +54,12 @@ export class LicenseCheckService {
       const licenseService = this.moduleRef.get(LicenseModule.LicenseService, {
         strict: false,
       });
-      return licenseService.hasFeature(licenseKey, feature);
+      const features: string[] = licenseService.getFeatures(licenseKey) ?? [];
+      return new Set([...features, ...SELF_HOSTED_FALLBACK_FEATURES]).has(
+        feature,
+      );
     } catch {
-      return false;
+      return SELF_HOSTED_FALLBACK_FEATURES.includes(feature);
     }
   }
 
@@ -56,9 +70,12 @@ export class LicenseCheckService {
       const licenseService = this.moduleRef.get(LicenseModule.LicenseService, {
         strict: false,
       });
-      return licenseService.getFeatures(licenseKey);
+      const features: string[] = licenseService.getFeatures(licenseKey) ?? [];
+      return [
+        ...new Set([...features, ...SELF_HOSTED_FALLBACK_FEATURES]),
+      ];
     } catch {
-      return [];
+      return [...SELF_HOSTED_FALLBACK_FEATURES];
     }
   }
 
