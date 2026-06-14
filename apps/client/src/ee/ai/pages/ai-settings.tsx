@@ -63,9 +63,7 @@ export default function AiSettings() {
               color="blue"
               mb="lg"
             >
-              {t(
-                "AI is only available in the Docmost enterprise edition. Contact sales@docmost.com.",
-              )}
+              {t("AI is not enabled for this workspace.")}
             </Alert>
           )}
 

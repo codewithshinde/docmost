@@ -14,6 +14,8 @@ import {
   sharedTreeDataAtom,
 } from "@/features/share/atoms/shared-page-atom.ts";
 import { isPageInTree } from "@/features/share/utils.ts";
+import { useWorkspacePublicDataQuery } from "@/features/workspace/queries/workspace-query";
+import WorkspaceBranding from "@/features/workspace/components/branding/workspace-branding";
 
 export default function SharedPage() {
   const { t } = useTranslation();
@@ -27,11 +29,11 @@ export default function SharedPage() {
 
   const sharedTreeData = useAtomValue(sharedTreeDataAtom);
   const fullWidth = useAtomValue(sharedPageFullWidthAtom);
+  const { data: publicWorkspace } = useWorkspacePublicDataQuery();
 
   useEffect(() => {
     if (shareId && data) {
       if (data.share.key !== shareId) {
-
         // Check if the current page is part of the active sharing tree (sidebar) - If we are part of it, we will not redirect, keeping the sidebar visible.
         const isPartOfTree =
           sharedTreeData && isPageInTree(sharedTreeData, data.page.slugId);
@@ -56,6 +58,7 @@ export default function SharedPage() {
 
   return (
     <div>
+      <WorkspaceBranding branding={publicWorkspace?.branding} />
       <Helmet>
         <title>{`${data?.page?.title || t("untitled")}`}</title>
         {!data?.share.searchIndexing && (

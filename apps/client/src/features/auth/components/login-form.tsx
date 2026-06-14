@@ -24,9 +24,7 @@ import React from "react";
 import { AuthLayout } from "./auth-layout.tsx";
 
 const formSchema = z.object({
-  email: z
-    .email()
-    .min(1, { message: "email is required" }),
+  email: z.email().min(1, { message: "email is required" }),
   password: z.string().min(1, { message: "Password is required" }),
 });
 type FormValues = z.infer<typeof formSchema>;
@@ -62,7 +60,7 @@ export function LoginForm() {
   }
 
   if (isDataLoading) {
-   return null;
+    return null;
   }
 
   if (isError && error?.["response"]?.status === 404) {
@@ -70,7 +68,7 @@ export function LoginForm() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout branding={data?.branding} logo={data?.logo} name={data?.name}>
       <Container size={420} className={classes.container}>
         <Box p="xl" className={classes.containerBox}>
           <Title order={1} size="h2" ta="center" fw={500} mb="md">

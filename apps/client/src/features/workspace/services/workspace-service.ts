@@ -8,6 +8,7 @@ import {
   IPublicWorkspace,
   IInvitationLink,
   IVersion,
+  IUpdateWorkspace,
 } from "../types/workspace.types";
 import { IPagination, QueryParams } from "@/lib/types.ts";
 import { ISetupWorkspace } from "@/features/auth/types/auth.types.ts";
@@ -54,7 +55,7 @@ export async function activateWorkspaceMember(data: {
   await api.post("/workspace/members/activate", data);
 }
 
-export async function updateWorkspace(data: Partial<IWorkspace>) {
+export async function updateWorkspace(data: IUpdateWorkspace) {
   const req = await api.post<IWorkspace>("/workspace/update", data);
   return req.data;
 }
@@ -113,7 +114,12 @@ export async function getInvitationById(data: {
 
 export async function createWorkspace(
   data: ISetupWorkspace,
-): Promise<{ workspace: IWorkspace; exchangeToken?: string; requiresEmailVerification?: boolean; emailSignature?: string }> {
+): Promise<{
+  workspace: IWorkspace;
+  exchangeToken?: string;
+  requiresEmailVerification?: boolean;
+  emailSignature?: string;
+}> {
   const req = await api.post("/workspace/create", data);
   return req.data;
 }

@@ -192,7 +192,7 @@ export function SearchSpotlightFilters({
                   <Text size="sm">{option.label}</Text>
                   {option.disabled && (
                     <Badge size="xs" mt={4}>
-                      {t("Enterprise")}
+                      {t("Unavailable")}
                     </Badge>
                   )}
                   {!option.disabled &&
@@ -203,7 +203,9 @@ export function SearchSpotlightFilters({
                       </Text>
                     )}
                 </div>
-                {contentType === option.value && <IconCheck size={20} aria-hidden />}
+                {contentType === option.value && (
+                  <IconCheck size={20} aria-hidden />
+                )}
               </Group>
             </Menu.Item>
           ))}

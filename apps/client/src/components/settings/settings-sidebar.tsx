@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Group, Text, ScrollArea, ActionIcon, Tooltip } from "@mantine/core";
+import { Group, Text, ScrollArea, ActionIcon } from "@mantine/core";
 import {
   IconUser,
   IconSettings,
@@ -24,13 +24,12 @@ import useUserRole from "@/hooks/use-user-role.tsx";
 import { useAtom } from "jotai";
 import { entitlementAtom } from "@/ee/entitlement/entitlement-atom";
 import { Feature } from "@/ee/features";
-import { useUpgradeLabel } from "@/ee/hooks/use-upgrade-label";
+import { isImplementedFeature } from "@/ee/hooks/use-feature";
 import {
   prefetchApiKeyManagement,
   prefetchApiKeys,
   prefetchBilling,
   prefetchGroups,
-  prefetchLicense,
   prefetchScimTokens,
   prefetchShares,
   prefetchSpaces,
@@ -127,16 +126,6 @@ const groupedData: DataGroup[] = [
       },
     ],
   },
-  {
-    heading: "System",
-    items: [
-      {
-        label: "License & Edition",
-        icon: IconKey,
-        path: "/settings/license",
-      },
-    ],
-  },
 ];
 
 export default function SettingsSidebar() {
@@ -146,7 +135,6 @@ export default function SettingsSidebar() {
   const { goBack } = useSettingsNavigation();
   const { isAdmin, isOwner } = useUserRole();
   const [entitlements] = useAtom(entitlementAtom);
-  const upgradeLabel = useUpgradeLabel();
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
 
@@ -155,7 +143,7 @@ export default function SettingsSidebar() {
   }, [location.pathname]);
 
   const hasFeature = (f: string) =>
-    entitlements?.features?.includes(f) ?? false;
+    isImplementedFeature(f) || (entitlements?.features?.includes(f) ?? false);
 
   const canShowItem = (item: DataItem) => {
     if (item.env === "cloud" && !isCloud()) return false;
@@ -171,10 +159,6 @@ export default function SettingsSidebar() {
   };
 
   const menuItems = groupedData.map((group) => {
-    if (group.heading === "System" && (!isAdmin || isCloud())) {
-      return null;
-    }
-
     return (
       <div key={group.heading}>
         <Text c="dimmed" className={classes.linkHeader}>
@@ -198,11 +182,6 @@ export default function SettingsSidebar() {
               break;
             case "Billing":
               prefetchHandler = prefetchBilling;
-              break;
-            case "License & Edition":
-              if (entitlements?.tier !== "free") {
-                prefetchHandler = prefetchLicense;
-              }
               break;
             case "Security & SSO":
               prefetchHandler = () => {
@@ -231,31 +210,7 @@ export default function SettingsSidebar() {
 
           const isDisabled = isItemDisabled(item);
 
-          if (isDisabled) {
-            return (
-              <Tooltip
-                key={item.label}
-                label={upgradeLabel}
-                position="right"
-                withArrow
-              >
-                <span
-                  className={classes.link}
-                  data-disabled
-                  role="link"
-                  aria-disabled="true"
-                  tabIndex={0}
-                  style={{
-                    opacity: 0.5,
-                    cursor: "not-allowed",
-                  }}
-                >
-                  <item.icon className={classes.linkIcon} stroke={2} />
-                  <span>{t(item.label)}</span>
-                </span>
-              </Tooltip>
-            );
-          }
+          if (isDisabled) return null;
 
           return (
             <Link
