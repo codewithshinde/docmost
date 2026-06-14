@@ -323,7 +323,10 @@ export class PagePermissionRepo {
     return result;
   }
 
-  async findRestrictedAncestor(pageId: string): Promise<
+  async findRestrictedAncestor(
+    pageId: string,
+    opts?: { excludeSelf?: boolean },
+  ): Promise<
     | {
         pageAccessId: string;
         pageId: string;
@@ -332,7 +335,7 @@ export class PagePermissionRepo {
       }
     | undefined
   > {
-    return this.db
+    let query = this.db
       .withRecursive('ancestors', (qb) =>
         qb
           .selectFrom('pages')
@@ -360,9 +363,13 @@ export class PagePermissionRepo {
         'pageAccess.pageId',
         'pageAccess.accessLevel',
         'ancestors.depth',
-      ])
-      .orderBy('ancestors.depth', 'asc')
-      .executeTakeFirst();
+      ]);
+
+    if (opts?.excludeSelf) {
+      query = query.where('ancestors.depth', '>', 0);
+    }
+
+    return query.orderBy('ancestors.depth', 'asc').executeTakeFirst();
   }
 
   /**

@@ -3,8 +3,11 @@ import { CreateWorkspaceDto } from './create-workspace.dto';
 import {
   IsArray,
   IsBoolean,
+  IsHexColor,
   IsInt,
   IsOptional,
+  IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -57,4 +60,22 @@ export class UpdateWorkspaceDto extends PartialType(CreateWorkspaceDto) {
   @IsOptional()
   @IsBoolean()
   allowMemberTemplates: boolean;
+
+  @IsOptional()
+  @IsHexColor()
+  brandPrimaryColor: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  brandFaviconUrl: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20000)
+  brandCustomCss: string;
+
+  @IsOptional()
+  @IsBoolean()
+  hidePoweredBy: boolean;
 }

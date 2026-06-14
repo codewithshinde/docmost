@@ -24,6 +24,9 @@ import { WatcherModule } from './watcher/watcher.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { SessionModule } from './session/session.module';
 import { SsoModule } from './sso/sso.module';
+import { TemplateModule } from './template/template.module';
+import { ApiKeyModule } from './api-key/api-key.module';
+import { AuditCoreModule } from './audit/audit.module';
 import { ClsMiddleware } from 'nestjs-cls';
 
 @Module({
@@ -46,6 +49,9 @@ import { ClsMiddleware } from 'nestjs-cls';
     WatcherModule,
     SessionModule,
     SsoModule,
+    TemplateModule,
+    ApiKeyModule,
+    AuditCoreModule,
   ],
 })
 export class CoreModule implements NestModule {

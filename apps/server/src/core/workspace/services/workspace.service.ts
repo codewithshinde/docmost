@@ -91,7 +91,16 @@ export class WorkspaceService {
   async getWorkspacePublicData(workspaceId: string) {
     const workspace = await this.db
       .selectFrom('workspaces')
-      .select(['id', 'name', 'logo', 'hostname', 'enforceSso', 'licenseKey', 'plan'])
+      .select([
+        'id',
+        'name',
+        'logo',
+        'hostname',
+        'enforceSso',
+        'licenseKey',
+        'plan',
+        'settings',
+      ])
       .select((eb) =>
         jsonArrayFrom(
           eb
@@ -112,9 +121,10 @@ export class WorkspaceService {
       throw new NotFoundException('Workspace not found');
     }
 
-    const { licenseKey, plan, ...rest } = workspace;
+    const { licenseKey, plan, settings, ...rest } = workspace;
+    const branding = (settings as Record<string, any>)?.branding ?? null;
 
-    return rest;
+    return { ...rest, branding };
   }
 
   async create(
@@ -500,6 +510,62 @@ export class WorkspaceService {
         );
       }
 
+      if (typeof updateWorkspaceDto.brandPrimaryColor !== 'undefined') {
+        const prev = settingsBefore?.branding?.primaryColor ?? null;
+        if (prev !== updateWorkspaceDto.brandPrimaryColor) {
+          before.brandPrimaryColor = prev;
+          after.brandPrimaryColor = updateWorkspaceDto.brandPrimaryColor;
+        }
+        await this.workspaceRepo.updateBrandingSettings(
+          workspaceId,
+          'primaryColor',
+          updateWorkspaceDto.brandPrimaryColor,
+          trx,
+        );
+      }
+
+      if (typeof updateWorkspaceDto.brandFaviconUrl !== 'undefined') {
+        const prev = settingsBefore?.branding?.faviconUrl ?? null;
+        if (prev !== updateWorkspaceDto.brandFaviconUrl) {
+          before.brandFaviconUrl = prev;
+          after.brandFaviconUrl = updateWorkspaceDto.brandFaviconUrl;
+        }
+        await this.workspaceRepo.updateBrandingSettings(
+          workspaceId,
+          'faviconUrl',
+          updateWorkspaceDto.brandFaviconUrl,
+          trx,
+        );
+      }
+
+      if (typeof updateWorkspaceDto.brandCustomCss !== 'undefined') {
+        const prev = settingsBefore?.branding?.customCss ?? null;
+        if (prev !== updateWorkspaceDto.brandCustomCss) {
+          before.brandCustomCss = prev;
+          after.brandCustomCss = updateWorkspaceDto.brandCustomCss;
+        }
+        await this.workspaceRepo.updateBrandingSettings(
+          workspaceId,
+          'customCss',
+          updateWorkspaceDto.brandCustomCss,
+          trx,
+        );
+      }
+
+      if (typeof updateWorkspaceDto.hidePoweredBy !== 'undefined') {
+        const prev = settingsBefore?.branding?.hidePoweredBy ?? false;
+        if (prev !== updateWorkspaceDto.hidePoweredBy) {
+          before.hidePoweredBy = prev;
+          after.hidePoweredBy = updateWorkspaceDto.hidePoweredBy;
+        }
+        await this.workspaceRepo.updateBrandingSettings(
+          workspaceId,
+          'hidePoweredBy',
+          updateWorkspaceDto.hidePoweredBy,
+          trx,
+        );
+      }
+
       delete updateWorkspaceDto.restrictApiToAdmins;
       delete updateWorkspaceDto.aiSearch;
       delete updateWorkspaceDto.generativeAi;
@@ -507,6 +573,10 @@ export class WorkspaceService {
       delete updateWorkspaceDto.mcpEnabled;
       delete updateWorkspaceDto.allowMemberTemplates;
       delete updateWorkspaceDto.aiChat;
+      delete updateWorkspaceDto.brandPrimaryColor;
+      delete updateWorkspaceDto.brandFaviconUrl;
+      delete updateWorkspaceDto.brandCustomCss;
+      delete updateWorkspaceDto.hidePoweredBy;
 
       await this.workspaceRepo.updateWorkspace(
         updateWorkspaceDto,

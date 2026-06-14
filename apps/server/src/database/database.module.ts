@@ -28,6 +28,8 @@ import { LabelRepo } from '@docmost/db/repos/label/label.repo';
 import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
 import { TemplateRepo } from '@docmost/db/repos/template/template.repo';
 import { AuthProviderRepo } from '@docmost/db/repos/auth-provider/auth-provider.repo';
+import { ApiKeyRepo } from '@docmost/db/repos/api-key/api-key.repo';
+import { AuditRepo } from '@docmost/db/repos/audit/audit.repo';
 import { PageListener } from '@docmost/db/listeners/page.listener';
 import { PostgresJSDialect } from 'kysely-postgres-js';
 import * as postgres from 'postgres';
@@ -94,6 +96,8 @@ import { normalizePostgresUrl } from '../common/helpers';
     LabelRepo,
     TemplateRepo,
     AuthProviderRepo,
+    ApiKeyRepo,
+    AuditRepo,
     PageListener,
   ],
   exports: [
@@ -120,6 +124,8 @@ import { normalizePostgresUrl } from '../common/helpers';
     LabelRepo,
     TemplateRepo,
     AuthProviderRepo,
+    ApiKeyRepo,
+    AuditRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {
