@@ -37,6 +37,17 @@ import {
   Watchers,
   Audit as _Audit,
   Templates,
+  Teams,
+  TeamMembers,
+  Channels,
+  ChannelMembers,
+  Messages,
+  MessageReactions,
+  MessageMentions,
+  MessageAttachments,
+  Calls,
+  CallParticipants,
+  PushSubscriptions,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
 
@@ -238,3 +249,54 @@ export type UpdatableAudit = Updateable<Omit<_Audit, 'id'>>;
 export type Template = Selectable<Templates>;
 export type InsertableTemplate = Insertable<Templates>;
 export type UpdatableTemplate = Updateable<Omit<Templates, 'id'>>;
+
+// Team
+export type Team = Selectable<Teams>;
+export type InsertableTeam = Insertable<Teams>;
+export type UpdatableTeam = Updateable<Omit<Teams, 'id'>>;
+
+// Team Member
+export type TeamMember = Selectable<TeamMembers>;
+export type InsertableTeamMember = Insertable<TeamMembers>;
+export type UpdatableTeamMember = Updateable<Omit<TeamMembers, 'id'>>;
+
+// Channel
+export type Channel = Selectable<Channels>;
+export type InsertableChannel = Insertable<Channels>;
+export type UpdatableChannel = Updateable<Omit<Channels, 'id'>>;
+
+// Channel Member
+export type ChannelMember = Selectable<ChannelMembers>;
+export type InsertableChannelMember = Insertable<ChannelMembers>;
+export type UpdatableChannelMember = Updateable<Omit<ChannelMembers, 'id'>>;
+
+// Message
+export type Message = Selectable<Messages>;
+export type InsertableMessage = Insertable<Messages>;
+export type UpdatableMessage = Updateable<Omit<Messages, 'id'>>;
+
+// Message Reaction
+export type MessageReaction = Selectable<MessageReactions>;
+export type InsertableMessageReaction = Insertable<MessageReactions>;
+
+// Message Mention
+export type MessageMention = Selectable<MessageMentions>;
+export type InsertableMessageMention = Insertable<MessageMentions>;
+
+// Message Attachment
+export type MessageAttachment = Selectable<MessageAttachments>;
+export type InsertableMessageAttachment = Insertable<MessageAttachments>;
+
+// Call
+export type Call = Selectable<Calls>;
+export type InsertableCall = Insertable<Calls>;
+export type UpdatableCall = Updateable<Omit<Calls, 'id'>>;
+
+// Call Participant
+export type CallParticipant = Selectable<CallParticipants>;
+export type InsertableCallParticipant = Insertable<CallParticipants>;
+export type UpdatableCallParticipant = Updateable<Omit<CallParticipants, 'id'>>;
+
+// Push Subscription
+export type PushSubscription = Selectable<PushSubscriptions>;
+export type InsertablePushSubscription = Insertable<PushSubscriptions>;

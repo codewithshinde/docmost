@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollArea, Text, Divider, Modal, UnstyledButton, Tooltip } from "@mantine/core";
+import { ScrollArea, Text, Divider, Modal, UnstyledButton, Tooltip, Badge } from "@mantine/core";
 import {
   IconHome,
   IconClock,
@@ -8,6 +8,7 @@ import {
   IconSettings,
   IconUserPlus,
   IconTemplate,
+  IconMessageCircle2,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./global-sidebar.module.css";
@@ -24,6 +25,7 @@ import { AvatarIconType } from "@/features/attachments/types/attachment.types";
 import { useHasFeature } from "@/ee/hooks/use-feature";
 import { Feature } from "@/ee/features";
 import { useUpgradeLabel } from "@/ee/hooks/use-upgrade-label";
+import { useUnreadCountsQuery } from "@/features/chat/queries/channel-query";
 
 export default function GlobalSidebar() {
   const { t } = useTranslation();
@@ -33,10 +35,21 @@ export default function GlobalSidebar() {
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const upgradeLabel = useUpgradeLabel();
+  const { data: unreadCounts } = useUnreadCountsQuery();
+  const totalUnread = (unreadCounts ?? []).reduce(
+    (sum, entry) => sum + entry.unreadCount,
+    0,
+  );
   const mainNavItems = [
     { label: "Home", icon: IconHome, path: "/home" },
     { label: "Favorites", icon: IconStar, path: "/favorites" },
     { label: "Spaces", icon: IconLayoutGrid, path: "/spaces" },
+    {
+      label: "Chat",
+      icon: IconMessageCircle2,
+      path: "/chat",
+      badge: totalUnread > 0 ? totalUnread : undefined,
+    },
     {
       label: "Templates",
       icon: IconTemplate,
@@ -98,6 +111,11 @@ export default function GlobalSidebar() {
               >
                 <item.icon className={classes.linkIcon} stroke={2} />
                 <span>{t(item.label)}</span>
+                {!!item.badge && (
+                  <Badge size="xs" variant="filled" color="red" ml="auto">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </Badge>
+                )}
               </Link>
             ),
           )}

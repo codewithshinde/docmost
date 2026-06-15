@@ -12,6 +12,7 @@ import {
 } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { SpaceSidebar } from "@/features/space/components/sidebar/space-sidebar.tsx";
 import AiChatSidebar from "@/ee/ai-chat/components/ai-chat-sidebar.tsx";
+import { ChatSidebar } from "@/features/chat/components/chat-sidebar.tsx";
 import { AppHeader } from "@/components/layouts/global/app-header.tsx";
 import Aside from "@/components/layouts/global/aside.tsx";
 import classes from "./app-shell.module.css";
@@ -79,8 +80,10 @@ export default function GlobalAppShell({
   const isSettingsRoute = location.pathname.startsWith("/settings");
   const isSpaceRoute = location.pathname.startsWith("/s/");
   const isAiRoute = location.pathname.startsWith("/ai");
+  const isChatRoute = location.pathname.startsWith("/chat");
   const isPageRoute = location.pathname.includes("/p/");
-  const showGlobalSidebar = !isSpaceRoute && !isSettingsRoute && !isAiRoute;
+  const showGlobalSidebar =
+    !isSpaceRoute && !isSettingsRoute && !isAiRoute && !isChatRoute;
 
   return (
     <>
@@ -118,7 +121,9 @@ export default function GlobalAppShell({
               ? t("Settings navigation")
               : isAiRoute
                 ? t("AI navigation")
-                : t("Main navigation")
+                : isChatRoute
+                  ? t("Chat navigation")
+                  : t("Main navigation")
         }
       >
         {isSpaceRoute && (
@@ -127,6 +132,7 @@ export default function GlobalAppShell({
         {isSpaceRoute && <SpaceSidebar />}
         {isSettingsRoute && <SettingsSidebar />}
         {isAiRoute && <AiChatSidebar />}
+        {isChatRoute && <ChatSidebar />}
         {showGlobalSidebar && <GlobalSidebar />}
       </AppShell.Navbar>
       <AppShell.Main id={MAIN_CONTENT_ID} tabIndex={-1}>

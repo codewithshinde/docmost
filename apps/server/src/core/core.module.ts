@@ -28,6 +28,11 @@ import { TemplateModule } from './template/template.module';
 import { ApiKeyModule } from './api-key/api-key.module';
 import { AuditCoreModule } from './audit/audit.module';
 import { ClsMiddleware } from 'nestjs-cls';
+import { TeamModule } from './chat/team/team.module';
+import { ChannelModule } from './chat/channel/channel.module';
+import { MessageModule } from './chat/message/message.module';
+import { ReactionModule } from './chat/reaction/reaction.module';
+import { CallModule } from './chat/call/call.module';
 
 @Module({
   imports: [
@@ -52,6 +57,11 @@ import { ClsMiddleware } from 'nestjs-cls';
     TemplateModule,
     ApiKeyModule,
     AuditCoreModule,
+    TeamModule,
+    ChannelModule,
+    MessageModule,
+    ReactionModule,
+    CallModule,
   ],
 })
 export class CoreModule implements NestModule {

@@ -34,6 +34,17 @@ import { PageListener } from '@docmost/db/listeners/page.listener';
 import { PostgresJSDialect } from 'kysely-postgres-js';
 import * as postgres from 'postgres';
 import { normalizePostgresUrl } from '../common/helpers';
+import { TeamRepo } from '@docmost/db/repos/chat/team.repo';
+import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
+import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
+import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
+import { MessageReactionRepo } from '@docmost/db/repos/chat/message-reaction.repo';
+import { MessageMentionRepo } from '@docmost/db/repos/chat/message-mention.repo';
+import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment.repo';
+import { CallRepo } from '@docmost/db/repos/chat/call.repo';
+import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
+import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
 
 @Global()
 @Module({
@@ -99,6 +110,17 @@ import { normalizePostgresUrl } from '../common/helpers';
     ApiKeyRepo,
     AuditRepo,
     PageListener,
+    TeamRepo,
+    TeamMemberRepo,
+    ChannelRepo,
+    ChannelMemberRepo,
+    MessageRepo,
+    MessageReactionRepo,
+    MessageMentionRepo,
+    MessageAttachmentRepo,
+    CallRepo,
+    CallParticipantRepo,
+    PushSubscriptionRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -126,6 +148,17 @@ import { normalizePostgresUrl } from '../common/helpers';
     AuthProviderRepo,
     ApiKeyRepo,
     AuditRepo,
+    TeamRepo,
+    TeamMemberRepo,
+    ChannelRepo,
+    ChannelMemberRepo,
+    MessageRepo,
+    MessageReactionRepo,
+    MessageMentionRepo,
+    MessageAttachmentRepo,
+    CallRepo,
+    CallParticipantRepo,
+    PushSubscriptionRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {

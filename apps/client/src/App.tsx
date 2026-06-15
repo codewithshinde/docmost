@@ -45,6 +45,7 @@ import FavoritesPage from "@/pages/favorites/favorites-page";
 import AiChat from "@/ee/ai-chat/pages/ai-chat.tsx";
 import VerifyEmail from "@/ee/pages/verify-email.tsx";
 import LabelPage from "@/pages/label/label-page";
+import ChatPage from "@/pages/chat/chat-page.tsx";
 
 export default function App() {
   const { t } = useTranslation();
@@ -90,6 +91,8 @@ export default function App() {
           <Route path={"/home"} element={<Home />} />
           <Route path={"/ai"} element={<AiChat />} />
           <Route path={"/ai/chat/:chatId"} element={<AiChat />} />
+          <Route path={"/chat"} element={<ChatPage />} />
+          <Route path={"/chat/:channelId"} element={<ChatPage />} />
           <Route path={"/spaces"} element={<SpacesPage />} />
           <Route path={"/favorites"} element={<FavoritesPage />} />
           <Route path={"/labels/:labelName"} element={<LabelPage />} />

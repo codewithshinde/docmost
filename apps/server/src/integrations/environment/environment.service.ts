@@ -360,4 +360,31 @@ export class EnvironmentService {
       .map((o) => o.trim())
       .filter(Boolean);
   }
+
+  getVapidPublicKey(): string | undefined {
+    return this.configService.get<string>('VAPID_PUBLIC_KEY');
+  }
+
+  getVapidPrivateKey(): string | undefined {
+    return this.configService.get<string>('VAPID_PRIVATE_KEY');
+  }
+
+  getVapidSubject(): string {
+    return this.configService.get<string>(
+      'VAPID_SUBJECT',
+      `mailto:support@docmost.com`,
+    );
+  }
+
+  getLiveKitUrl(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_URL');
+  }
+
+  getLiveKitApiKey(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_API_KEY');
+  }
+
+  getLiveKitApiSecret(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_API_SECRET');
+  }
 }

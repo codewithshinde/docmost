@@ -24,6 +24,10 @@ export class WsService {
     this.server = server;
   }
 
+  getServer(): Server {
+    return this.server;
+  }
+
   async handleTreeEvent(client: Socket, data: any): Promise<void> {
     const room = getSpaceRoomName(data.spaceId);
 

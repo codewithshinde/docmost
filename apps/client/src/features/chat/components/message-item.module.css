@@ -1,0 +1,221 @@
+.messageRow {
+  position: relative;
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+  padding: 2px var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-sm);
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-7)
+    );
+  }
+}
+
+.messageRowGrouped {
+  padding-top: 0;
+}
+
+.avatarColumn {
+  width: 36px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.hoverTime {
+  width: 36px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+  opacity: 0;
+  padding-top: 6px;
+
+  .messageRow:hover & {
+    opacity: 1;
+  }
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.headerLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.authorName {
+  font-weight: 700;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.timestamp {
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+}
+
+.body {
+  font-size: var(--mantine-font-size-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.editedTag {
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+  margin-left: 4px;
+}
+
+.deletedBody {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+  font-style: italic;
+}
+
+.mention {
+  background-color: light-dark(
+    var(--mantine-color-blue-0),
+    var(--mantine-color-dark-5)
+  );
+  color: var(--mantine-color-blue-7);
+  border-radius: 4px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+
+.attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.attachmentImage {
+  max-width: 320px;
+  max-height: 320px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  cursor: pointer;
+}
+
+.attachmentFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  text-decoration: none;
+  color: inherit;
+  font-size: var(--mantine-font-size-sm);
+  max-width: 320px;
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-6)
+    );
+  }
+}
+
+.attachmentFileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachmentFileSize {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-xs);
+  flex-shrink: 0;
+}
+
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.reactionPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  font-size: var(--mantine-font-size-xs);
+  cursor: pointer;
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-6)
+  );
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-1),
+      var(--mantine-color-dark-5)
+    );
+  }
+
+  &[data-active="true"] {
+    border-color: var(--mantine-primary-color-filled);
+    background-color: light-dark(
+      var(--mantine-color-blue-0),
+      var(--mantine-color-dark-5)
+    );
+  }
+}
+
+.replyLink {
+  margin-top: 4px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-blue-6);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  @mixin hover {
+    text-decoration: underline;
+  }
+}
+
+.toolbar {
+  position: absolute;
+  top: -14px;
+  right: var(--mantine-spacing-md);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-dark-6)
+  );
+  opacity: 0;
+  z-index: 1;
+
+  .messageRow:hover &,
+  &:focus-within {
+    opacity: 1;
+  }
+}
+
+.editArea {
+  margin-top: 2px;
+}
