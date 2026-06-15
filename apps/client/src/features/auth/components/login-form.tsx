@@ -59,10 +59,6 @@ export function LoginForm() {
     }
   }
 
-  if (isDataLoading) {
-    return null;
-  }
-
   if (isError && error?.["response"]?.status === 404) {
     return <Error404 />;
   }
@@ -75,9 +71,9 @@ export function LoginForm() {
             {t("Login")}
           </Title>
 
-          <SsoLogin />
+          {!isDataLoading && <SsoLogin />}
 
-          {!data?.enforceSso && (
+          {(isDataLoading || !data?.enforceSso) && (
             <>
               <form onSubmit={form.onSubmit(onSubmit, handleValidationFailure)}>
                 <TextInput
