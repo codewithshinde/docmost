@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Text } from "@mantine/core";
 import {
@@ -30,7 +31,16 @@ export function TimeGrid({
 }: TimeGridProps) {
   const { t } = useTranslation();
   const locale = useDateFnsLocale();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  useEffect(() => {
+    const currentHour = isToday(days[0]) ? new Date().getHours() : 8;
+    wrapperRef.current?.scrollTo({
+      top: Math.max((currentHour - 1) * HOUR_HEIGHT, 0),
+      behavior: "smooth",
+    });
+  }, [days]);
 
   const isEventOnDay = (event: ICalendarEvent, day: Date) => {
     const dayStart = startOfDay(day);
@@ -44,7 +54,7 @@ export function TimeGrid({
   const timedEvents = events.filter((event) => !event.allDay);
 
   return (
-    <div className={classes.timeGridWrapper}>
+    <div className={classes.timeGridWrapper} ref={wrapperRef}>
       <div
         className={classes.timeGridHeader}
         style={{ gridTemplateColumns: `60px repeat(${days.length}, 1fr)` }}

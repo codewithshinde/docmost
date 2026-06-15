@@ -33,7 +33,10 @@ export default function CalendarPage() {
   const [anchorDate, setAnchorDate] = useState(new Date());
   const [formOpened, setFormOpened] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ICalendarEvent | null>(null);
-  const [initialRange, setInitialRange] = useState<{ start: Date; end: Date } | null>(null);
+  const [initialRange, setInitialRange] = useState<{
+    start: Date;
+    end: Date;
+  } | null>(null);
   const [defaultPrivate, setDefaultPrivate] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
@@ -51,7 +54,10 @@ export default function CalendarPage() {
   const handleNext = () => setAnchorDate((d) => shiftAnchorDate(view, d, 1));
   const handleToday = () => setAnchorDate(new Date());
 
-  const openCreateForm = (range?: { start: Date; end: Date }, isPrivate = false) => {
+  const openCreateForm = (
+    range?: { start: Date; end: Date },
+    isPrivate = false,
+  ) => {
     setEditingEvent(null);
     setInitialRange(range ?? null);
     setDefaultPrivate(isPrivate);
@@ -83,6 +89,9 @@ export default function CalendarPage() {
   const handleSelectDay = (date: Date) => {
     setAnchorDate(date);
     setView("day");
+    const slotStart = new Date(date);
+    slotStart.setHours(9, 0, 0, 0);
+    openCreateForm({ start: slotStart, end: addHours(slotStart, 1) });
   };
 
   const handleEdit = (event: ICalendarEvent) => {

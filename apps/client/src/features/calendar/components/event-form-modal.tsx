@@ -15,7 +15,7 @@ import {
 import { DatePickerInput, DateTimePicker } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import { useAtomValue } from "jotai";
-import { addDays, addHours, parse, startOfDay } from "date-fns";
+import { addDays, addHours, format, parse, startOfDay } from "date-fns";
 import { userAtom } from "@/features/user/atoms/current-user-atom";
 import { MultiUserSelect } from "@/features/group/components/multi-user-select";
 import {
@@ -189,28 +189,28 @@ export function EventFormModal({
           <Group grow>
             <DatePickerInput
               label={t("Start date")}
-              value={start}
+              value={format(start, "yyyy-MM-dd")}
               onChange={(value) => value && setStart(parseDateValue(value))}
             />
             <DatePickerInput
               label={t("End date")}
-              value={end}
+              value={format(end, "yyyy-MM-dd")}
               onChange={(value) => value && setEnd(parseDateValue(value))}
-              minDate={start}
+              minDate={format(start, "yyyy-MM-dd")}
             />
           </Group>
         ) : (
           <Group grow>
             <DateTimePicker
               label={t("Starts")}
-              value={start}
+              value={format(start, "yyyy-MM-dd HH:mm:ss")}
               onChange={(value) => value && setStart(parseDateTimeValue(value))}
             />
             <DateTimePicker
               label={t("Ends")}
-              value={end}
+              value={format(end, "yyyy-MM-dd HH:mm:ss")}
               onChange={(value) => value && setEnd(parseDateTimeValue(value))}
-              minDate={start}
+              minDate={format(start, "yyyy-MM-dd HH:mm:ss")}
             />
           </Group>
         )}
@@ -258,7 +258,9 @@ export function EventFormModal({
               size={24}
               style={{
                 cursor: "pointer",
-                outline: !color ? "2px solid var(--mantine-color-blue-filled)" : undefined,
+                outline: !color
+                  ? "2px solid var(--mantine-color-blue-filled)"
+                  : undefined,
               }}
               onClick={() => setColor(undefined)}
             />

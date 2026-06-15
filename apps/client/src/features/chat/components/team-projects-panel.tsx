@@ -275,7 +275,7 @@ function ProjectList({
   );
 }
 
-function ProjectTasks({
+export function ProjectTasks({
   teamId,
   project,
   members,

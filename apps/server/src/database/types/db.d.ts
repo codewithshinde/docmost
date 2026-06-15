@@ -326,6 +326,7 @@ export interface Spaces {
   name: string | null;
   settings: Json | null;
   slug: string;
+  teamId: string | null;
   updatedAt: Generated<Timestamp>;
   visibility: Generated<string>;
   workspaceId: string;

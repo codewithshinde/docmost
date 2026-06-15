@@ -32,6 +32,10 @@ export class ProjectService {
     return this.projectRepo.getTeamProjects(teamId, workspace.id);
   }
 
+  async getUserProjects(user: User, workspace: Workspace) {
+    return this.projectRepo.getUserProjects(user.id, workspace.id);
+  }
+
   async createProject(
     dto: CreateTeamProjectDto,
     user: User,

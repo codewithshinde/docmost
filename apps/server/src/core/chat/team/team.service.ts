@@ -10,11 +10,19 @@ import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
 import { UserRepo } from '@docmost/db/repos/user/user.repo';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
 import { executeTx } from '@docmost/db/utils';
-import { Team, TeamMember, User, Workspace } from '@docmost/db/types/entity.types';
+import {
+  Team,
+  TeamMember,
+  User,
+  Workspace,
+} from '@docmost/db/types/entity.types';
 import { slugify } from '../../../common/helpers/slug.utils';
 import { nanoIdGen } from '../../../common/helpers/nanoid.utils';
 import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';
+import { SpaceService } from '../../space/services/space.service';
+import { SpaceMemberService } from '../../space/services/space-member.service';
+import { SpaceRole } from '../../../common/helpers/types/permission';
 import {
   AddTeamMemberDto,
   CreateTeamDto,
@@ -30,6 +38,8 @@ export class TeamService {
     private readonly teamMemberRepo: TeamMemberRepo,
     private readonly userRepo: UserRepo,
     private readonly chatWsService: ChatWsService,
+    private readonly spaceService: SpaceService,
+    private readonly spaceMemberService: SpaceMemberService,
     @InjectKysely() private readonly db: KyselyDB,
   ) {}
 
@@ -114,7 +124,11 @@ export class TeamService {
     );
   }
 
-  async deleteTeam(teamId: string, user: User, workspace: Workspace): Promise<void> {
+  async deleteTeam(
+    teamId: string,
+    user: User,
+    workspace: Workspace,
+  ): Promise<void> {
     await this.assertOwner(teamId, user.id);
 
     const team = await this.teamRepo.findById(teamId, workspace.id);
@@ -163,6 +177,7 @@ export class TeamService {
     });
 
     await this.chatWsService.addUserToTeam(dto.userId, dto.teamId);
+    await this.addUserToLinkedTeamSpaces(dto.userId, dto.teamId, workspace.id);
     this.chatWsService.emitToTeam(
       dto.teamId,
       ChatWsEvent.TEAM_MEMBER_ADDED,
@@ -172,10 +187,7 @@ export class TeamService {
     return member;
   }
 
-  async removeTeamMember(
-    dto: RemoveTeamMemberDto,
-    user: User,
-  ): Promise<void> {
+  async removeTeamMember(dto: RemoveTeamMemberDto, user: User): Promise<void> {
     const isSelf = dto.userId === user.id;
     if (!isSelf) {
       await this.assertOwner(dto.teamId, user.id);
@@ -254,7 +266,12 @@ export class TeamService {
     });
 
     await this.chatWsService.addUserToTeam(user.id, teamId);
-    this.chatWsService.emitToTeam(teamId, ChatWsEvent.TEAM_MEMBER_ADDED, member);
+    await this.addUserToLinkedTeamSpaces(user.id, teamId, workspace.id);
+    this.chatWsService.emitToTeam(
+      teamId,
+      ChatWsEvent.TEAM_MEMBER_ADDED,
+      member,
+    );
 
     return member;
   }
@@ -292,7 +309,10 @@ export class TeamService {
     return slug;
   }
 
-  private async assertMember(teamId: string, userId: string): Promise<TeamMember> {
+  private async assertMember(
+    teamId: string,
+    userId: string,
+  ): Promise<TeamMember> {
     const member = await this.teamMemberRepo.getTeamMember(teamId, userId);
     if (!member) {
       throw new ForbiddenException('You are not a member of this team');
@@ -300,7 +320,10 @@ export class TeamService {
     return member;
   }
 
-  private async assertOwner(teamId: string, userId: string): Promise<TeamMember> {
+  private async assertOwner(
+    teamId: string,
+    userId: string,
+  ): Promise<TeamMember> {
     const member = await this.assertMember(teamId, userId);
     if (member.role !== 'owner') {
       throw new ForbiddenException('Only team owners can perform this action');
@@ -315,6 +338,22 @@ export class TeamService {
     );
     if (ownerCount <= 1) {
       throw new BadRequestException('Team must have at least one owner');
+    }
+  }
+
+  private async addUserToLinkedTeamSpaces(
+    userId: string,
+    teamId: string,
+    workspaceId: string,
+  ): Promise<void> {
+    const spaces = await this.spaceService.getTeamSpaces(teamId, workspaceId);
+    for (const space of spaces) {
+      await this.spaceMemberService.addUserToSpace(
+        userId,
+        space.id,
+        SpaceRole.WRITER,
+        workspaceId,
+      );
     }
   }
 }

@@ -32,6 +32,29 @@ export class TeamProjectRepo {
       .execute();
   }
 
+  async getUserProjects(userId: string, workspaceId: string) {
+    return this.db
+      .selectFrom('teamProjects')
+      .innerJoin('teamMembers', 'teamMembers.teamId', 'teamProjects.teamId')
+      .innerJoin('teams', 'teams.id', 'teamProjects.teamId')
+      .selectAll('teamProjects')
+      .select([
+        'teams.name as teamName',
+        'teams.slug as teamSlug',
+        'teamMembers.role as memberRole',
+      ])
+      .select((eb) => [
+        this.withTaskCount(eb).as('taskCount'),
+        this.withDoneTaskCount(eb).as('doneTaskCount'),
+      ])
+      .where('teamMembers.userId', '=', userId)
+      .where('teamProjects.workspaceId', '=', workspaceId)
+      .where('teamProjects.deletedAt', 'is', null)
+      .where('teams.deletedAt', 'is', null)
+      .orderBy('teamProjects.updatedAt', 'desc')
+      .execute();
+  }
+
   async findProjectById(
     projectId: string,
     workspaceId: string,

@@ -68,6 +68,16 @@ export class SpaceService {
           workspaceId,
           trx,
         );
+
+        if (createSpaceDto.teamId) {
+          await this.addTeamMembersToLinkedSpace(
+            createSpaceDto.teamId,
+            space.id,
+            workspaceId,
+            authUser.id,
+            trx,
+          );
+        }
       },
       trx,
     );
@@ -112,9 +122,40 @@ export class SpaceService {
         creatorId: userId,
         workspaceId: workspaceId,
         slug: createSpaceDto.slug,
+        teamId: createSpaceDto.teamId,
       },
       trx,
     );
+  }
+
+  async getTeamSpaces(teamId: string, workspaceId: string): Promise<Space[]> {
+    return this.spaceRepo.getTeamSpaces(teamId, workspaceId);
+  }
+
+  private async addTeamMembersToLinkedSpace(
+    teamId: string,
+    spaceId: string,
+    workspaceId: string,
+    ownerId: string,
+    trx?: KyselyTransaction,
+  ): Promise<void> {
+    const members = await this.db
+      .selectFrom('teamMembers')
+      .select(['userId', 'role'])
+      .where('teamId', '=', teamId)
+      .execute();
+
+    for (const member of members) {
+      await this.spaceMemberService.addUserToSpace(
+        member.userId,
+        spaceId,
+        member.userId === ownerId || member.role === 'owner'
+          ? SpaceRole.ADMIN
+          : SpaceRole.WRITER,
+        workspaceId,
+        trx,
+      );
+    }
   }
 
   async updateSpace(

@@ -15,12 +15,7 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import {
-  IconDots,
-  IconInfoCircle,
-  IconLayoutKanban,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconDots, IconInfoCircle, IconUsers } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { useAtomValue, useSetAtom } from "jotai";
 import { modals } from "@mantine/modals";
@@ -29,7 +24,6 @@ import { MultiUserSelect } from "@/features/group/components/multi-user-select";
 import RoleSelectMenu from "@/components/ui/role-select-menu";
 import { IRoleData } from "@/lib/types";
 import { userAtom } from "@/features/user/atoms/current-user-atom";
-import { TeamProjectsPanel } from "./team-projects-panel";
 import {
   useAddTeamMemberMutation,
   useDeleteTeamMutation,
@@ -205,12 +199,6 @@ export function TeamSettingsModal({
           <Tabs.Tab value="members" leftSection={<IconUsers size={16} />}>
             {t("Members")}
           </Tabs.Tab>
-          <Tabs.Tab
-            value="projects"
-            leftSection={<IconLayoutKanban size={16} />}
-          >
-            {t("Projects")}
-          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="overview" pt="md">
@@ -377,10 +365,6 @@ export function TeamSettingsModal({
               </Table>
             </ScrollArea>
           </Stack>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="projects" pt="md">
-          <TeamProjectsPanel teamId={teamId} members={members} />
         </Tabs.Panel>
       </Tabs>
     </Modal>

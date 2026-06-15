@@ -12,6 +12,11 @@ export async function getTeamProjects(teamId: string): Promise<ITeamProject[]> {
   return req.data;
 }
 
+export async function getUserProjects(): Promise<ITeamProject[]> {
+  const req = await api.post<ITeamProject[]>("/projects");
+  return req.data;
+}
+
 export async function createProject(data: {
   teamId: string;
   name: string;

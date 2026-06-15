@@ -47,6 +47,9 @@ export interface ITeamProject {
   createdById: string | null;
   taskCount?: number;
   doneTaskCount?: number;
+  teamName?: string;
+  teamSlug?: string;
+  memberRole?: TeamMemberRole;
   createdAt: string;
   updatedAt: string;
 }

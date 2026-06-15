@@ -27,6 +27,15 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @HttpCode(HttpStatus.OK)
+  @Post('/')
+  async getUserProjects(
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.projectService.getUserProjects(user, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Post('team')
   async getTeamProjects(
     @Body() dto: TeamIdDto,

@@ -2,10 +2,11 @@ import {
   IsAlphanumeric,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import {Transform, TransformFnParams} from "class-transformer";
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class CreateSpaceDto {
   @MinLength(2)
@@ -22,4 +23,8 @@ export class CreateSpaceDto {
   @MaxLength(100)
   @IsAlphanumeric()
   slug: string;
+
+  @IsOptional()
+  @IsUUID()
+  teamId?: string;
 }

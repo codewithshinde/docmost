@@ -50,6 +50,10 @@ import ChatPage from "@/pages/chat/chat-page.tsx";
 import Inbox from "@/pages/mail/inbox.tsx";
 import EmailSettings from "@/pages/settings/account/email-settings.tsx";
 import CalendarPage from "@/pages/calendar/calendar.tsx";
+import TeamsPage from "@/pages/teams/teams";
+import TeamHubPage from "@/pages/teams/team-hub";
+import ProjectsPage from "@/pages/projects/projects";
+import AdminConsole from "@/pages/settings/admin-console";
 
 export default function App() {
   const { t } = useTranslation();
@@ -97,6 +101,9 @@ export default function App() {
           <Route path={"/ai/chat/:chatId"} element={<AiChat />} />
           <Route path={"/chat"} element={<ChatPage />} />
           <Route path={"/chat/:channelId"} element={<ChatPage />} />
+          <Route path={"/teams"} element={<TeamsPage />} />
+          <Route path={"/teams/:teamId"} element={<TeamHubPage />} />
+          <Route path={"/projects"} element={<ProjectsPage />} />
           <Route path={"/mail"} element={<Inbox />} />
           <Route path={"/calendar"} element={<CalendarPage />} />
           <Route path={"/spaces"} element={<SpacesPage />} />
@@ -109,6 +116,7 @@ export default function App() {
           <Route path={"/s/:spaceSlug/p/:pageSlug"} element={<Page />} />
 
           <Route path={"/settings"}>
+            <Route index element={<AdminConsole />} />
             <Route path={"account/profile"} element={<AccountSettings />} />
             <Route
               path={"account/preferences"}

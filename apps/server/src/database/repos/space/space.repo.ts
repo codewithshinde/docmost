@@ -182,6 +182,18 @@ export class SpaceRepo {
     });
   }
 
+  async getTeamSpaces(teamId: string, workspaceId: string): Promise<Space[]> {
+    return this.db
+      .selectFrom('spaces')
+      .selectAll('spaces')
+      .select((eb) => [this.withMemberCount(eb)])
+      .where('teamId', '=', teamId)
+      .where('workspaceId', '=', workspaceId)
+      .where('deletedAt', 'is', null)
+      .orderBy('name', 'asc')
+      .execute();
+  }
+
   withMemberCount(eb: ExpressionBuilder<DB, 'spaces'>) {
     const subquery = eb
       .selectFrom('spaceMembers')

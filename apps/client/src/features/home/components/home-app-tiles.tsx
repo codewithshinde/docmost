@@ -2,6 +2,7 @@ import { Badge, Text } from "@mantine/core";
 import {
   IconCalendar,
   IconFileText,
+  IconLayoutKanban,
   IconLayoutGrid,
   IconMail,
   IconMessageCircle2,
@@ -10,6 +11,7 @@ import {
   IconStar,
   IconTemplate,
   IconUsers,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -58,10 +60,22 @@ export default function HomeAppTiles() {
       color: "var(--mantine-color-teal-6)",
     },
     {
+      label: "Teams",
+      path: "/teams",
+      icon: IconUsersGroup,
+      color: "var(--mantine-color-violet-6)",
+    },
+    {
+      label: "Projects",
+      path: "/projects",
+      icon: IconLayoutKanban,
+      color: "var(--mantine-color-pink-6)",
+    },
+    {
       label: "Chat",
       path: "/chat",
       icon: IconMessageCircle2,
-      color: "var(--mantine-color-violet-6)",
+      color: "var(--mantine-color-indigo-6)",
       badge: chatUnread,
     },
     {
@@ -104,8 +118,8 @@ export default function HomeAppTiles() {
       enabled: aiChatEnabled,
     },
     {
-      label: "Settings",
-      path: "/settings/account/profile",
+      label: "Admin",
+      path: "/settings",
       icon: IconSettings,
       color: "var(--mantine-color-gray-7)",
     },

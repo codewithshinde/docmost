@@ -12,6 +12,7 @@ import {
   deleteProjectTask,
   getProjectTasks,
   getTeamProjects,
+  getUserProjects,
   updateProject,
   updateProjectTask,
 } from "../services/project-service";
@@ -42,6 +43,13 @@ export function useTeamProjectsQuery(
   });
 }
 
+export function useUserProjectsQuery(): UseQueryResult<ITeamProject[], Error> {
+  return useQuery({
+    queryKey: [...PROJECTS_KEY, "me"],
+    queryFn: getUserProjects,
+  });
+}
+
 export function useProjectTasksQuery(
   projectId?: string,
 ): UseQueryResult<ITeamProjectTask[], Error> {
@@ -65,6 +73,7 @@ export function useCreateProjectMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
@@ -89,6 +98,7 @@ export function useUpdateProjectMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
@@ -103,6 +113,7 @@ export function useDeleteProjectMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
@@ -133,6 +144,7 @@ export function useCreateProjectTaskMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
@@ -165,6 +177,7 @@ export function useUpdateProjectTaskMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
@@ -186,6 +199,7 @@ export function useDeleteProjectTaskMutation() {
       queryClient.invalidateQueries({
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
+      queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
     },
     onError: showError,
   });
