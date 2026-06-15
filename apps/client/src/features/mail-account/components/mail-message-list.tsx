@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ActionIcon, Loader, Text } from "@mantine/core";
+import { ActionIcon, Button, Group, Loader, Text } from "@mantine/core";
 import {
   IconChevronLeft,
   IconChevronRight,
   IconInboxOff,
+  IconPencilPlus,
   IconRefresh,
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
@@ -16,11 +17,13 @@ const PAGE_SIZE = 25;
 interface MailMessageListProps {
   selectedUid: number | null;
   onSelect: (uid: number) => void;
+  onCompose: () => void;
 }
 
 export function MailMessageList({
   selectedUid,
   onSelect,
+  onCompose,
 }: MailMessageListProps) {
   const { t } = useTranslation();
   const locale = useDateFnsLocale();
@@ -40,15 +43,25 @@ export function MailMessageList({
         <Text fw={700} size="sm">
           {t("Inbox")}
         </Text>
-        <ActionIcon
-          variant="subtle"
-          c="gray"
-          onClick={() => refetch()}
-          loading={isFetching && !isLoading}
-          aria-label={t("Refresh")}
-        >
-          <IconRefresh size={16} />
-        </ActionIcon>
+        <Group gap="xs" wrap="nowrap">
+          <Button
+            variant="light"
+            size="xs"
+            leftSection={<IconPencilPlus size={14} />}
+            onClick={onCompose}
+          >
+            {t("Compose")}
+          </Button>
+          <ActionIcon
+            variant="subtle"
+            c="gray"
+            onClick={() => refetch()}
+            loading={isFetching && !isLoading}
+            aria-label={t("Refresh")}
+          >
+            <IconRefresh size={16} />
+          </ActionIcon>
+        </Group>
       </div>
 
       <div className={classes.listScroll}>

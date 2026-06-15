@@ -7,6 +7,7 @@ import { CommentNotificationService } from './services/comment.notification';
 import { PageNotificationService } from './services/page.notification';
 import { VerificationNotificationService } from './services/verification.notification';
 import { ChatNotificationService } from './services/chat.notification';
+import { CalendarNotificationService } from './services/calendar.notification';
 import { PageUpdateEmailRateLimiter } from './services/page-update-email-rate-limiter';
 import { WebPushService } from '../../integrations/webpush/webpush.service';
 
@@ -20,9 +21,15 @@ import { WebPushService } from '../../integrations/webpush/webpush.service';
     PageNotificationService,
     VerificationNotificationService,
     ChatNotificationService,
+    CalendarNotificationService,
     PageUpdateEmailRateLimiter,
     WebPushService,
   ],
-  exports: [NotificationService, ChatNotificationService, WebPushService],
+  exports: [
+    NotificationService,
+    ChatNotificationService,
+    CalendarNotificationService,
+    WebPushService,
+  ],
 })
 export class NotificationModule {}

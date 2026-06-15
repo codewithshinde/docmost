@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ActionIcon, Badge, ScrollArea, Text, Tooltip } from "@mantine/core";
 import { IconHash, IconLock, IconPlus, IconSettings, IconUsersGroup } from "@tabler/icons-react";
@@ -37,6 +37,7 @@ export function ChatSidebar() {
   const [createChannelOpened, createChannelHandlers] = useDisclosure(false);
   const [createDmOpened, createDmHandlers] = useDisclosure(false);
   const [teamSettingsOpened, teamSettingsHandlers] = useDisclosure(false);
+  const [settingsTeamId, setSettingsTeamId] = useState<string | null>(null);
 
   const unreadMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -51,6 +52,16 @@ export function ChatSidebar() {
   }, [activeTeamId, teams, setActiveTeamId]);
 
   const activeTeam = teams?.find((team) => team.id === activeTeamId);
+
+  const openTeamSettings = (teamId: string) => {
+    setSettingsTeamId(teamId);
+    teamSettingsHandlers.open();
+  };
+
+  const closeTeamSettings = () => {
+    teamSettingsHandlers.close();
+    setSettingsTeamId(null);
+  };
 
   return (
     <div className={classes.sidebar}>
@@ -92,7 +103,7 @@ export function ChatSidebar() {
                 variant="subtle"
                 color="gray"
                 size="sm"
-                onClick={teamSettingsHandlers.open}
+                onClick={() => openTeamSettings(activeTeam.id)}
                 aria-label={t("Team settings")}
               >
                 <IconSettings size={14} />
@@ -235,7 +246,11 @@ export function ChatSidebar() {
         </ScrollArea>
       </div>
 
-      <CreateTeamModal opened={createTeamOpened} onClose={createTeamHandlers.close} />
+      <CreateTeamModal
+        opened={createTeamOpened}
+        onClose={createTeamHandlers.close}
+        onCreated={openTeamSettings}
+      />
       {activeTeam && (
         <CreateChannelModal
           opened={createChannelOpened}
@@ -244,11 +259,11 @@ export function ChatSidebar() {
         />
       )}
       <CreateDmModal opened={createDmOpened} onClose={createDmHandlers.close} />
-      {activeTeam && (
+      {settingsTeamId && (
         <TeamSettingsModal
-          teamId={activeTeam.id}
+          teamId={settingsTeamId}
           opened={teamSettingsOpened}
-          onClose={teamSettingsHandlers.close}
+          onClose={closeTeamSettings}
         />
       )}
     </div>

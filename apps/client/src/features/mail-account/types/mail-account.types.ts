@@ -38,6 +38,7 @@ export interface IMailMessageSummary {
 
 export interface IMailMessageDetail {
   uid: number;
+  messageId: string | null;
   subject: string;
   from: string;
   to: string;
@@ -54,4 +55,19 @@ export interface IListMailMessages {
 export interface IMailMessageListResult {
   messages: IMailMessageSummary[];
   total: number;
+}
+
+export interface ISendMailMessage {
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  inReplyTo?: string;
+  references?: string[];
+}
+
+export interface IMailUnreadCount {
+  unread: number;
 }

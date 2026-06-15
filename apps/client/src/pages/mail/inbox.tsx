@@ -8,12 +8,25 @@ import { getAppName } from "@/lib/config.ts";
 import { useMailAccountQuery } from "@/features/mail-account/queries/mail-account-query";
 import { MailMessageList } from "@/features/mail-account/components/mail-message-list";
 import { MailMessageReader } from "@/features/mail-account/components/mail-message-reader";
+import {
+  ComposeMailInitialValues,
+  ComposeMailModal,
+} from "@/features/mail-account/components/compose-mail-modal";
 import classes from "@/features/mail-account/styles/inbox.module.css";
 
 export default function Inbox() {
   const { t } = useTranslation();
   const { data: account, isLoading } = useMailAccountQuery();
   const [selectedUid, setSelectedUid] = useState<number | null>(null);
+  const [composeOpened, setComposeOpened] = useState(false);
+  const [composeInitialValues, setComposeInitialValues] = useState<
+    ComposeMailInitialValues | undefined
+  >();
+
+  const openCompose = (initialValues?: ComposeMailInitialValues) => {
+    setComposeInitialValues(initialValues);
+    setComposeOpened(true);
+  };
 
   return (
     <div className={classes.page}>
@@ -49,8 +62,14 @@ export default function Inbox() {
           <MailMessageList
             selectedUid={selectedUid}
             onSelect={setSelectedUid}
+            onCompose={() => openCompose()}
           />
-          <MailMessageReader uid={selectedUid} />
+          <MailMessageReader uid={selectedUid} onCompose={openCompose} />
+          <ComposeMailModal
+            opened={composeOpened}
+            onClose={() => setComposeOpened(false)}
+            initialValues={composeInitialValues}
+          />
         </>
       )}
     </div>

@@ -46,7 +46,8 @@ export function useCreateTeamMutation() {
     { name: string; description?: string; type?: string }
   >({
     mutationFn: createTeam,
-    onSuccess: () => {
+    onSuccess: (team) => {
+      queryClient.setQueryData([...TEAMS_KEY, team.id], team);
       queryClient.invalidateQueries({ queryKey: TEAMS_KEY });
     },
     onError: (error: any) => {
@@ -67,7 +68,8 @@ export function useUpdateTeamMutation() {
     { teamId: string; name?: string; description?: string; type?: string }
   >({
     mutationFn: updateTeam,
-    onSuccess: () => {
+    onSuccess: (team, variables) => {
+      queryClient.setQueryData([...TEAMS_KEY, variables.teamId], team);
       queryClient.invalidateQueries({ queryKey: TEAMS_KEY });
     },
     onError: (error: any) => {
@@ -117,8 +119,12 @@ export function useAddTeamMemberMutation() {
     mutationFn: addTeamMember,
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId],
+      });
+      queryClient.invalidateQueries({
         queryKey: [...TEAMS_KEY, variables.teamId, "members"],
       });
+      queryClient.invalidateQueries({ queryKey: TEAMS_KEY });
     },
     onError: (error: any) => {
       notifications.show({
@@ -135,6 +141,9 @@ export function useRemoveTeamMemberMutation() {
   return useMutation<void, Error, { teamId: string; userId: string }>({
     mutationFn: removeTeamMember,
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId],
+      });
       queryClient.invalidateQueries({
         queryKey: [...TEAMS_KEY, variables.teamId, "members"],
       });
@@ -159,6 +168,9 @@ export function useUpdateTeamMemberRoleMutation() {
   >({
     mutationFn: updateTeamMemberRole,
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId],
+      });
       queryClient.invalidateQueries({
         queryKey: [...TEAMS_KEY, variables.teamId, "members"],
       });

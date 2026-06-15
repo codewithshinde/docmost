@@ -5,7 +5,9 @@ import {
   IMailAccountView,
   IMailMessageDetail,
   IMailMessageListResult,
+  IMailUnreadCount,
   ISaveMailAccount,
+  ISendMailMessage,
 } from "../types/mail-account.types";
 
 export async function getMailAccount(): Promise<IMailAccountView> {
@@ -49,5 +51,26 @@ export async function getMailMessage(
     "/mail-accounts/me/messages/get",
     { uid },
   );
+  return req.data;
+}
+
+export async function getMailUnreadCount(): Promise<IMailUnreadCount> {
+  const req = await api.post<IMailUnreadCount>(
+    "/mail-accounts/me/unread-count",
+  );
+  return req.data;
+}
+
+export async function testSmtpConnection(): Promise<IConnectionTestResult> {
+  const req = await api.post<IConnectionTestResult>(
+    "/mail-accounts/me/test-smtp",
+  );
+  return req.data;
+}
+
+export async function sendMailMessage(
+  data: ISendMailMessage,
+): Promise<{ ok: true }> {
+  const req = await api.post<{ ok: true }>("/mail-accounts/me/send", data);
   return req.data;
 }

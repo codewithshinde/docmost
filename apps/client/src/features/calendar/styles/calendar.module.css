@@ -1,0 +1,211 @@
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+}
+
+.weekdayHeader {
+  padding: 6px 8px;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  color: var(--mantine-color-dimmed);
+  text-align: center;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.weekdayHeader:last-child {
+  border-right: none;
+}
+
+.dayCell {
+  min-height: 110px;
+  padding: 4px;
+  border-right: 1px solid var(--mantine-color-default-border);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dayCell:hover {
+  background-color: var(--mantine-color-default-hover);
+}
+
+.dayCell:nth-child(7n) {
+  border-right: none;
+}
+
+.dayNumber {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  padding: 2px 4px;
+}
+
+.dimmed {
+  color: var(--mantine-color-dimmed);
+}
+
+.today .dayNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-blue-filled);
+  color: var(--mantine-color-white);
+}
+
+.eventChip {
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background-color: var(--mantine-color-blue-light);
+  color: var(--mantine-color-blue-light-color);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.eventChipCancelled {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.moreLink {
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+  padding: 1px 4px;
+}
+
+/* Time grid (week / day views) */
+.timeGridWrapper {
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-md);
+  overflow: auto;
+  max-height: 70vh;
+}
+
+.timeGridHeader {
+  display: grid;
+  position: sticky;
+  top: 0;
+  background-color: var(--mantine-color-body);
+  z-index: 2;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.timeGridHeaderCell {
+  padding: 6px 8px;
+  text-align: center;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.timeGridHeaderCell:last-child {
+  border-right: none;
+}
+
+.allDayRow {
+  display: grid;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.allDayCell {
+  min-height: 28px;
+  padding: 2px 4px;
+  border-right: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.allDayCell:last-child {
+  border-right: none;
+}
+
+.timeGridBody {
+  display: grid;
+  position: relative;
+}
+
+.timeGutter {
+  position: relative;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.timeGutterLabel {
+  position: absolute;
+  top: -7px;
+  right: 6px;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+}
+
+.dayColumn {
+  position: relative;
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+.hourLine {
+  height: 48px;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.timeEvent {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 11px;
+  line-height: 1.3;
+  overflow: hidden;
+  background-color: var(--mantine-color-blue-light);
+  color: var(--mantine-color-blue-light-color);
+  border-left: 3px solid var(--mantine-color-blue-filled);
+  cursor: pointer;
+}
+
+.timeEventCancelled {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Agenda */
+.agendaDateHeading {
+  font-weight: 600;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+  margin-top: var(--mantine-spacing-sm);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.agendaItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--mantine-radius-md);
+  cursor: pointer;
+}
+
+.agendaItem:hover {
+  background-color: var(--mantine-color-default-hover);
+}
+
+.agendaColorBar {
+  width: 4px;
+  border-radius: 2px;
+  align-self: stretch;
+  min-height: 36px;
+  background-color: var(--mantine-color-blue-filled);
+}

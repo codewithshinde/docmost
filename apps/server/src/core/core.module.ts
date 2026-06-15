@@ -33,7 +33,7 @@ import { ChannelModule } from './chat/channel/channel.module';
 import { MessageModule } from './chat/message/message.module';
 import { ReactionModule } from './chat/reaction/reaction.module';
 import { CallModule } from './chat/call/call.module';
-import { SchedulingModule } from './scheduling/scheduling.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { MailAccountModule } from './mail-account/mail-account.module';
 
 @Module({
@@ -64,7 +64,7 @@ import { MailAccountModule } from './mail-account/mail-account.module';
     MessageModule,
     ReactionModule,
     CallModule,
-    SchedulingModule,
+    CalendarModule,
     MailAccountModule,
   ],
 })

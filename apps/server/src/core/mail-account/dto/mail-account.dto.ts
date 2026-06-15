@@ -1,4 +1,6 @@
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsEmail,
   IsInt,
@@ -64,4 +66,41 @@ export class ListMailMessagesDto {
 export class GetMailMessageDto {
   @IsInt()
   uid: number;
+}
+
+export class SendMailMessageDto {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEmail({}, { each: true })
+  to: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsEmail({}, { each: true })
+  cc?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsEmail({}, { each: true })
+  bcc?: string[];
+
+  @IsString()
+  subject: string;
+
+  @IsOptional()
+  @IsString()
+  html?: string;
+
+  @IsOptional()
+  @IsString()
+  text?: string;
+
+  @IsOptional()
+  @IsString()
+  inReplyTo?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  references?: string[];
 }

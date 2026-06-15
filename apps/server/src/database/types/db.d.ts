@@ -751,43 +751,30 @@ export interface WebhookDeliveries {
   updatedAt: Generated<Timestamp>;
 }
 
-export interface AvailabilitySchedules {
+export interface CalendarEvents {
   id: Generated<string>;
   workspaceId: string;
-  userId: string;
-  name: string;
-  timeZone: Generated<string>;
-  rules: Generated<Json>;
-  createdAt: Generated<Timestamp>;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface EventTypes {
-  id: Generated<string>;
-  workspaceId: string;
-  userId: string;
-  scheduleId: string | null;
-  name: string;
-  slug: string;
+  organizerId: string;
+  title: string;
   description: string | null;
-  durationMinutes: Generated<number>;
-  minimumNoticeMinutes: Generated<number>;
-  enabled: Generated<boolean>;
-  createdAt: Generated<Timestamp>;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface Bookings {
-  id: Generated<string>;
-  workspaceId: string;
-  eventTypeId: string;
-  hostUserId: string;
-  bookerName: string;
-  bookerEmail: string;
+  location: string | null;
+  meetingUrl: string | null;
   startsAt: Timestamp;
   endsAt: Timestamp;
+  allDay: Generated<boolean>;
+  visibility: Generated<string>;
   status: Generated<string>;
-  notes: string | null;
+  color: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface CalendarEventAttendees {
+  id: Generated<string>;
+  eventId: string;
+  userId: string;
+  role: Generated<string>;
+  responseStatus: Generated<string>;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;
 }
@@ -816,10 +803,10 @@ export interface DB {
   audit: Audit;
   authAccounts: AuthAccounts;
   authProviders: AuthProviders;
-  availabilitySchedules: AvailabilitySchedules;
   backlinks: Backlinks;
   billing: Billing;
-  bookings: Bookings;
+  calendarEvents: CalendarEvents;
+  calendarEventAttendees: CalendarEventAttendees;
   calls: Calls;
   callParticipants: CallParticipants;
   channels: Channels;
@@ -827,7 +814,6 @@ export interface DB {
   comments: Comments;
   favorites: Favorites;
   fileTasks: FileTasks;
-  eventTypes: EventTypes;
   groups: Groups;
   groupUsers: GroupUsers;
   integrationSettings: IntegrationSettings;

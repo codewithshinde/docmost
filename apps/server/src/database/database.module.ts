@@ -48,7 +48,8 @@ import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscr
 import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integration-settings.repo';
 import { WebhookRepo } from '@docmost/db/repos/webhook/webhook.repo';
 import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.repo';
-import { SchedulingRepo } from '@docmost/db/repos/scheduling/scheduling.repo';
+import { CalendarEventRepo } from '@docmost/db/repos/calendar/calendar-event.repo';
+import { CalendarAttendeeRepo } from '@docmost/db/repos/calendar/calendar-attendee.repo';
 import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
 
 @Global()
@@ -129,7 +130,8 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     IntegrationSettingsRepo,
     WebhookRepo,
     WebhookDeliveryRepo,
-    SchedulingRepo,
+    CalendarEventRepo,
+    CalendarAttendeeRepo,
     MailAccountRepo,
   ],
   exports: [
@@ -172,7 +174,8 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     IntegrationSettingsRepo,
     WebhookRepo,
     WebhookDeliveryRepo,
-    SchedulingRepo,
+    CalendarEventRepo,
+    CalendarAttendeeRepo,
     MailAccountRepo,
   ],
 })

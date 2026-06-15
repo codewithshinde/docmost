@@ -51,9 +51,8 @@ import {
   IntegrationSettings,
   Webhooks,
   WebhookDeliveries,
-  AvailabilitySchedules,
-  EventTypes,
-  Bookings,
+  CalendarEvents,
+  CalendarEventAttendees,
   UserMailAccounts,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
@@ -325,18 +324,16 @@ export type UpdatableWebhookDelivery = Updateable<
   Omit<WebhookDeliveries, 'id'>
 >;
 
-// Scheduling
-export type AvailabilitySchedule = Selectable<AvailabilitySchedules>;
-export type InsertableAvailabilitySchedule = Insertable<AvailabilitySchedules>;
-export type UpdatableAvailabilitySchedule = Updateable<
-  Omit<AvailabilitySchedules, 'id'>
+// Calendar
+export type CalendarEvent = Selectable<CalendarEvents>;
+export type InsertableCalendarEvent = Insertable<CalendarEvents>;
+export type UpdatableCalendarEvent = Updateable<Omit<CalendarEvents, 'id'>>;
+export type CalendarEventAttendee = Selectable<CalendarEventAttendees>;
+export type InsertableCalendarEventAttendee =
+  Insertable<CalendarEventAttendees>;
+export type UpdatableCalendarEventAttendee = Updateable<
+  Omit<CalendarEventAttendees, 'id'>
 >;
-export type EventType = Selectable<EventTypes>;
-export type InsertableEventType = Insertable<EventTypes>;
-export type UpdatableEventType = Updateable<Omit<EventTypes, 'id'>>;
-export type Booking = Selectable<Bookings>;
-export type InsertableBooking = Insertable<Bookings>;
-export type UpdatableBooking = Updateable<Omit<Bookings, 'id'>>;
 
 // User Mail Accounts
 export type UserMailAccount = Selectable<UserMailAccounts>;

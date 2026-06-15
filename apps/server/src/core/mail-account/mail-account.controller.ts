@@ -7,6 +7,7 @@ import {
   GetMailMessageDto,
   ListMailMessagesDto,
   SaveMailAccountDto,
+  SendMailMessageDto,
 } from './dto/mail-account.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -48,5 +49,23 @@ export class MailAccountController {
   @Post('me/messages/get')
   getMyMessage(@Body() dto: GetMailMessageDto, @AuthUser() user: User) {
     return this.mailAccountService.getMessage(user.id, dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('me/unread-count')
+  getMyUnreadCount(@AuthUser() user: User) {
+    return this.mailAccountService.getUnreadCount(user.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('me/test-smtp')
+  testMySmtp(@AuthUser() user: User) {
+    return this.mailAccountService.testSmtpConnection(user.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('me/send')
+  sendMyMessage(@Body() dto: SendMailMessageDto, @AuthUser() user: User) {
+    return this.mailAccountService.sendMessage(user.id, dto);
   }
 }

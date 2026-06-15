@@ -1,5 +1,14 @@
 import { useState } from "react";
-import { Modal, TextInput, Textarea, Button, Stack, Group, Divider } from "@mantine/core";
+import {
+  Modal,
+  TextInput,
+  Textarea,
+  Button,
+  Stack,
+  Group,
+  Divider,
+  SegmentedControl,
+} from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { useCreateTeamMutation } from "../queries/team-query";
 import { useSetAtom } from "jotai";
@@ -8,18 +17,25 @@ import { activeTeamIdAtom } from "../atoms/chat-atoms";
 interface CreateTeamModalProps {
   opened: boolean;
   onClose: () => void;
+  onCreated?: (teamId: string) => void;
 }
 
-export function CreateTeamModal({ opened, onClose }: CreateTeamModalProps) {
+export function CreateTeamModal({
+  opened,
+  onClose,
+  onCreated,
+}: CreateTeamModalProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [type, setType] = useState("open");
   const createTeamMutation = useCreateTeamMutation();
   const setActiveTeamId = useSetAtom(activeTeamIdAtom);
 
   const handleClose = () => {
     setName("");
     setDescription("");
+    setType("open");
     onClose();
   };
 
@@ -30,9 +46,11 @@ export function CreateTeamModal({ opened, onClose }: CreateTeamModalProps) {
     const team = await createTeamMutation.mutateAsync({
       name: name.trim(),
       description: description.trim() || undefined,
+      type,
     });
 
     setActiveTeamId(team.id);
+    onCreated?.(team.id);
     handleClose();
   };
 
@@ -62,6 +80,15 @@ export function CreateTeamModal({ opened, onClose }: CreateTeamModalProps) {
             onChange={(event) => setDescription(event.currentTarget.value)}
             autosize
             minRows={2}
+          />
+          <SegmentedControl
+            value={type}
+            onChange={setType}
+            data={[
+              { value: "open", label: t("Open") },
+              { value: "invite_only", label: t("Invite only") },
+            ]}
+            fullWidth
           />
         </Stack>
         <Group justify="flex-end" mt="md">

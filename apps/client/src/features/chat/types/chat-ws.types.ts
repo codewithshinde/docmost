@@ -18,6 +18,10 @@ export const ChatWsEvent = {
   CALL_PARTICIPANT_JOINED: "call.participant.joined",
   CALL_PARTICIPANT_LEFT: "call.participant.left",
   CALL_PARTICIPANT_UPDATED: "call.participant.updated",
+  CALENDAR_EVENT_CREATED: "calendar.event.created",
+  CALENDAR_EVENT_UPDATED: "calendar.event.updated",
+  CALENDAR_EVENT_CANCELLED: "calendar.event.cancelled",
+  CALENDAR_EVENT_RESPONSE_UPDATED: "calendar.event.response.updated",
 } as const;
 
 export type ChatWsEventName = (typeof ChatWsEvent)[keyof typeof ChatWsEvent];

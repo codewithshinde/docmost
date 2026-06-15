@@ -1,16 +1,22 @@
-import { Center, Loader, Text, Title } from "@mantine/core";
-import { IconMailOpened } from "@tabler/icons-react";
+import { Button, Center, Group, Loader, Text, Title } from "@mantine/core";
+import { IconArrowBackUp, IconArrowForward, IconMailOpened } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 import { useMailMessageQuery } from "../queries/mail-account-query";
 import { formatLocalized, useDateFnsLocale } from "@/lib/date-locale";
 import classes from "../styles/inbox.module.css";
+import { ComposeMailInitialValues } from "./compose-mail-modal";
+import {
+  buildForwardInitialValues,
+  buildReplyInitialValues,
+} from "../utils/mail-compose.utils";
 
 interface MailMessageReaderProps {
   uid: number | null;
+  onCompose: (initialValues?: ComposeMailInitialValues) => void;
 }
 
-export function MailMessageReader({ uid }: MailMessageReaderProps) {
+export function MailMessageReader({ uid, onCompose }: MailMessageReaderProps) {
   const { t } = useTranslation();
   const locale = useDateFnsLocale();
   const { data: message, isLoading } = useMailMessageQuery(uid);
@@ -42,7 +48,27 @@ export function MailMessageReader({ uid }: MailMessageReaderProps) {
   return (
     <div className={classes.readerPane}>
       <div className={classes.readerHeader}>
-        <Title order={4}>{message.subject || t("(No subject)")}</Title>
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
+          <Title order={4}>{message.subject || t("(No subject)")}</Title>
+          <Group gap="xs" wrap="nowrap">
+            <Button
+              variant="default"
+              size="xs"
+              leftSection={<IconArrowBackUp size={14} />}
+              onClick={() => onCompose(buildReplyInitialValues(message, locale))}
+            >
+              {t("Reply")}
+            </Button>
+            <Button
+              variant="default"
+              size="xs"
+              leftSection={<IconArrowForward size={14} />}
+              onClick={() => onCompose(buildForwardInitialValues(message))}
+            >
+              {t("Forward")}
+            </Button>
+          </Group>
+        </Group>
         <Text size="sm" c="dimmed">
           {t("From")}: {message.from}
         </Text>

@@ -6,9 +6,18 @@ import { Group, MultiSelect, MultiSelectProps, Text } from "@mantine/core";
 import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
 import { useTranslation } from "react-i18next";
 
+interface IPreselectedUser {
+  id: string;
+  name: string;
+  email?: string;
+  avatarUrl?: string;
+}
+
 interface MultiUserSelectProps {
   onChange: (value: string[]) => void;
   label?: string;
+  excludeUserIds?: string[];
+  initialSelectedUsers?: IPreselectedUser[];
 }
 
 const renderMultiSelectOption: MultiSelectProps["renderOption"] = ({
@@ -29,7 +38,12 @@ const renderMultiSelectOption: MultiSelectProps["renderOption"] = ({
   </Group>
 );
 
-export function MultiUserSelect({ onChange, label }: MultiUserSelectProps) {
+export function MultiUserSelect({
+  onChange,
+  label,
+  excludeUserIds,
+  initialSelectedUsers,
+}: MultiUserSelectProps) {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
   const [debouncedQuery] = useDebouncedValue(searchValue, 500);
@@ -37,18 +51,27 @@ export function MultiUserSelect({ onChange, label }: MultiUserSelectProps) {
     query: debouncedQuery,
     limit: 50,
   });
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(() =>
+    (initialSelectedUsers ?? []).map((user) => ({
+      value: user.id,
+      label: user.name,
+      avatarUrl: user.avatarUrl,
+      email: user.email,
+    })),
+  );
 
   useEffect(() => {
     if (users) {
-      const usersData = users?.items.map((user: IUser) => {
-        return {
-          value: user.id,
-          label: user.name,
-          avatarUrl: user.avatarUrl,
-          email: user.email,
-        };
-      });
+      const usersData = users?.items
+        .filter((user: IUser) => !excludeUserIds?.includes(user.id))
+        .map((user: IUser) => {
+          return {
+            value: user.id,
+            label: user.name,
+            avatarUrl: user.avatarUrl,
+            email: user.email,
+          };
+        });
 
       // Filter out existing users by their ids
       const filteredUsersData = usersData.filter(
@@ -59,11 +82,12 @@ export function MultiUserSelect({ onChange, label }: MultiUserSelectProps) {
       // Combine existing data with new search data
       setData((prevData) => [...prevData, ...filteredUsersData]);
     }
-  }, [users]);
+  }, [users, excludeUserIds]);
 
   return (
     <MultiSelect
       data={data}
+      defaultValue={initialSelectedUsers?.map((user) => user.id)}
       renderOption={renderMultiSelectOption}
       hidePickedOptions
       maxDropdownHeight={300}

@@ -16,6 +16,7 @@ import {
 import { IMessage } from "../types/chat.types";
 import { IPagination } from "@/lib/types";
 import { notifications } from "@mantine/notifications";
+import { addMessageToCache } from "../utils/message-cache";
 
 export const CHANNEL_MESSAGES_KEY = ["chat", "channel-messages"];
 export const THREAD_MESSAGES_KEY = ["chat", "thread-messages"];
@@ -53,6 +54,8 @@ export function useMessageQuery(
 }
 
 export function useSendMessageMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation<
     IMessage,
     Error,
@@ -65,6 +68,9 @@ export function useSendMessageMutation() {
     }
   >({
     mutationFn: sendMessage,
+    onSuccess: (data) => {
+      addMessageToCache(queryClient, data);
+    },
     onError: (error: any) => {
       notifications.show({
         message: error?.response?.data?.message,

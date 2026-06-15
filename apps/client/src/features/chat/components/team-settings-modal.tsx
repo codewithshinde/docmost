@@ -7,6 +7,7 @@ import {
   Menu,
   Modal,
   ScrollArea,
+  SegmentedControl,
   Stack,
   Table,
   Text,
@@ -71,6 +72,7 @@ export function TeamSettingsModal({
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [type, setType] = useState("open");
   const [newMemberIds, setNewMemberIds] = useState<string[]>([]);
 
   const updateTeamMutation = useUpdateTeamMutation();
@@ -84,6 +86,7 @@ export function TeamSettingsModal({
     if (team) {
       setName(team.name ?? "");
       setDescription(team.description ?? "");
+      setType(team.type ?? "open");
     }
   }, [team]);
 
@@ -92,15 +95,28 @@ export function TeamSettingsModal({
   }
 
   const isOwner = team.memberRole === "owner";
+  const canSave =
+    isOwner &&
+    name.trim().length > 0 &&
+    (name.trim() !== team.name ||
+      description.trim() !== (team.description ?? "") ||
+      type !== team.type);
 
   const handleSave = () => {
-    updateTeamMutation.mutate({ teamId, name, description });
+    updateTeamMutation.mutate({
+      teamId,
+      name: name.trim(),
+      description: description.trim(),
+      type,
+    });
   };
 
-  const handleAddMembers = () => {
-    newMemberIds.forEach((userId) => {
-      addTeamMemberMutation.mutate({ teamId, userId });
-    });
+  const handleAddMembers = async () => {
+    await Promise.all(
+      newMemberIds.map((userId) =>
+        addTeamMemberMutation.mutateAsync({ teamId, userId }),
+      ),
+    );
     setNewMemberIds([]);
   };
 
@@ -109,7 +125,20 @@ export function TeamSettingsModal({
   };
 
   const handleRemoveMember = (userId: string) => {
-    removeTeamMemberMutation.mutate({ teamId, userId });
+    const member = members?.find((item) => item.userId === userId);
+    modals.openConfirmModal({
+      title: t("Remove member"),
+      children: (
+        <Text size="sm">
+          {t("Remove {{name}} from this team?", {
+            name: member?.user?.name ?? t("this member"),
+          })}
+        </Text>
+      ),
+      labels: { confirm: t("Remove"), cancel: t("Cancel") },
+      confirmProps: { color: "red" },
+      onConfirm: () => removeTeamMemberMutation.mutate({ teamId, userId }),
+    });
   };
 
   const handleLeave = () => {
@@ -178,11 +207,22 @@ export function TeamSettingsModal({
           autosize
           minRows={2}
         />
+        <SegmentedControl
+          value={type}
+          onChange={setType}
+          disabled={!isOwner}
+          data={[
+            { value: "open", label: t("Open") },
+            { value: "invite_only", label: t("Invite only") },
+          ]}
+          fullWidth
+        />
 
         {isOwner && (
           <Group justify="flex-end">
             <Button
               onClick={handleSave}
+              disabled={!canSave}
               loading={updateTeamMutation.isPending}
             >
               {t("Save changes")}
@@ -195,7 +235,10 @@ export function TeamSettingsModal({
         {isOwner && (
           <Group align="flex-end" gap="sm">
             <div style={{ flex: 1 }}>
-              <MultiUserSelect onChange={setNewMemberIds} />
+              <MultiUserSelect
+                onChange={setNewMemberIds}
+                excludeUserIds={members?.map((member) => member.userId) ?? []}
+              />
             </div>
             <Button
               onClick={handleAddMembers}
@@ -236,6 +279,10 @@ export function TeamSettingsModal({
                         roleName={getTeamRoleLabel(member.role)}
                         onChange={(role) =>
                           handleRoleChange(member.userId, role)
+                        }
+                        disabled={
+                          updateTeamMemberRoleMutation.isPending ||
+                          member.userId === currentUser?.id
                         }
                       />
                     ) : (

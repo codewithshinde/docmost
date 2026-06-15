@@ -16,7 +16,6 @@ import {
   IconHistory,
   IconShieldCheck,
   IconPlug,
-  IconCalendarTime,
   IconMail,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
@@ -69,11 +68,6 @@ const groupedData: DataGroup[] = [
         label: "Preferences",
         icon: IconBrush,
         path: "/settings/account/preferences",
-      },
-      {
-        label: "Availability",
-        icon: IconCalendarTime,
-        path: "/settings/account/availability",
       },
       {
         label: "Email",

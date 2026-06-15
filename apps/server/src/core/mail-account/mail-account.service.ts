@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
+import * as nodemailer from 'nodemailer';
+import { Transporter } from 'nodemailer';
 import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
 import { EncryptionService } from '../../integrations/crypto/encryption.service';
 import {
   GetMailMessageDto,
   ListMailMessagesDto,
   SaveMailAccountDto,
+  SendMailMessageDto,
 } from './dto/mail-account.dto';
 
 export interface MailAccountView {
@@ -32,6 +35,7 @@ export interface MailMessageSummary {
 
 export interface MailMessageDetail {
   uid: number;
+  messageId: string | null;
   subject: string;
   from: string;
   to: string;
@@ -199,6 +203,7 @@ export class MailAccountService {
 
         return {
           uid: dto.uid,
+          messageId: parsed.messageId ?? null,
           subject: parsed.subject ?? '(no subject)',
           from: parsed.from?.text ?? '',
           to,
@@ -212,5 +217,83 @@ export class MailAccountService {
     } finally {
       await client.logout().catch(() => {});
     }
+  }
+
+  async getUnreadCount(userId: string): Promise<{ unread: number }> {
+    const client = await this.connect(userId);
+    try {
+      const status = await client.status('INBOX', { unseen: true });
+      return { unread: status.unseen ?? 0 };
+    } finally {
+      await client.logout().catch(() => {});
+    }
+  }
+
+  private async getTransport(userId: string): Promise<{
+    transporter: Transporter;
+    from: string;
+  }> {
+    const account = await this.mailAccountRepo.findByUserId(userId);
+    if (!account) {
+      throw new BadRequestException('Email account is not configured');
+    }
+
+    const secrets = this.encryption.decryptJson(account.secrets);
+    if (!secrets.password) {
+      throw new BadRequestException('Email account is not configured');
+    }
+
+    const host = account.smtpHost || account.imapHost;
+    const port = account.smtpPort ?? 587;
+    const secure = account.smtpHost
+      ? account.smtpSecure ?? true
+      : account.imapSecure;
+
+    if (!host) {
+      throw new BadRequestException('SMTP is not configured for this account');
+    }
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        user: account.username || account.emailAddress,
+        pass: secrets.password,
+      },
+    });
+
+    return { transporter, from: account.emailAddress };
+  }
+
+  async testSmtpConnection(userId: string): Promise<{ ok: boolean; message: string }> {
+    try {
+      const { transporter } = await this.getTransport(userId);
+      await transporter.verify();
+      return { ok: true, message: 'Successfully connected to SMTP server' };
+    } catch (err) {
+      return {
+        ok: false,
+        message: err instanceof Error ? err.message : 'SMTP connection failed',
+      };
+    }
+  }
+
+  async sendMessage(userId: string, dto: SendMailMessageDto): Promise<{ ok: true }> {
+    const { transporter, from } = await this.getTransport(userId);
+
+    await transporter.sendMail({
+      from,
+      to: dto.to,
+      cc: dto.cc,
+      bcc: dto.bcc,
+      subject: dto.subject,
+      html: dto.html,
+      text: dto.text,
+      inReplyTo: dto.inReplyTo,
+      references: dto.references,
+    });
+
+    return { ok: true };
   }
 }
