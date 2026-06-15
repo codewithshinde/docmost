@@ -779,6 +779,37 @@ export interface CalendarEventAttendees {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface TeamProjects {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  name: string;
+  description: string | null;
+  view: Generated<string>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamProjectTasks {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  title: string;
+  description: string | null;
+  status: Generated<string>;
+  priority: Generated<string>;
+  assigneeId: string | null;
+  dueAt: Timestamp | null;
+  sortOrder: Generated<number>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
 export interface UserMailAccounts {
   id: Generated<string>;
   userId: string;
@@ -839,6 +870,8 @@ export interface DB {
   spaces: Spaces;
   teams: Teams;
   teamMembers: TeamMembers;
+  teamProjects: TeamProjects;
+  teamProjectTasks: TeamProjectTasks;
   templates: Templates;
   userMailAccounts: UserMailAccounts;
   userMfa: UserMfa;

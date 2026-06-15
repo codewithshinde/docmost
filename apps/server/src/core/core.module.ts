@@ -35,6 +35,7 @@ import { ReactionModule } from './chat/reaction/reaction.module';
 import { CallModule } from './chat/call/call.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { MailAccountModule } from './mail-account/mail-account.module';
+import { ProjectModule } from './chat/project/project.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { MailAccountModule } from './mail-account/mail-account.module';
     MessageModule,
     ReactionModule,
     CallModule,
+    ProjectModule,
     CalendarModule,
     MailAccountModule,
   ],

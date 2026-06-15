@@ -33,6 +33,42 @@ export interface ITeamMember {
   createdAt: string;
 }
 
+export type ProjectView = "table" | "kanban" | "calendar";
+export type ProjectTaskStatus = "todo" | "in_progress" | "blocked" | "done";
+export type ProjectTaskPriority = "low" | "medium" | "high" | "urgent";
+
+export interface ITeamProject {
+  id: string;
+  workspaceId: string;
+  teamId: string;
+  name: string;
+  description: string | null;
+  view: ProjectView;
+  createdById: string | null;
+  taskCount?: number;
+  doneTaskCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ITeamProjectTask {
+  id: string;
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  title: string;
+  description: string | null;
+  status: ProjectTaskStatus;
+  priority: ProjectTaskPriority;
+  assigneeId: string | null;
+  assignee?: IChatUser | null;
+  dueAt: string | null;
+  sortOrder: number;
+  createdById: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IChannel {
   id: string;
   workspaceId: string;

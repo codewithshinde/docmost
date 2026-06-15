@@ -36,6 +36,7 @@ import * as postgres from 'postgres';
 import { normalizePostgresUrl } from '../common/helpers';
 import { TeamRepo } from '@docmost/db/repos/chat/team.repo';
 import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
+import { TeamProjectRepo } from '@docmost/db/repos/chat/team-project.repo';
 import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
 import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
 import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
@@ -118,6 +119,7 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     PageListener,
     TeamRepo,
     TeamMemberRepo,
+    TeamProjectRepo,
     ChannelRepo,
     ChannelMemberRepo,
     MessageRepo,
@@ -162,6 +164,7 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     AuditRepo,
     TeamRepo,
     TeamMemberRepo,
+    TeamProjectRepo,
     ChannelRepo,
     ChannelMemberRepo,
     MessageRepo,

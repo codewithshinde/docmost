@@ -29,6 +29,7 @@ import { MultiUserSelect } from "@/features/group/components/multi-user-select";
 import RoleSelectMenu from "@/components/ui/role-select-menu";
 import { IRoleData } from "@/lib/types";
 import { userAtom } from "@/features/user/atoms/current-user-atom";
+import { TeamProjectsPanel } from "./team-projects-panel";
 import {
   useAddTeamMemberMutation,
   useDeleteTeamMutation,
@@ -379,12 +380,7 @@ export function TeamSettingsModal({
         </Tabs.Panel>
 
         <Tabs.Panel value="projects" pt="md">
-          <Stack gap={4}>
-            <Text fw={500}>{t("Team projects")}</Text>
-            <Text size="sm" c="dimmed">
-              {t("Project management will live inside this team.")}
-            </Text>
-          </Stack>
+          <TeamProjectsPanel teamId={teamId} members={members} />
         </Tabs.Panel>
       </Tabs>
     </Modal>

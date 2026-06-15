@@ -39,6 +39,8 @@ import {
   Templates,
   Teams,
   TeamMembers,
+  TeamProjects,
+  TeamProjectTasks,
   Channels,
   ChannelMembers,
   Messages,
@@ -67,10 +69,7 @@ export type UpdatableAiChat = Updateable<Omit<AiChats, 'id'>>;
 // full-text search. It is omitted from the public type so it never leaks
 // into HTTP responses or the chat history fed to the language model.
 export type AiChatMessage = Omit<Selectable<AiChatMessages>, 'tsv'>;
-export type InsertableAiChatMessage = Omit<
-  Insertable<AiChatMessages>,
-  'tsv'
->;
+export type InsertableAiChatMessage = Omit<Insertable<AiChatMessages>, 'tsv'>;
 
 // Workspace
 export type Workspace = Selectable<Workspaces>;
@@ -169,11 +168,14 @@ export type UpdatableFavorite = Updateable<Omit<Favorites, 'id'>>;
 // Page Transclusion
 export type PageTransclusion = Selectable<PageTransclusions>;
 export type InsertablePageTransclusion = Insertable<PageTransclusions>;
-export type UpdatablePageTransclusion = Updateable<Omit<PageTransclusions, 'id'>>;
+export type UpdatablePageTransclusion = Updateable<
+  Omit<PageTransclusions, 'id'>
+>;
 
 // Page Transclusion Reference
 export type PageTransclusionReference = Selectable<PageTransclusionReferences>;
-export type InsertablePageTransclusionReference = Insertable<PageTransclusionReferences>;
+export type InsertablePageTransclusionReference =
+  Insertable<PageTransclusionReferences>;
 export type UpdatablePageTransclusionReference = Updateable<
   Omit<PageTransclusionReferences, 'id'>
 >;
@@ -235,7 +237,9 @@ export type UpdatablePagePermission = Updateable<Omit<_PagePermissions, 'id'>>;
 // Page Verification
 export type PageVerification = Selectable<_PageVerifications>;
 export type InsertablePageVerification = Insertable<_PageVerifications>;
-export type UpdatablePageVerification = Updateable<Omit<_PageVerifications, 'id'>>;
+export type UpdatablePageVerification = Updateable<
+  Omit<_PageVerifications, 'id'>
+>;
 
 // Page Verifier
 export type PageVerifier = Selectable<_PageVerifiers>;
@@ -265,6 +269,15 @@ export type UpdatableTeam = Updateable<Omit<Teams, 'id'>>;
 export type TeamMember = Selectable<TeamMembers>;
 export type InsertableTeamMember = Insertable<TeamMembers>;
 export type UpdatableTeamMember = Updateable<Omit<TeamMembers, 'id'>>;
+
+// Team projects
+export type TeamProject = Selectable<TeamProjects>;
+export type InsertableTeamProject = Insertable<TeamProjects>;
+export type UpdatableTeamProject = Updateable<Omit<TeamProjects, 'id'>>;
+
+export type TeamProjectTask = Selectable<TeamProjectTasks>;
+export type InsertableTeamProjectTask = Insertable<TeamProjectTasks>;
+export type UpdatableTeamProjectTask = Updateable<Omit<TeamProjectTasks, 'id'>>;
 
 // Channel
 export type Channel = Selectable<Channels>;
@@ -338,6 +351,4 @@ export type UpdatableCalendarEventAttendee = Updateable<
 // User Mail Accounts
 export type UserMailAccount = Selectable<UserMailAccounts>;
 export type InsertableUserMailAccount = Insertable<UserMailAccounts>;
-export type UpdatableUserMailAccount = Updateable<
-  Omit<UserMailAccounts, 'id'>
->;
+export type UpdatableUserMailAccount = Updateable<Omit<UserMailAccounts, 'id'>>;
