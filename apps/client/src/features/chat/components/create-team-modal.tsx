@@ -10,9 +10,13 @@ import {
   SegmentedControl,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
-import { useCreateTeamMutation } from "../queries/team-query";
+import {
+  useAddTeamMemberMutation,
+  useCreateTeamMutation,
+} from "../queries/team-query";
 import { useSetAtom } from "jotai";
 import { activeTeamIdAtom } from "../atoms/chat-atoms";
+import { MultiUserSelect } from "@/features/group/components/multi-user-select";
 
 interface CreateTeamModalProps {
   opened: boolean;
@@ -29,13 +33,16 @@ export function CreateTeamModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("open");
+  const [memberIds, setMemberIds] = useState<string[]>([]);
   const createTeamMutation = useCreateTeamMutation();
+  const addTeamMemberMutation = useAddTeamMemberMutation();
   const setActiveTeamId = useSetAtom(activeTeamIdAtom);
 
   const handleClose = () => {
     setName("");
     setDescription("");
     setType("open");
+    setMemberIds([]);
     onClose();
   };
 
@@ -50,6 +57,15 @@ export function CreateTeamModal({
     });
 
     setActiveTeamId(team.id);
+
+    if (memberIds.length > 0) {
+      await Promise.all(
+        memberIds.map((userId) =>
+          addTeamMemberMutation.mutateAsync({ teamId: team.id, userId }),
+        ),
+      );
+    }
+
     onCreated?.(team.id);
     handleClose();
   };
@@ -90,6 +106,10 @@ export function CreateTeamModal({
             ]}
             fullWidth
           />
+          <MultiUserSelect
+            label={t("Invite members")}
+            onChange={setMemberIds}
+          />
         </Stack>
         <Group justify="flex-end" mt="md">
           <Button variant="default" onClick={handleClose}>
@@ -98,7 +118,9 @@ export function CreateTeamModal({
           <Button
             type="submit"
             disabled={!name.trim()}
-            loading={createTeamMutation.isPending}
+            loading={
+              createTeamMutation.isPending || addTeamMemberMutation.isPending
+            }
           >
             {t("Create")}
           </Button>
