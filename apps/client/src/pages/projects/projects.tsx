@@ -1,27 +1,43 @@
 import { useEffect, useState } from "react";
 import {
   Badge,
+  Button,
   Container,
   Group,
   Paper,
+  Select,
   SimpleGrid,
   Stack,
   Text,
+  TextInput,
+  Textarea,
 } from "@mantine/core";
-import { IconLayoutKanban } from "@tabler/icons-react";
+import { IconLayoutKanban, IconPlus } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { getAppName } from "@/lib/config";
-import { useUserProjectsQuery } from "@/features/chat/queries/project-query";
-import { useTeamMembersQuery } from "@/features/chat/queries/team-query";
+import {
+  useCreateProjectMutation,
+  useUserProjectsQuery,
+} from "@/features/chat/queries/project-query";
+import {
+  useTeamMembersQuery,
+  useTeamsQuery,
+} from "@/features/chat/queries/team-query";
 import { ProjectTasks } from "@/features/chat/components/team-projects-panel";
-import { ITeamProject } from "@/features/chat/types/chat.types";
+import { ITeamProject, ProjectView } from "@/features/chat/types/chat.types";
 
 export default function ProjectsPage() {
   const { t } = useTranslation();
   const { data: projects } = useUserProjectsQuery();
+  const { data: teams } = useTeamsQuery();
+  const createProjectMutation = useCreateProjectMutation();
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [view, setView] = useState<ProjectView>("kanban");
   const activeProject = projects?.find(
     (project) => project.id === activeProjectId,
   );
@@ -39,6 +55,20 @@ export default function ProjectsPage() {
       setActiveProjectId(projects[0]?.id ?? null);
     }
   }, [activeProjectId, projects]);
+
+  const handleCreateProject = async () => {
+    if (!teamId || !name.trim()) return;
+    const project = await createProjectMutation.mutateAsync({
+      teamId,
+      name: name.trim(),
+      description: description.trim() || undefined,
+      view,
+    });
+    setActiveProjectId(project.id);
+    setName("");
+    setDescription("");
+    setView("kanban");
+  };
 
   return (
     <Container size="1200" py="xl">
@@ -59,8 +89,57 @@ export default function ProjectsPage() {
         </div>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-        <Stack gap="sm">
+      <Paper withBorder radius="sm" p="md" mb="lg">
+        <SimpleGrid cols={{ base: 1, md: 4 }} spacing="sm">
+          <Select
+            label={t("Team")}
+            data={(teams ?? []).map((team) => ({
+              value: team.id,
+              label: team.name,
+            }))}
+            value={teamId}
+            onChange={setTeamId}
+            searchable
+            placeholder={t("Select team")}
+          />
+          <TextInput
+            label={t("Project name")}
+            value={name}
+            onChange={(event) => setName(event.currentTarget.value)}
+            placeholder={t("e.g. Release board")}
+          />
+          <Select
+            label={t("Default view")}
+            value={view}
+            onChange={(value) => setView((value as ProjectView) ?? "kanban")}
+            data={[
+              { value: "kanban", label: t("Board") },
+              { value: "table", label: t("Table") },
+              { value: "calendar", label: t("Calendar") },
+            ]}
+          />
+          <Button
+            mt={24}
+            leftSection={<IconPlus size={16} />}
+            onClick={handleCreateProject}
+            disabled={!teamId || !name.trim()}
+            loading={createProjectMutation.isPending}
+          >
+            {t("Create project")}
+          </Button>
+        </SimpleGrid>
+        <Textarea
+          mt="sm"
+          label={t("Description")}
+          value={description}
+          onChange={(event) => setDescription(event.currentTarget.value)}
+          minRows={2}
+          autosize
+        />
+      </Paper>
+
+      <Stack gap="lg">
+        <SimpleGrid cols={{ base: 1, md: 2, xl: 4 }} spacing="sm">
           {(projects ?? []).map((project) => (
             <ProjectCard
               key={project.id}
@@ -73,13 +152,13 @@ export default function ProjectsPage() {
             <Paper withBorder radius="sm" p="md">
               <Text fw={600}>{t("No projects yet")}</Text>
               <Text size="sm" c="dimmed">
-                {t("Create a project from a team hub to start tracking work.")}
+                {t("Create a project here or from a team hub to start tracking work.")}
               </Text>
             </Paper>
           )}
-        </Stack>
+        </SimpleGrid>
 
-        <Paper withBorder radius="sm" p="md" style={{ gridColumn: "span 2" }}>
+        <Paper withBorder radius="sm" p="md" mih={520}>
           {activeProject ? (
             <ProjectTasks
               teamId={activeProject.teamId}
@@ -93,7 +172,7 @@ export default function ProjectsPage() {
             </Stack>
           )}
         </Paper>
-      </SimpleGrid>
+      </Stack>
     </Container>
   );
 }

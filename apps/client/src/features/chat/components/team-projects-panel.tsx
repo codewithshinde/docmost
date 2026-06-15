@@ -6,7 +6,10 @@ import {
   Button,
   Divider,
   Group,
+  Anchor,
   Menu,
+  MultiSelect,
+  NumberInput,
   Paper,
   Select,
   SimpleGrid,
@@ -29,6 +32,7 @@ import { CustomAvatar } from "@/components/ui/custom-avatar";
 import {
   ITeamMember,
   ITeamProject,
+  ProjectIssueType,
   ITeamProjectTask,
   ProjectTaskPriority,
   ProjectTaskStatus,
@@ -36,10 +40,12 @@ import {
 } from "../types/chat.types";
 import {
   useCreateProjectMutation,
+  useCreateProjectTaskCommentMutation,
   useCreateProjectTaskMutation,
   useDeleteProjectMutation,
   useDeleteProjectTaskMutation,
   useProjectTasksQuery,
+  useProjectTaskCommentsQuery,
   useTeamProjectsQuery,
   useUpdateProjectMutation,
   useUpdateProjectTaskMutation,
@@ -57,6 +63,13 @@ const priorityOptions: { value: ProjectTaskPriority; label: string }[] = [
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
   { value: "urgent", label: "Urgent" },
+];
+
+const issueTypeOptions: { value: ProjectIssueType; label: string }[] = [
+  { value: "task", label: "Task" },
+  { value: "bug", label: "Bug" },
+  { value: "story", label: "Story" },
+  { value: "epic", label: "Epic" },
 ];
 
 const viewOptions: { value: ProjectView; label: string }[] = [
@@ -292,9 +305,16 @@ export function ProjectTasks({
   const deleteTaskMutation = useDeleteProjectTaskMutation();
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [issueType, setIssueType] = useState<ProjectIssueType>("task");
   const [assigneeId, setAssigneeId] = useState<string | null>(null);
   const [dueAt, setDueAt] = useState("");
   const [priority, setPriority] = useState<ProjectTaskPriority>("medium");
+  const [tags, setTags] = useState<string[]>([]);
+  const [sprint, setSprint] = useState("");
+  const [storyPoints, setStoryPoints] = useState<string | number>("");
+  const [externalLinks, setExternalLinks] = useState("");
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const memberOptions = useMemo(
     () =>
@@ -311,19 +331,48 @@ export function ProjectTasks({
       teamId,
       projectId: project.id,
       title: title.trim(),
+      description: description.trim() || undefined,
+      issueType,
       assigneeId: assigneeId ?? undefined,
       dueAt: dueAt || undefined,
       priority,
+      tags,
+      sprint: sprint.trim() || undefined,
+      storyPoints:
+        storyPoints === "" || storyPoints === null ? undefined : Number(storyPoints),
+      externalLinks: externalLinks
+        .split("\n")
+        .map((link) => link.trim())
+        .filter(Boolean),
     });
     setTitle("");
+    setDescription("");
+    setIssueType("task");
     setAssigneeId(null);
     setDueAt("");
     setPriority("medium");
+    setTags([]);
+    setSprint("");
+    setStoryPoints("");
+    setExternalLinks("");
   };
 
   const updateTask = (
     task: ITeamProjectTask,
-    data: Partial<Pick<ITeamProjectTask, "status" | "priority" | "assigneeId">>,
+    data: Partial<
+      Pick<
+        ITeamProjectTask,
+        | "status"
+        | "priority"
+        | "assigneeId"
+        | "issueType"
+        | "tags"
+        | "sprint"
+        | "storyPoints"
+        | "description"
+        | "externalLinks"
+      >
+    >,
   ) => {
     updateTaskMutation.mutate({
       teamId,
@@ -364,13 +413,21 @@ export function ProjectTasks({
         />
       </Group>
 
-      <Group align="flex-end" gap="xs">
+      <SimpleGrid cols={{ base: 1, md: 4 }} spacing="xs">
         <TextInput
           label={t("Task")}
           value={title}
           onChange={(e) => setTitle(e.currentTarget.value)}
           placeholder={t("Add a task")}
-          style={{ flex: 1 }}
+        />
+        <Select
+          label={t("Type")}
+          value={issueType}
+          data={issueTypeOptions.map((item) => ({
+            value: item.value,
+            label: t(item.label),
+          }))}
+          onChange={(value) => setIssueType((value as ProjectIssueType) ?? "task")}
         />
         <Select
           label={t("Owner")}
@@ -379,14 +436,12 @@ export function ProjectTasks({
           onChange={setAssigneeId}
           clearable
           searchable
-          w={150}
         />
         <TextInput
           label={t("Due")}
           type="date"
           value={dueAt}
           onChange={(e) => setDueAt(e.currentTarget.value)}
-          w={140}
         />
         <Select
           label={t("Priority")}
@@ -398,8 +453,59 @@ export function ProjectTasks({
           onChange={(value) =>
             setPriority((value as ProjectTaskPriority) ?? "medium")
           }
-          w={120}
         />
+        <TextInput
+          label={t("Sprint")}
+          value={sprint}
+          onChange={(e) => setSprint(e.currentTarget.value)}
+          placeholder={t("Sprint name")}
+        />
+        <NumberInput
+          label={t("Points")}
+          min={0}
+          value={storyPoints}
+          onChange={setStoryPoints}
+        />
+        <MultiSelect
+          label={t("Tags")}
+          data={tags}
+          value={tags}
+          onChange={setTags}
+          searchable
+          clearable
+          comboboxProps={{ withinPortal: true }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              const target = event.target as HTMLInputElement;
+              const value = target.value.trim();
+              if (value && !tags.includes(value)) {
+                setTags([...tags, value]);
+              }
+            }
+          }}
+          placeholder={t("Press Enter")}
+        />
+      </SimpleGrid>
+
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xs">
+        <Textarea
+          label={t("Description")}
+          value={description}
+          onChange={(e) => setDescription(e.currentTarget.value)}
+          minRows={2}
+          autosize
+        />
+        <Textarea
+          label={t("Attachments / links")}
+          value={externalLinks}
+          onChange={(e) => setExternalLinks(e.currentTarget.value)}
+          minRows={2}
+          autosize
+          placeholder={t("One external link per line")}
+        />
+      </SimpleGrid>
+
+      <Group justify="flex-end">
         <Button
           onClick={handleCreateTask}
           disabled={!title.trim()}
@@ -413,6 +519,7 @@ export function ProjectTasks({
         <KanbanTasks
           tasks={taskList}
           onUpdateStatus={(task, status) => updateTask(task, { status })}
+          onOpenTask={(task) => setSelectedTaskId(task.id)}
           onDeleteTask={(task) =>
             deleteTaskMutation.mutate({
               teamId,
@@ -426,6 +533,7 @@ export function ProjectTasks({
           tasks={taskList}
           memberOptions={memberOptions}
           onUpdateTask={updateTask}
+          onOpenTask={(task) => setSelectedTaskId(task.id)}
           onDeleteTask={(task) =>
             deleteTaskMutation.mutate({
               teamId,
@@ -436,6 +544,11 @@ export function ProjectTasks({
           calendarMode={view === "calendar"}
         />
       )}
+      <TaskDetails
+        task={taskList.find((task) => task.id === selectedTaskId)}
+        projectId={project.id}
+        onClose={() => setSelectedTaskId(null)}
+      />
     </Stack>
   );
 }
@@ -445,6 +558,7 @@ function TaskTable({
   memberOptions,
   calendarMode,
   onUpdateTask,
+  onOpenTask,
   onDeleteTask,
 }: {
   tasks: ITeamProjectTask[];
@@ -452,8 +566,14 @@ function TaskTable({
   calendarMode: boolean;
   onUpdateTask: (
     task: ITeamProjectTask,
-    data: Partial<Pick<ITeamProjectTask, "status" | "priority" | "assigneeId">>,
+    data: Partial<
+      Pick<
+        ITeamProjectTask,
+        "status" | "priority" | "assigneeId" | "issueType" | "sprint"
+      >
+    >,
   ) => void;
+  onOpenTask: (task: ITeamProjectTask) => void;
   onDeleteTask: (task: ITeamProjectTask) => void;
 }) {
   const { t } = useTranslation();
@@ -467,8 +587,10 @@ function TaskTable({
         <Table.Thead>
           <Table.Tr>
             <Table.Th>{t("Task")}</Table.Th>
+            <Table.Th>{t("Type")}</Table.Th>
             <Table.Th>{t("Status")}</Table.Th>
             <Table.Th>{t("Owner")}</Table.Th>
+            <Table.Th>{t("Sprint")}</Table.Th>
             <Table.Th>{t("Due")}</Table.Th>
             <Table.Th>{t("Priority")}</Table.Th>
             <Table.Th />
@@ -481,6 +603,28 @@ function TaskTable({
                 <Text size="sm" fw={500}>
                   {task.title}
                 </Text>
+                <Group gap={4} mt={4}>
+                  {(task.tags ?? []).map((tag) => (
+                    <Badge key={tag} size="xs" variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </Group>
+              </Table.Td>
+              <Table.Td>
+                <Select
+                  size="xs"
+                  value={task.issueType}
+                  data={issueTypeOptions.map((item) => ({
+                    value: item.value,
+                    label: t(item.label),
+                  }))}
+                  onChange={(value) =>
+                    onUpdateTask(task, {
+                      issueType: (value as ProjectIssueType) ?? "task",
+                    })
+                  }
+                />
               </Table.Td>
               <Table.Td>
                 <Select
@@ -510,6 +654,15 @@ function TaskTable({
                 />
               </Table.Td>
               <Table.Td>
+                <TextInput
+                  size="xs"
+                  value={task.sprint ?? ""}
+                  onChange={(event) =>
+                    onUpdateTask(task, { sprint: event.currentTarget.value })
+                  }
+                />
+              </Table.Td>
+              <Table.Td>
                 <Text size="xs" c={task.dueAt ? undefined : "dimmed"}>
                   {task.dueAt
                     ? new Date(task.dueAt).toLocaleDateString()
@@ -532,6 +685,10 @@ function TaskTable({
                 />
               </Table.Td>
               <Table.Td>
+                <Group gap={4} wrap="nowrap">
+                  <Button size="compact-xs" variant="subtle" onClick={() => onOpenTask(task)}>
+                    {t("Open")}
+                  </Button>
                 <ActionIcon
                   variant="subtle"
                   color="red"
@@ -540,6 +697,7 @@ function TaskTable({
                 >
                   <IconTrash size={16} />
                 </ActionIcon>
+                </Group>
               </Table.Td>
             </Table.Tr>
           ))}
@@ -552,13 +710,16 @@ function TaskTable({
 function KanbanTasks({
   tasks,
   onUpdateStatus,
+  onOpenTask,
   onDeleteTask,
 }: {
   tasks: ITeamProjectTask[];
   onUpdateStatus: (task: ITeamProjectTask, status: ProjectTaskStatus) => void;
+  onOpenTask: (task: ITeamProjectTask) => void;
   onDeleteTask: (task: ITeamProjectTask) => void;
 }) {
   const { t } = useTranslation();
+  const [dragTaskId, setDragTaskId] = useState<string | null>(null);
 
   return (
     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
@@ -570,6 +731,14 @@ function KanbanTasks({
             border: "1px solid var(--mantine-color-gray-3)",
             borderRadius: 6,
             minHeight: 120,
+          }}
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={() => {
+            const task = tasks.find((task) => task.id === dragTaskId);
+            if (task && task.status !== status.value) {
+              onUpdateStatus(task, status.value);
+            }
+            setDragTaskId(null);
           }}
         >
           <Group justify="space-between" mb="xs">
@@ -584,13 +753,29 @@ function KanbanTasks({
             {tasks
               .filter((task) => task.status === status.value)
               .map((task) => (
-                <Paper key={task.id} withBorder radius="sm" p="xs">
+                <Paper
+                  key={task.id}
+                  withBorder
+                  radius="sm"
+                  p="xs"
+                  draggable
+                  onDragStart={() => setDragTaskId(task.id)}
+                  onClick={() => onOpenTask(task)}
+                  style={{ cursor: "grab" }}
+                >
                   <Group justify="space-between" wrap="nowrap">
                     <div style={{ minWidth: 0 }}>
                       <Text size="sm" fw={500} truncate>
                         {task.title}
                       </Text>
                       <Group gap={6} mt={4} wrap="nowrap">
+                        <Badge size="xs" variant="light">
+                          {t(
+                            issueTypeOptions.find(
+                              (item) => item.value === task.issueType,
+                            )?.label ?? task.issueType,
+                          )}
+                        </Badge>
                         <Badge size="xs" variant="light">
                           {t(
                             priorityOptions.find(
@@ -641,5 +826,99 @@ function KanbanTasks({
         </Box>
       ))}
     </SimpleGrid>
+  );
+}
+
+function TaskDetails({
+  task,
+  projectId,
+  onClose,
+}: {
+  task?: ITeamProjectTask;
+  projectId: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const [comment, setComment] = useState("");
+  const { data: comments } = useProjectTaskCommentsQuery(task?.id);
+  const createCommentMutation = useCreateProjectTaskCommentMutation();
+
+  if (!task) {
+    return null;
+  }
+
+  const addComment = async () => {
+    if (!comment.trim()) return;
+    await createCommentMutation.mutateAsync({
+      taskId: task.id,
+      projectId,
+      content: comment.trim(),
+    });
+    setComment("");
+  };
+
+  return (
+    <Paper withBorder radius="sm" p="md">
+      <Group justify="space-between" mb="xs">
+        <div>
+          <Text fw={700}>{task.title}</Text>
+          <Group gap={6}>
+            <Badge variant="light">{t(task.issueType)}</Badge>
+            <Badge variant="light">{t(task.priority)}</Badge>
+            {task.sprint && <Badge variant="outline">{task.sprint}</Badge>}
+            {task.storyPoints !== null && (
+              <Badge variant="outline">{t("{{points}} pts", { points: task.storyPoints })}</Badge>
+            )}
+          </Group>
+        </div>
+        <Button size="xs" variant="subtle" onClick={onClose}>
+          {t("Close")}
+        </Button>
+      </Group>
+      {task.description && (
+        <Text size="sm" mb="sm" style={{ whiteSpace: "pre-wrap" }}>
+          {task.description}
+        </Text>
+      )}
+      {!!task.externalLinks?.length && (
+        <Stack gap={2} mb="sm">
+          {task.externalLinks.map((link) => (
+            <Anchor key={link} href={link} target="_blank" size="sm">
+              {link}
+            </Anchor>
+          ))}
+        </Stack>
+      )}
+      <Divider my="sm" />
+      <Stack gap="xs">
+        {(comments ?? []).map((item) => (
+          <Paper key={item.id} withBorder radius="sm" p="xs">
+            <Text size="xs" c="dimmed">
+              {item.user?.name ?? t("Unknown user")}
+            </Text>
+            <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+              {item.content}
+            </Text>
+          </Paper>
+        ))}
+        <Textarea
+          label={t("Comment")}
+          value={comment}
+          onChange={(event) => setComment(event.currentTarget.value)}
+          minRows={2}
+          autosize
+        />
+        <Group justify="flex-end">
+          <Button
+            size="xs"
+            onClick={addComment}
+            disabled={!comment.trim()}
+            loading={createCommentMutation.isPending}
+          >
+            {t("Comment")}
+          </Button>
+        </Group>
+      </Stack>
+    </Paper>
   );
 }

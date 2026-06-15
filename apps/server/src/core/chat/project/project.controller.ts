@@ -13,6 +13,7 @@ import { User, Workspace } from '@docmost/db/types/entity.types';
 import { TeamIdDto } from '../team/dto/team.dto';
 import {
   CreateTeamProjectDto,
+  CreateTeamProjectTaskCommentDto,
   CreateTeamProjectTaskDto,
   TeamProjectIdDto,
   TeamProjectTaskIdDto,
@@ -115,5 +116,25 @@ export class ProjectController {
   ) {
     await this.projectService.deleteTask(dto.taskId, user, workspace);
     return { success: true };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('tasks/comments')
+  async getTaskComments(
+    @Body() dto: TeamProjectTaskIdDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.projectService.getTaskComments(dto.taskId, user, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('tasks/comments/create')
+  async createTaskComment(
+    @Body() dto: CreateTeamProjectTaskCommentDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.projectService.createTaskComment(dto, user, workspace);
   }
 }

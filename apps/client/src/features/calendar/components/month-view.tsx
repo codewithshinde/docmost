@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Text } from "@mantine/core";
 import {
-  addDays,
   eachDayOfInterval,
   endOfDay,
   format,
@@ -55,7 +54,7 @@ export function MonthView({
           .filter((event) => {
             const eventStart = new Date(event.startsAt);
             const eventEnd = new Date(event.endsAt);
-            return eventStart < addDays(dayEnd, 1) && eventEnd > dayStart;
+            return eventStart <= dayEnd && eventEnd > dayStart;
           })
           .sort(
             (a, b) =>

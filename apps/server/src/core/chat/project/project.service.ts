@@ -14,6 +14,7 @@ import {
 } from '@docmost/db/types/entity.types';
 import {
   CreateTeamProjectDto,
+  CreateTeamProjectTaskCommentDto,
   CreateTeamProjectTaskDto,
   UpdateTeamProjectDto,
   UpdateTeamProjectTaskDto,
@@ -105,9 +106,14 @@ export class ProjectService {
       projectId: project.id,
       title: dto.title,
       description: dto.description,
+      issueType: dto.issueType ?? 'task',
+      tags: dto.tags ?? [],
       status: dto.status ?? 'todo',
       priority: dto.priority ?? 'medium',
       assigneeId: dto.assigneeId,
+      sprint: dto.sprint,
+      storyPoints: dto.storyPoints,
+      externalLinks: dto.externalLinks ?? [],
       dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined,
       sortOrder: await this.projectRepo.nextSortOrder(project.id),
       createdById: user.id,
@@ -125,9 +131,16 @@ export class ProjectService {
     return this.projectRepo.updateTask(dto.taskId, workspace.id, {
       ...(dto.title !== undefined && { title: dto.title }),
       ...(dto.description !== undefined && { description: dto.description }),
+      ...(dto.issueType !== undefined && { issueType: dto.issueType }),
+      ...(dto.tags !== undefined && { tags: dto.tags }),
       ...(dto.status !== undefined && { status: dto.status }),
       ...(dto.priority !== undefined && { priority: dto.priority }),
       ...(dto.assigneeId !== undefined && { assigneeId: dto.assigneeId }),
+      ...(dto.sprint !== undefined && { sprint: dto.sprint }),
+      ...(dto.storyPoints !== undefined && { storyPoints: dto.storyPoints }),
+      ...(dto.externalLinks !== undefined && {
+        externalLinks: dto.externalLinks,
+      }),
       ...(dto.dueAt !== undefined && { dueAt: new Date(dto.dueAt) }),
       workspaceId: workspace.id,
       teamId: task.teamId,
@@ -142,6 +155,27 @@ export class ProjectService {
   ): Promise<void> {
     await this.getTaskForMember(taskId, user, workspace);
     await this.projectRepo.softDeleteTask(taskId, workspace.id);
+  }
+
+  async getTaskComments(taskId: string, user: User, workspace: Workspace) {
+    await this.getTaskForMember(taskId, user, workspace);
+    return this.projectRepo.getTaskComments(taskId, workspace.id);
+  }
+
+  async createTaskComment(
+    dto: CreateTeamProjectTaskCommentDto,
+    user: User,
+    workspace: Workspace,
+  ) {
+    const task = await this.getTaskForMember(dto.taskId, user, workspace);
+    return this.projectRepo.insertTaskComment({
+      workspaceId: workspace.id,
+      teamId: task.teamId,
+      projectId: task.projectId,
+      taskId: task.id,
+      userId: user.id,
+      content: dto.content,
+    });
   }
 
   private async getProjectForMember(

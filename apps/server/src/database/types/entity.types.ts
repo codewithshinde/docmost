@@ -38,8 +38,10 @@ import {
   Audit as _Audit,
   Templates,
   Teams,
+  TeamGroups,
   TeamMembers,
   TeamProjects,
+  TeamProjectTaskComments,
   TeamProjectTasks,
   Channels,
   ChannelMembers,
@@ -270,6 +272,8 @@ export type TeamMember = Selectable<TeamMembers>;
 export type InsertableTeamMember = Insertable<TeamMembers>;
 export type UpdatableTeamMember = Updateable<Omit<TeamMembers, 'id'>>;
 
+export type TeamGroup = Selectable<TeamGroups>;
+
 // Team projects
 export type TeamProject = Selectable<TeamProjects>;
 export type InsertableTeamProject = Insertable<TeamProjects>;
@@ -278,6 +282,9 @@ export type UpdatableTeamProject = Updateable<Omit<TeamProjects, 'id'>>;
 export type TeamProjectTask = Selectable<TeamProjectTasks>;
 export type InsertableTeamProjectTask = Insertable<TeamProjectTasks>;
 export type UpdatableTeamProjectTask = Updateable<Omit<TeamProjectTasks, 'id'>>;
+export type TeamProjectTaskComment = Selectable<TeamProjectTaskComments>;
+export type InsertableTeamProjectTaskComment =
+  Insertable<TeamProjectTaskComments>;
 
 // Channel
 export type Channel = Selectable<Channels>;

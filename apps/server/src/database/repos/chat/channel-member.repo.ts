@@ -25,6 +25,21 @@ export class ChannelMemberRepo {
       .executeTakeFirst();
   }
 
+  async ensureChannelMember(
+    insertableChannelMember: InsertableChannelMember,
+    trx?: KyselyTransaction,
+  ): Promise<ChannelMember> {
+    const existing = await this.getChannelMember(
+      insertableChannelMember.channelId,
+      insertableChannelMember.userId,
+      trx,
+    );
+    if (existing) {
+      return existing;
+    }
+    return this.insertChannelMember(insertableChannelMember, trx);
+  }
+
   async getChannelMember(
     channelId: string,
     userId: string,

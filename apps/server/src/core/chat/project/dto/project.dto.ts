@@ -1,10 +1,13 @@
 import {
   IsDateString,
   IsIn,
+  IsInt,
   IsOptional,
+  IsArray,
   IsString,
   IsUUID,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class TeamProjectIdDto {
@@ -62,6 +65,15 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
   description?: string;
 
   @IsOptional()
+  @IsIn(['task', 'bug', 'story', 'epic'])
+  issueType?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
   @IsIn(['todo', 'in_progress', 'blocked', 'done'])
   status?: string;
 
@@ -72,6 +84,21 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
   @IsOptional()
   @IsUUID()
   assigneeId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  sprint?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  storyPoints?: number | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  externalLinks?: string[];
 
   @IsOptional()
   @IsDateString()
@@ -90,6 +117,15 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
   description?: string;
 
   @IsOptional()
+  @IsIn(['task', 'bug', 'story', 'epic'])
+  issueType?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
   @IsIn(['todo', 'in_progress', 'blocked', 'done'])
   status?: string;
 
@@ -102,6 +138,27 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
   assigneeId?: string | null;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  sprint?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  storyPoints?: number | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  externalLinks?: string[];
+
+  @IsOptional()
   @IsDateString()
   dueAt?: string;
+}
+
+export class CreateTeamProjectTaskCommentDto extends TeamProjectTaskIdDto {
+  @IsString()
+  @MaxLength(4000)
+  content: string;
 }

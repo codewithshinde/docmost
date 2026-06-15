@@ -2,6 +2,8 @@ import api from "@/lib/api-client";
 import {
   ITeamProject,
   ITeamProjectTask,
+  ITeamProjectTaskComment,
+  ProjectIssueType,
   ProjectTaskPriority,
   ProjectTaskStatus,
   ProjectView,
@@ -54,9 +56,14 @@ export async function createProjectTask(data: {
   projectId: string;
   title: string;
   description?: string;
+  issueType?: ProjectIssueType;
+  tags?: string[];
   status?: ProjectTaskStatus;
   priority?: ProjectTaskPriority;
   assigneeId?: string | null;
+  sprint?: string | null;
+  storyPoints?: number | null;
+  externalLinks?: string[];
   dueAt?: string;
 }): Promise<ITeamProjectTask> {
   const req = await api.post<ITeamProjectTask>("/projects/tasks/create", data);
@@ -67,9 +74,14 @@ export async function updateProjectTask(data: {
   taskId: string;
   title?: string;
   description?: string;
+  issueType?: ProjectIssueType;
+  tags?: string[];
   status?: ProjectTaskStatus;
   priority?: ProjectTaskPriority;
   assigneeId?: string | null;
+  sprint?: string | null;
+  storyPoints?: number | null;
+  externalLinks?: string[];
   dueAt?: string;
 }): Promise<ITeamProjectTask> {
   const req = await api.post<ITeamProjectTask>("/projects/tasks/update", data);
@@ -78,4 +90,25 @@ export async function updateProjectTask(data: {
 
 export async function deleteProjectTask(taskId: string): Promise<void> {
   await api.post("/projects/tasks/delete", { taskId });
+}
+
+export async function getProjectTaskComments(
+  taskId: string,
+): Promise<ITeamProjectTaskComment[]> {
+  const req = await api.post<ITeamProjectTaskComment[]>(
+    "/projects/tasks/comments",
+    { taskId },
+  );
+  return req.data;
+}
+
+export async function createProjectTaskComment(data: {
+  taskId: string;
+  content: string;
+}): Promise<ITeamProjectTaskComment> {
+  const req = await api.post<ITeamProjectTaskComment>(
+    "/projects/tasks/comments/create",
+    data,
+  );
+  return req.data;
 }

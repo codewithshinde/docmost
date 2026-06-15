@@ -8,6 +8,7 @@ import { InjectKysely } from 'nestjs-kysely';
 import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
 import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
 import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
+import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
 import { MessageMentionRepo } from '@docmost/db/repos/chat/message-mention.repo';
 import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment.repo';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
@@ -33,6 +34,7 @@ export class MessageService {
     private readonly messageRepo: MessageRepo,
     private readonly channelRepo: ChannelRepo,
     private readonly channelMemberRepo: ChannelMemberRepo,
+    private readonly teamMemberRepo: TeamMemberRepo,
     private readonly messageMentionRepo: MessageMentionRepo,
     private readonly messageAttachmentRepo: MessageAttachmentRepo,
     private readonly chatWsService: ChatWsService,
@@ -274,8 +276,25 @@ export class MessageService {
       channelId,
       userId,
     );
-    if (!member) {
-      throw new ForbiddenException('You do not have access to this channel');
+    if (member) {
+      return;
     }
+
+    if (channel.type === 'public' && channel.teamId) {
+      const teamMember = await this.teamMemberRepo.getTeamMember(
+        channel.teamId,
+        userId,
+      );
+      if (teamMember) {
+        await this.channelMemberRepo.ensureChannelMember({
+          channelId,
+          userId,
+          role: 'member',
+        });
+        return;
+      }
+    }
+
+    throw new ForbiddenException('You do not have access to this channel');
   }
 }

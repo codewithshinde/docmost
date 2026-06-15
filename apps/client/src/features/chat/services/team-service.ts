@@ -1,5 +1,5 @@
 import api from "@/lib/api-client";
-import { ITeam, ITeamMember } from "../types/chat.types";
+import { ITeam, ITeamGroup, ITeamMember } from "../types/chat.types";
 
 export async function getTeams(): Promise<ITeam[]> {
   const req = await api.post<ITeam[]>("/teams");
@@ -62,6 +62,27 @@ export async function updateTeamMemberRole(data: {
 }): Promise<ITeamMember> {
   const req = await api.post<ITeamMember>("/teams/members/update-role", data);
   return req.data;
+}
+
+export async function getTeamGroups(teamId: string): Promise<ITeamGroup[]> {
+  const req = await api.post<ITeamGroup[]>("/teams/groups", { teamId });
+  return req.data;
+}
+
+export async function addTeamGroup(data: {
+  teamId: string;
+  groupId: string;
+  role?: string;
+}): Promise<ITeamGroup> {
+  const req = await api.post<ITeamGroup>("/teams/groups/add", data);
+  return req.data;
+}
+
+export async function removeTeamGroup(data: {
+  teamId: string;
+  groupId: string;
+}): Promise<void> {
+  await api.post("/teams/groups/remove", data);
 }
 
 export async function joinTeam(teamId: string): Promise<ITeamMember> {

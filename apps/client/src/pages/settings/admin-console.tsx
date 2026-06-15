@@ -9,6 +9,7 @@ import {
   IconSettings,
   IconShare,
   IconShield,
+  IconCloudUpload,
   IconUsers,
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
@@ -53,6 +54,12 @@ const adminTiles = [
     path: "/settings/integrations",
     icon: IconLink,
     color: "var(--mantine-color-violet-6)",
+  },
+  {
+    label: "Storage",
+    path: "/settings/integrations",
+    icon: IconCloudUpload,
+    color: "var(--mantine-color-pink-6)",
   },
   {
     label: "API keys",

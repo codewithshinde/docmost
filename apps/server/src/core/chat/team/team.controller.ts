@@ -2,7 +2,9 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs
 import { TeamService } from './team.service';
 import {
   AddTeamMemberDto,
+  AddTeamGroupDto,
   CreateTeamDto,
+  RemoveTeamGroupDto,
   RemoveTeamMemberDto,
   TeamIdDto,
   UpdateTeamDto,
@@ -98,6 +100,36 @@ export class TeamController {
     @AuthUser() user: User,
   ) {
     return this.teamService.updateTeamMemberRole(dto, user);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('groups')
+  async getTeamGroups(
+    @Body() dto: TeamIdDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.teamService.getTeamGroups(dto.teamId, user, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('groups/add')
+  async addTeamGroup(
+    @Body() dto: AddTeamGroupDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.teamService.addTeamGroup(dto, user, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('groups/remove')
+  async removeTeamGroup(
+    @Body() dto: RemoveTeamGroupDto,
+    @AuthUser() user: User,
+  ) {
+    await this.teamService.removeTeamGroup(dto, user);
+    return { success: true };
   }
 
   @HttpCode(HttpStatus.OK)

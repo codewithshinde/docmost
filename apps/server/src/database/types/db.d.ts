@@ -800,15 +800,43 @@ export interface TeamProjectTasks {
   projectId: string;
   title: string;
   description: string | null;
+  issueType: Generated<string>;
+  tags: Generated<Json>;
   status: Generated<string>;
   priority: Generated<string>;
   assigneeId: string | null;
+  sprint: string | null;
+  storyPoints: number | null;
+  externalLinks: Generated<Json>;
   dueAt: Timestamp | null;
   sortOrder: Generated<number>;
   createdById: string | null;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;
   deletedAt: Timestamp | null;
+}
+
+export interface TeamProjectTaskComments {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  taskId: string;
+  userId: string | null;
+  content: string;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamGroups {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  groupId: string;
+  role: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface UserMailAccounts {
@@ -870,8 +898,10 @@ export interface DB {
   spaceMembers: SpaceMembers;
   spaces: Spaces;
   teams: Teams;
+  teamGroups: TeamGroups;
   teamMembers: TeamMembers;
   teamProjects: TeamProjects;
+  teamProjectTaskComments: TeamProjectTaskComments;
   teamProjectTasks: TeamProjectTasks;
   templates: Templates;
   userMailAccounts: UserMailAccounts;

@@ -133,6 +133,21 @@ export class ChannelRepo {
       .execute();
   }
 
+  async getPublicTeamChannels(teamId: string, workspaceId?: string) {
+    let query = this.db
+      .selectFrom('channels')
+      .selectAll()
+      .where('teamId', '=', teamId)
+      .where('type', '=', 'public')
+      .where('deletedAt', 'is', null);
+
+    if (workspaceId) {
+      query = query.where('workspaceId', '=', workspaceId);
+    }
+
+    return query.orderBy('name', 'asc').execute();
+  }
+
   async getDirectChannelsForUser(userId: string, workspaceId: string) {
     return this.db
       .selectFrom('channels')

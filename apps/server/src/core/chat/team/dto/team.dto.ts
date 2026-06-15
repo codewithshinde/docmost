@@ -45,6 +45,20 @@ export class AddTeamMemberDto extends TeamIdDto {
   role?: string;
 }
 
+export class AddTeamGroupDto extends TeamIdDto {
+  @IsUUID()
+  groupId: string;
+
+  @IsOptional()
+  @IsIn(['owner', 'member'])
+  role?: string;
+}
+
+export class RemoveTeamGroupDto extends TeamIdDto {
+  @IsUUID()
+  groupId: string;
+}
+
 export class RemoveTeamMemberDto extends TeamIdDto {
   @IsUUID()
   userId: string;

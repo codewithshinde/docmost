@@ -91,7 +91,7 @@ export class ChannelService {
         trx,
       );
 
-      await this.channelMemberRepo.insertChannelMember(
+      await this.channelMemberRepo.ensureChannelMember(
         {
           channelId: channel.id,
           userId: user.id,
@@ -99,6 +99,20 @@ export class ChannelService {
         },
         trx,
       );
+
+      if ((dto.type ?? 'public') === 'public') {
+        const teamMembers = await this.teamMemberRepo.getTeamMembers(dto.teamId);
+        for (const teamMember of teamMembers) {
+          await this.channelMemberRepo.ensureChannelMember(
+            {
+              channelId: channel.id,
+              userId: teamMember.userId,
+              role: teamMember.userId === user.id ? 'admin' : 'member',
+            },
+            trx,
+          );
+        }
+      }
     });
 
     await this.chatWsService.addUserToChannel(user.id, channel.id);
@@ -235,15 +249,7 @@ export class ChannelService {
 
     await this.assertTeamMember(channel.teamId, user.id);
 
-    const existing = await this.channelMemberRepo.getChannelMember(
-      channelId,
-      user.id,
-    );
-    if (existing) {
-      throw new BadRequestException('You are already a member of this channel');
-    }
-
-    const member = await this.channelMemberRepo.insertChannelMember({
+    const member = await this.channelMemberRepo.ensureChannelMember({
       channelId,
       userId: user.id,
       role: 'member',

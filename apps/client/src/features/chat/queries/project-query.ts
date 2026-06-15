@@ -7,10 +7,12 @@ import {
 import { notifications } from "@mantine/notifications";
 import {
   createProject,
+  createProjectTaskComment,
   createProjectTask,
   deleteProject,
   deleteProjectTask,
   getProjectTasks,
+  getProjectTaskComments,
   getTeamProjects,
   getUserProjects,
   updateProject,
@@ -19,6 +21,8 @@ import {
 import {
   ITeamProject,
   ITeamProjectTask,
+  ITeamProjectTaskComment,
+  ProjectIssueType,
   ProjectTaskPriority,
   ProjectTaskStatus,
   ProjectView,
@@ -57,6 +61,16 @@ export function useProjectTasksQuery(
     queryKey: [...PROJECTS_KEY, projectId, "tasks"],
     queryFn: () => getProjectTasks(projectId),
     enabled: !!projectId,
+  });
+}
+
+export function useProjectTaskCommentsQuery(
+  taskId?: string,
+): UseQueryResult<ITeamProjectTaskComment[], Error> {
+  return useQuery({
+    queryKey: [...PROJECTS_KEY, "task", taskId, "comments"],
+    queryFn: () => getProjectTaskComments(taskId),
+    enabled: !!taskId,
   });
 }
 
@@ -130,9 +144,14 @@ export function useCreateProjectTaskMutation() {
       teamId: string;
       title: string;
       description?: string;
+      issueType?: ProjectIssueType;
+      tags?: string[];
       status?: ProjectTaskStatus;
       priority?: ProjectTaskPriority;
       assigneeId?: string | null;
+      sprint?: string | null;
+      storyPoints?: number | null;
+      externalLinks?: string[];
       dueAt?: string;
     }
   >({
@@ -162,9 +181,14 @@ export function useUpdateProjectTaskMutation() {
       teamId: string;
       title?: string;
       description?: string;
+      issueType?: ProjectIssueType;
+      tags?: string[];
       status?: ProjectTaskStatus;
       priority?: ProjectTaskPriority;
       assigneeId?: string | null;
+      sprint?: string | null;
+      storyPoints?: number | null;
+      externalLinks?: string[];
       dueAt?: string;
     }
   >({
@@ -178,6 +202,28 @@ export function useUpdateProjectTaskMutation() {
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
       queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
+    },
+    onError: showError,
+  });
+}
+
+export function useCreateProjectTaskCommentMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ITeamProjectTaskComment,
+    Error,
+    { taskId: string; projectId: string; content: string }
+  >({
+    mutationFn: ({ projectId: _projectId, ...data }) =>
+      createProjectTaskComment(data),
+    onSuccess: (_comment, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...PROJECTS_KEY, "task", variables.taskId, "comments"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...PROJECTS_KEY, variables.projectId, "tasks"],
+      });
     },
     onError: showError,
   });

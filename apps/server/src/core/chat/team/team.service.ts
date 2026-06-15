@@ -7,6 +7,10 @@ import {
 import { InjectKysely } from 'nestjs-kysely';
 import { TeamRepo } from '@docmost/db/repos/chat/team.repo';
 import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
+import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
+import { GroupRepo } from '@docmost/db/repos/group/group.repo';
+import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
 import { UserRepo } from '@docmost/db/repos/user/user.repo';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
 import { executeTx } from '@docmost/db/utils';
@@ -25,7 +29,9 @@ import { SpaceMemberService } from '../../space/services/space-member.service';
 import { SpaceRole } from '../../../common/helpers/types/permission';
 import {
   AddTeamMemberDto,
+  AddTeamGroupDto,
   CreateTeamDto,
+  RemoveTeamGroupDto,
   RemoveTeamMemberDto,
   UpdateTeamDto,
   UpdateTeamMemberRoleDto,
@@ -36,6 +42,10 @@ export class TeamService {
   constructor(
     private readonly teamRepo: TeamRepo,
     private readonly teamMemberRepo: TeamMemberRepo,
+    private readonly channelRepo: ChannelRepo,
+    private readonly channelMemberRepo: ChannelMemberRepo,
+    private readonly groupRepo: GroupRepo,
+    private readonly groupUserRepo: GroupUserRepo,
     private readonly userRepo: UserRepo,
     private readonly chatWsService: ChatWsService,
     private readonly spaceService: SpaceService,
@@ -178,6 +188,7 @@ export class TeamService {
 
     await this.chatWsService.addUserToTeam(dto.userId, dto.teamId);
     await this.addUserToLinkedTeamSpaces(dto.userId, dto.teamId, workspace.id);
+    await this.addUserToPublicTeamChannels(dto.userId, dto.teamId, workspace.id);
     this.chatWsService.emitToTeam(
       dto.teamId,
       ChatWsEvent.TEAM_MEMBER_ADDED,
@@ -267,6 +278,7 @@ export class TeamService {
 
     await this.chatWsService.addUserToTeam(user.id, teamId);
     await this.addUserToLinkedTeamSpaces(user.id, teamId, workspace.id);
+    await this.addUserToPublicTeamChannels(user.id, teamId, workspace.id);
     this.chatWsService.emitToTeam(
       teamId,
       ChatWsEvent.TEAM_MEMBER_ADDED,
@@ -274,6 +286,78 @@ export class TeamService {
     );
 
     return member;
+  }
+
+  async getTeamGroups(teamId: string, user: User, workspace: Workspace) {
+    await this.assertMember(teamId, user.id);
+    return this.db
+      .selectFrom('teamGroups')
+      .innerJoin('groups', 'groups.id', 'teamGroups.groupId')
+      .select([
+        'teamGroups.id',
+        'teamGroups.teamId',
+        'teamGroups.groupId',
+        'teamGroups.role',
+        'teamGroups.createdAt',
+        'groups.name',
+        'groups.description',
+      ])
+      .where('teamGroups.teamId', '=', teamId)
+      .where('teamGroups.workspaceId', '=', workspace.id)
+      .orderBy('groups.name', 'asc')
+      .execute();
+  }
+
+  async addTeamGroup(
+    dto: AddTeamGroupDto,
+    user: User,
+    workspace: Workspace,
+  ) {
+    await this.assertOwner(dto.teamId, user.id);
+    const group = await this.groupRepo.findById(dto.groupId, workspace.id);
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    const teamGroup = await this.db
+      .insertInto('teamGroups')
+      .values({
+        workspaceId: workspace.id,
+        teamId: dto.teamId,
+        groupId: dto.groupId,
+        role: dto.role ?? 'member',
+      })
+      .onConflict((oc) =>
+        oc.columns(['teamId', 'groupId']).doUpdateSet({
+          role: dto.role ?? 'member',
+          updatedAt: new Date(),
+        }),
+      )
+      .returningAll()
+      .executeTakeFirst();
+
+    const groupUserIds = await this.groupUserRepo.getUserIdsByGroupId(
+      dto.groupId,
+    );
+    for (const userId of groupUserIds) {
+      await this.ensureTeamMember(
+        dto.teamId,
+        userId,
+        dto.role ?? 'member',
+        workspace.id,
+      );
+    }
+
+    return teamGroup;
+  }
+
+  async removeTeamGroup(dto: RemoveTeamGroupDto, user: User): Promise<void> {
+    await this.assertOwner(dto.teamId, user.id);
+    await this.db
+      .deleteFrom('teamGroups')
+      .where('teamId', '=', dto.teamId)
+      .where('groupId', '=', dto.groupId)
+      .execute();
   }
 
   async leaveTeam(teamId: string, user: User): Promise<void> {
@@ -355,5 +439,47 @@ export class TeamService {
         workspaceId,
       );
     }
+  }
+
+  private async addUserToPublicTeamChannels(
+    userId: string,
+    teamId: string,
+    workspaceId: string,
+  ): Promise<void> {
+    const channels = await this.channelRepo.getPublicTeamChannels(
+      teamId,
+      workspaceId,
+    );
+    for (const channel of channels) {
+      await this.channelMemberRepo.ensureChannelMember({
+        channelId: channel.id,
+        userId,
+        role: 'member',
+      });
+      await this.chatWsService.addUserToChannel(userId, channel.id);
+    }
+  }
+
+  private async ensureTeamMember(
+    teamId: string,
+    userId: string,
+    role: string,
+    workspaceId: string,
+  ): Promise<TeamMember> {
+    const existing = await this.teamMemberRepo.getTeamMember(teamId, userId);
+    if (existing) {
+      return existing;
+    }
+
+    const member = await this.teamMemberRepo.insertTeamMember({
+      teamId,
+      userId,
+      role,
+    });
+    await this.chatWsService.addUserToTeam(userId, teamId);
+    await this.addUserToLinkedTeamSpaces(userId, teamId, workspaceId);
+    await this.addUserToPublicTeamChannels(userId, teamId, workspaceId);
+    this.chatWsService.emitToTeam(teamId, ChatWsEvent.TEAM_MEMBER_ADDED, member);
+    return member;
   }
 }

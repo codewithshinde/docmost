@@ -48,12 +48,6 @@ export default function HomeAppTiles() {
 
   const tiles: Tile[] = [
     {
-      label: "Pages",
-      path: "/spaces",
-      icon: IconFileText,
-      color: "var(--mantine-color-blue-6)",
-    },
-    {
       label: "Spaces",
       path: "/spaces",
       icon: IconLayoutGrid,

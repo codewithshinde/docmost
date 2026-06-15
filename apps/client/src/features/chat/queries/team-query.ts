@@ -6,18 +6,21 @@ import {
 } from "@tanstack/react-query";
 import {
   addTeamMember,
+  addTeamGroup,
   createTeam,
   deleteTeam,
   getTeamById,
+  getTeamGroups,
   getTeamMembers,
   getTeams,
   joinTeam,
   leaveTeam,
   removeTeamMember,
+  removeTeamGroup,
   updateTeam,
   updateTeamMemberRole,
 } from "../services/team-service";
-import { ITeam, ITeamMember } from "../types/chat.types";
+import { ITeam, ITeamGroup, ITeamMember } from "../types/chat.types";
 import { notifications } from "@mantine/notifications";
 
 export const TEAMS_KEY = ["chat", "teams"];
@@ -108,6 +111,16 @@ export function useTeamMembersQuery(
   });
 }
 
+export function useTeamGroupsQuery(
+  teamId?: string,
+): UseQueryResult<ITeamGroup[], Error> {
+  return useQuery({
+    queryKey: [...TEAMS_KEY, teamId, "groups"],
+    queryFn: () => getTeamGroups(teamId),
+    enabled: !!teamId,
+  });
+}
+
 export function useAddTeamMemberMutation() {
   const queryClient = useQueryClient();
 
@@ -170,6 +183,55 @@ export function useUpdateTeamMemberRoleMutation() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: [...TEAMS_KEY, variables.teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId, "members"],
+      });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        message: error?.response?.data?.message,
+        color: "red",
+      });
+    },
+  });
+}
+
+export function useAddTeamGroupMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    ITeamGroup,
+    Error,
+    { teamId: string; groupId: string; role?: string }
+  >({
+    mutationFn: addTeamGroup,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId, "groups"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId, "members"],
+      });
+      queryClient.invalidateQueries({ queryKey: TEAMS_KEY });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        message: error?.response?.data?.message,
+        color: "red",
+      });
+    },
+  });
+}
+
+export function useRemoveTeamGroupMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { teamId: string; groupId: string }>({
+    mutationFn: removeTeamGroup,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...TEAMS_KEY, variables.teamId, "groups"],
       });
       queryClient.invalidateQueries({
         queryKey: [...TEAMS_KEY, variables.teamId, "members"],

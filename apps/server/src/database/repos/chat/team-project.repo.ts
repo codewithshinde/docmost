@@ -8,6 +8,7 @@ import {
   InsertableTeamProjectTask,
   TeamProject,
   TeamProjectTask,
+  InsertableTeamProjectTaskComment,
   UpdatableTeamProject,
   UpdatableTeamProjectTask,
 } from '@docmost/db/types/entity.types';
@@ -113,9 +114,14 @@ export class TeamProjectRepo {
         'teamProjectTasks.projectId',
         'teamProjectTasks.title',
         'teamProjectTasks.description',
+        'teamProjectTasks.issueType',
+        'teamProjectTasks.tags',
         'teamProjectTasks.status',
         'teamProjectTasks.priority',
         'teamProjectTasks.assigneeId',
+        'teamProjectTasks.sprint',
+        'teamProjectTasks.storyPoints',
+        'teamProjectTasks.externalLinks',
         'teamProjectTasks.dueAt',
         'teamProjectTasks.sortOrder',
         'teamProjectTasks.createdById',
@@ -151,6 +157,46 @@ export class TeamProjectRepo {
       .where('id', '=', taskId)
       .where('workspaceId', '=', workspaceId)
       .where('deletedAt', 'is', null)
+      .executeTakeFirst();
+  }
+
+  async getTaskComments(taskId: string, workspaceId: string) {
+    return this.db
+      .selectFrom('teamProjectTaskComments')
+      .select((eb) => [
+        'teamProjectTaskComments.id',
+        'teamProjectTaskComments.workspaceId',
+        'teamProjectTaskComments.teamId',
+        'teamProjectTaskComments.projectId',
+        'teamProjectTaskComments.taskId',
+        'teamProjectTaskComments.userId',
+        'teamProjectTaskComments.content',
+        'teamProjectTaskComments.createdAt',
+        'teamProjectTaskComments.updatedAt',
+        jsonObjectFrom(
+          eb
+            .selectFrom('users')
+            .select([
+              'users.id',
+              'users.name',
+              'users.email',
+              'users.avatarUrl',
+            ])
+            .whereRef('users.id', '=', 'teamProjectTaskComments.userId'),
+        ).as('user'),
+      ])
+      .where('teamProjectTaskComments.taskId', '=', taskId)
+      .where('teamProjectTaskComments.workspaceId', '=', workspaceId)
+      .where('teamProjectTaskComments.deletedAt', 'is', null)
+      .orderBy('teamProjectTaskComments.createdAt', 'asc')
+      .execute();
+  }
+
+  async insertTaskComment(comment: InsertableTeamProjectTaskComment) {
+    return this.db
+      .insertInto('teamProjectTaskComments')
+      .values(comment)
+      .returningAll()
       .executeTakeFirst();
   }
 
