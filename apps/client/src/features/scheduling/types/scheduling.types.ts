@@ -21,3 +21,21 @@ export interface IEventType {
   scheduleId: string | null;
   enabled: boolean;
 }
+
+export interface IBooking {
+  id: string;
+  eventTypeId: string;
+  eventTypeName: string | null;
+  hostUserId: string;
+  bookerName: string;
+  bookerEmail: string;
+  startsAt: string;
+  endsAt: string;
+  status: string;
+  notes: string | null;
+}
+
+export interface ISlot {
+  startsAt: string;
+  endsAt: string;
+}

@@ -23,6 +23,7 @@ import {
   InviteUserDto,
   RevokeInviteDto,
 } from '../dto/invitation.dto';
+import { CreateMemberDto } from '../dto/create-member.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { User, Workspace } from '@docmost/db/types/entity.types';
 import WorkspaceAbilityFactory from '../../casl/abilities/workspace-ability.factory';
@@ -125,6 +126,27 @@ export class WorkspaceController {
     }
 
     return this.workspaceService.getWorkspaceUsers(workspace.id, pagination);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('members/create')
+  async createMember(
+    @Body() createMemberDto: CreateMemberDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    const ability = this.workspaceAbility.createForUser(user, workspace);
+    if (
+      ability.cannot(WorkspaceCaslAction.Manage, WorkspaceCaslSubject.Member)
+    ) {
+      throw new ForbiddenException();
+    }
+
+    return this.workspaceInvitationService.createMember(
+      createMemberDto,
+      workspace,
+      user,
+    );
   }
 
   @HttpCode(HttpStatus.OK)

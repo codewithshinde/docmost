@@ -55,6 +55,30 @@ export class SchedulingService {
     return this.schedulingRepo.listEventTypes(workspace.id, user.id);
   }
 
+  listMyBookings(user: User, workspace: Workspace, start: Date, end: Date) {
+    return this.schedulingRepo.listBookingsForRange({
+      workspaceId: workspace.id,
+      hostUserId: user.id,
+      start,
+      end,
+    });
+  }
+
+  async listEventTypesForUser(
+    targetUserId: string,
+    requesterId: string,
+    workspace: Workspace,
+  ) {
+    const eventTypes = await this.schedulingRepo.listEventTypes(
+      workspace.id,
+      targetUserId,
+    );
+    if (targetUserId === requesterId) {
+      return eventTypes;
+    }
+    return eventTypes.filter((eventType) => eventType.enabled);
+  }
+
   async getSlots(dto: GetSlotsDto, workspace: Workspace) {
     const eventType = await this.schedulingRepo.findEventType(
       dto.eventTypeId,

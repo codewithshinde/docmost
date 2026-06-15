@@ -1,0 +1,216 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ImapFlow } from 'imapflow';
+import { simpleParser } from 'mailparser';
+import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
+import { EncryptionService } from '../../integrations/crypto/encryption.service';
+import {
+  GetMailMessageDto,
+  ListMailMessagesDto,
+  SaveMailAccountDto,
+} from './dto/mail-account.dto';
+
+export interface MailAccountView {
+  emailAddress: string | null;
+  imapHost: string | null;
+  imapPort: number;
+  imapSecure: boolean;
+  smtpHost: string | null;
+  smtpPort: number | null;
+  smtpSecure: boolean;
+  username: string | null;
+  configured: boolean;
+}
+
+export interface MailMessageSummary {
+  uid: number;
+  subject: string;
+  from: string;
+  fromName: string;
+  date: Date | null;
+  seen: boolean;
+}
+
+export interface MailMessageDetail {
+  uid: number;
+  subject: string;
+  from: string;
+  to: string;
+  date: Date | null;
+  html: string | null;
+  text: string | null;
+}
+
+@Injectable()
+export class MailAccountService {
+  constructor(
+    private readonly mailAccountRepo: MailAccountRepo,
+    private readonly encryption: EncryptionService,
+  ) {}
+
+  async getView(userId: string): Promise<MailAccountView> {
+    const row = await this.mailAccountRepo.findByUserId(userId);
+    const secrets = this.encryption.decryptJson(row?.secrets);
+
+    return {
+      emailAddress: row?.emailAddress ?? null,
+      imapHost: row?.imapHost ?? null,
+      imapPort: row?.imapPort ?? 993,
+      imapSecure: row?.imapSecure ?? true,
+      smtpHost: row?.smtpHost ?? null,
+      smtpPort: row?.smtpPort ?? null,
+      smtpSecure: row?.smtpSecure ?? true,
+      username: row?.username ?? null,
+      configured: Boolean(row?.emailAddress && row?.imapHost && secrets.password),
+    };
+  }
+
+  async save(userId: string, dto: SaveMailAccountDto): Promise<MailAccountView> {
+    const existing = await this.mailAccountRepo.findByUserId(userId);
+    const existingSecrets = this.encryption.decryptJson(existing?.secrets);
+
+    const secrets = { ...existingSecrets };
+    if (dto.password) {
+      secrets.password = dto.password;
+    }
+
+    await this.mailAccountRepo.upsert(userId, {
+      emailAddress: dto.emailAddress,
+      imapHost: dto.imapHost,
+      imapPort: dto.imapPort,
+      imapSecure: dto.imapSecure,
+      smtpHost: dto.smtpHost,
+      smtpPort: dto.smtpPort,
+      smtpSecure: dto.smtpSecure,
+      username: dto.username,
+      secrets: this.encryption.encryptJson(secrets),
+    });
+
+    return this.getView(userId);
+  }
+
+  async delete(userId: string): Promise<void> {
+    await this.mailAccountRepo.deleteByUserId(userId);
+  }
+
+  private async connect(userId: string): Promise<ImapFlow> {
+    const account = await this.mailAccountRepo.findByUserId(userId);
+    if (!account) {
+      throw new BadRequestException('Email account is not configured');
+    }
+
+    const secrets = this.encryption.decryptJson(account.secrets);
+    if (!secrets.password) {
+      throw new BadRequestException('Email account is not configured');
+    }
+
+    const client = new ImapFlow({
+      host: account.imapHost,
+      port: account.imapPort,
+      secure: account.imapSecure,
+      auth: {
+        user: account.username || account.emailAddress,
+        pass: secrets.password,
+      },
+      logger: false,
+    });
+
+    await client.connect();
+    return client;
+  }
+
+  async testConnection(userId: string): Promise<{ ok: boolean; message: string }> {
+    let client: ImapFlow | null = null;
+    try {
+      client = await this.connect(userId);
+      return { ok: true, message: 'Successfully connected to IMAP server' };
+    } catch (err) {
+      return {
+        ok: false,
+        message: err instanceof Error ? err.message : 'IMAP connection failed',
+      };
+    } finally {
+      if (client) await client.logout().catch(() => {});
+    }
+  }
+
+  async listMessages(
+    userId: string,
+    dto: ListMailMessagesDto,
+  ): Promise<{ messages: MailMessageSummary[]; total: number }> {
+    const page = dto.page ?? 1;
+    const pageSize = dto.pageSize ?? 25;
+
+    const client = await this.connect(userId);
+    try {
+      const lock = await client.getMailboxLock('INBOX');
+      try {
+        const total = client.mailbox ? client.mailbox.exists : 0;
+        const end = total - (page - 1) * pageSize;
+        const start = end - pageSize + 1;
+
+        const messages: MailMessageSummary[] = [];
+        if (end >= 1) {
+          const range = `${Math.max(start, 1)}:${end}`;
+          for await (const message of client.fetch(range, {
+            uid: true,
+            envelope: true,
+            flags: true,
+          })) {
+            messages.push({
+              uid: message.uid,
+              subject: message.envelope?.subject ?? '(no subject)',
+              from: message.envelope?.from?.[0]?.address ?? '',
+              fromName: message.envelope?.from?.[0]?.name ?? '',
+              date: message.envelope?.date ?? null,
+              seen: message.flags?.has('\\Seen') ?? false,
+            });
+          }
+        }
+
+        messages.sort((a, b) => b.uid - a.uid);
+        return { messages, total };
+      } finally {
+        lock.release();
+      }
+    } finally {
+      await client.logout().catch(() => {});
+    }
+  }
+
+  async getMessage(userId: string, dto: GetMailMessageDto): Promise<MailMessageDetail> {
+    const client = await this.connect(userId);
+    try {
+      const lock = await client.getMailboxLock('INBOX');
+      try {
+        const message = await client.fetchOne(
+          String(dto.uid),
+          { source: true },
+          { uid: true },
+        );
+
+        if (!message || !message.source) {
+          throw new NotFoundException('Message not found');
+        }
+
+        const parsed = await simpleParser(message.source);
+        const to = Array.isArray(parsed.to)
+          ? parsed.to.map((addr) => addr.text).join(', ')
+          : parsed.to?.text ?? '';
+
+        return {
+          uid: dto.uid,
+          subject: parsed.subject ?? '(no subject)',
+          from: parsed.from?.text ?? '',
+          to,
+          date: parsed.date ?? null,
+          html: parsed.html || null,
+          text: parsed.text || null,
+        };
+      } finally {
+        lock.release();
+      }
+    } finally {
+      await client.logout().catch(() => {});
+    }
+  }
+}

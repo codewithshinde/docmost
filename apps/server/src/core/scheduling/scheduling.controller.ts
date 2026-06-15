@@ -8,7 +8,9 @@ import {
   CreateBookingDto,
   CreateEventTypeDto,
   GetSlotsDto,
+  ListBookingsDto,
   SaveScheduleDto,
+  UserEventTypesDto,
 } from './dto/scheduling.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -61,5 +63,34 @@ export class SchedulingController {
     @AuthWorkspace() workspace: Workspace,
   ) {
     return this.schedulingService.createBooking(dto, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('bookings')
+  listMyBookings(
+    @Body() dto: ListBookingsDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.schedulingService.listMyBookings(
+      user,
+      workspace,
+      new Date(dto.start),
+      new Date(dto.end),
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('event-types/user')
+  listEventTypesForUser(
+    @Body() dto: UserEventTypesDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.schedulingService.listEventTypesForUser(
+      dto.userId,
+      user.id,
+      workspace,
+    );
   }
 }

@@ -24,7 +24,7 @@ import React from "react";
 import { AuthLayout } from "./auth-layout.tsx";
 
 const formSchema = z.object({
-  email: z.email().min(1, { message: "email is required" }),
+  identifier: z.string().min(1, { message: "Email or username is required" }),
   password: z.string().min(1, { message: "Password is required" }),
 });
 type FormValues = z.infer<typeof formSchema>;
@@ -43,13 +43,19 @@ export function LoginForm() {
   const form = useForm<FormValues>({
     validate: zod4Resolver(formSchema),
     initialValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
 
   async function onSubmit(data: FormValues) {
-    await signIn(data);
+    const identifier = data.identifier.trim();
+    await signIn({
+      ...(identifier.includes("@")
+        ? { email: identifier }
+        : { username: identifier }),
+      password: data.password,
+    });
   }
 
   function handleValidationFailure(errors: Record<string, unknown>) {
@@ -77,14 +83,14 @@ export function LoginForm() {
             <>
               <form onSubmit={form.onSubmit(onSubmit, handleValidationFailure)}>
                 <TextInput
-                  id="email"
-                  type="email"
-                  label={t("Email")}
-                  placeholder="email@example.com"
+                  id="identifier"
+                  type="text"
+                  label={t("Email or username")}
+                  placeholder={t("Email or username")}
                   variant="filled"
-                  autoComplete="email"
+                  autoComplete="username"
                   errorProps={{ role: "alert" }}
-                  {...form.getInputProps("email")}
+                  {...form.getInputProps("identifier")}
                 />
 
                 <PasswordInput

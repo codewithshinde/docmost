@@ -108,7 +108,7 @@ export default function WorkspaceBrandingForm() {
             {t("Hide powered by badge")}
           </Text>
           <Text size="xs" c="dimmed">
-            {t("Remove the Docmost badge from public shared pages.")}
+            {t("Remove the Likh badge from public shared pages.")}
           </Text>
         </div>
         <Switch

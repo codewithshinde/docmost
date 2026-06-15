@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AcceptInviteDto, InviteUserDto } from '../dto/invitation.dto';
+import { CreateMemberDto } from '../dto/create-member.dto';
 import { UserRepo } from '@docmost/db/repos/user/user.repo';
 import { InjectKysely } from 'nestjs-kysely';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
@@ -317,7 +318,7 @@ export class WorkspaceInvitationService {
       workspace.id,
     );
 
-    if (invitedByUser) {
+    if (invitedByUser?.email) {
       const emailTemplate = InvitationAcceptedEmail({
         invitedUserName: newUser.name,
         invitedUserEmail: newUser.email,
@@ -326,7 +327,7 @@ export class WorkspaceInvitationService {
       await this.mailService.sendToQueue({
         workspaceId: workspace.id,
         to: invitedByUser.email,
-        subject: `${newUser.name} has accepted your Docmost invite`,
+        subject: `${newUser.name} has accepted your Likh invite`,
         template: emailTemplate,
       });
     }
@@ -362,6 +363,114 @@ export class WorkspaceInvitationService {
 
     const authToken = await this.sessionService.createSessionAndToken(newUser);
     return { authToken };
+  }
+
+  async createMember(
+    dto: CreateMemberDto,
+    workspace: Workspace,
+    creator: User,
+  ): Promise<User> {
+    if (!dto.email && !dto.username) {
+      throw new BadRequestException(
+        'Either email or username is required',
+      );
+    }
+
+    if (dto.email) {
+      const existingByEmail = await this.userRepo.findByEmail(
+        dto.email,
+        workspace.id,
+      );
+      if (existingByEmail) {
+        throw new BadRequestException(
+          'A user with this email already exists',
+        );
+      }
+    }
+
+    if (dto.username) {
+      const existingByUsername = await this.userRepo.findByUsername(
+        dto.username,
+        workspace.id,
+      );
+      if (existingByUsername) {
+        throw new BadRequestException(
+          'A user with this username already exists',
+        );
+      }
+    }
+
+    let newUser: User;
+
+    await executeTx(this.db, async (trx) => {
+      newUser = await this.userRepo.insertUser(
+        {
+          name: dto.name,
+          email: dto.email || null,
+          username: dto.username || null,
+          emailVerifiedAt: dto.email ? new Date() : null,
+          password: dto.password,
+          role: dto.role,
+          invitedById: creator.id,
+          workspaceId: workspace.id,
+        },
+        trx,
+      );
+
+      await this.groupUserRepo.addUserToDefaultGroup(
+        newUser.id,
+        workspace.id,
+        trx,
+      );
+
+      if (dto.groupIds && dto.groupIds.length > 0) {
+        const validGroups = await trx
+          .selectFrom('groups')
+          .select(['id', 'name'])
+          .where('groups.id', 'in', dto.groupIds)
+          .where('groups.workspaceId', '=', workspace.id)
+          .execute();
+
+        if (validGroups && validGroups.length > 0) {
+          const groupUsersToInsert = validGroups.map((group) => ({
+            userId: newUser.id,
+            groupId: group.id,
+          }));
+
+          await trx
+            .insertInto('groupUsers')
+            .values(groupUsersToInsert)
+            .onConflict((oc) => oc.columns(['userId', 'groupId']).doNothing())
+            .execute();
+        }
+      }
+    });
+
+    this.auditService.log({
+      event: AuditEvent.USER_CREATED,
+      resourceType: AuditResource.USER,
+      resourceId: newUser.id,
+      changes: {
+        after: {
+          name: newUser.name,
+          email: newUser.email,
+          username: newUser.username,
+          role: newUser.role,
+        },
+      },
+      metadata: {
+        source: 'admin_created',
+        createdById: creator.id,
+      },
+    });
+
+    if (this.environmentService.isCloud()) {
+      await this.billingQueue.add(QueueJob.STRIPE_SEATS_SYNC, {
+        workspaceId: workspace.id,
+      });
+    }
+
+    return newUser;
   }
 
   async resendInvitation(
@@ -478,7 +587,7 @@ export class WorkspaceInvitationService {
     await this.mailService.sendToQueue({
       workspaceId,
       to: inviteeEmail,
-      subject: `${invitedByName} invited you to Docmost`,
+      subject: `${invitedByName} invited you to Likh`,
       template: emailTemplate,
     });
   }

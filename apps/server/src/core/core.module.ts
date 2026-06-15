@@ -34,6 +34,7 @@ import { MessageModule } from './chat/message/message.module';
 import { ReactionModule } from './chat/reaction/reaction.module';
 import { CallModule } from './chat/call/call.module';
 import { SchedulingModule } from './scheduling/scheduling.module';
+import { MailAccountModule } from './mail-account/mail-account.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { SchedulingModule } from './scheduling/scheduling.module';
     ReactionModule,
     CallModule,
     SchedulingModule,
+    MailAccountModule,
   ],
 })
 export class CoreModule implements NestModule {

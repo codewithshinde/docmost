@@ -348,7 +348,7 @@ export interface Users {
   createdAt: Generated<Timestamp>;
   deactivatedAt: Timestamp | null;
   deletedAt: Timestamp | null;
-  email: string;
+  email: string | null;
   emailVerifiedAt: Timestamp | null;
   id: Generated<string>;
   invitedById: string | null;
@@ -363,6 +363,7 @@ export interface Users {
   settings: Json | null;
   timezone: string | null;
   updatedAt: Generated<Timestamp>;
+  username: string | null;
   workspaceId: string | null;
 }
 
@@ -791,6 +792,22 @@ export interface Bookings {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface UserMailAccounts {
+  id: Generated<string>;
+  userId: string;
+  emailAddress: string;
+  imapHost: string;
+  imapPort: Generated<number>;
+  imapSecure: Generated<boolean>;
+  smtpHost: string | null;
+  smtpPort: number | null;
+  smtpSecure: Generated<boolean>;
+  username: string | null;
+  secrets: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface DB {
   aiChats: AiChats;
   aiChatMessages: AiChatMessages;
@@ -837,6 +854,7 @@ export interface DB {
   teams: Teams;
   teamMembers: TeamMembers;
   templates: Templates;
+  userMailAccounts: UserMailAccounts;
   userMfa: UserMfa;
   users: Users;
   userSessions: UserSessions;

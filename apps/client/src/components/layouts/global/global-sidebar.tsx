@@ -9,6 +9,8 @@ import {
   IconUserPlus,
   IconTemplate,
   IconMessageCircle2,
+  IconMail,
+  IconCalendar,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./global-sidebar.module.css";
@@ -49,6 +51,16 @@ export default function GlobalSidebar() {
       icon: IconMessageCircle2,
       path: "/chat",
       badge: totalUnread > 0 ? totalUnread : undefined,
+    },
+    {
+      label: "Mail",
+      icon: IconMail,
+      path: "/mail",
+    },
+    {
+      label: "Calendar",
+      icon: IconCalendar,
+      path: "/calendar",
     },
     {
       label: "Templates",

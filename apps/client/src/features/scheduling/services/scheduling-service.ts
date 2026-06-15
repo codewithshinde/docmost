@@ -2,7 +2,9 @@ import api from "@/lib/api-client";
 import {
   IAvailabilityRule,
   IAvailabilitySchedule,
+  IBooking,
   IEventType,
+  ISlot,
 } from "../types/scheduling.types";
 
 export async function listSchedules(): Promise<IAvailabilitySchedule[]> {
@@ -39,5 +41,42 @@ export async function createEventType(data: {
     "/scheduling/event-types/create",
     data,
   );
+  return req.data;
+}
+
+export async function listMyBookings(data: {
+  start: string;
+  end: string;
+}): Promise<IBooking[]> {
+  const req = await api.post<IBooking[]>("/scheduling/bookings", data);
+  return req.data;
+}
+
+export async function listEventTypesForUser(
+  userId: string,
+): Promise<IEventType[]> {
+  const req = await api.post<IEventType[]>("/scheduling/event-types/user", {
+    userId,
+  });
+  return req.data;
+}
+
+export async function getSlots(data: {
+  eventTypeId: string;
+  start: string;
+  end: string;
+}): Promise<ISlot[]> {
+  const req = await api.post<ISlot[]>("/scheduling/slots", data);
+  return req.data;
+}
+
+export async function createBooking(data: {
+  eventTypeId: string;
+  startsAt: string;
+  bookerName: string;
+  bookerEmail: string;
+  notes?: string;
+}): Promise<IBooking> {
+  const req = await api.post<IBooking>("/scheduling/bookings/create", data);
   return req.data;
 }

@@ -63,7 +63,7 @@ export default function IntegrationsSettings() {
   const [mailProvider, setMailProvider] = useState<MailProvider>("smtp");
   const [mailEnabled, setMailEnabled] = useState(false);
   const [fromAddress, setFromAddress] = useState("");
-  const [fromName, setFromName] = useState("Docmost");
+  const [fromName, setFromName] = useState("Likh");
   const [smtpHost, setSmtpHost] = useState("");
   const [smtpPort, setSmtpPort] = useState("587");
   const [smtpSecure, setSmtpSecure] = useState(false);
@@ -95,7 +95,7 @@ export default function IntegrationsSettings() {
     setMailProvider(mailSettings.config.provider ?? mailSettings.effective.provider);
     setMailEnabled(mailSettings.enabled);
     setFromAddress(mailSettings.config.fromAddress ?? "");
-    setFromName(mailSettings.config.fromName ?? "Docmost");
+    setFromName(mailSettings.config.fromName ?? "Likh");
     setSmtpHost(mailSettings.config.smtpHost ?? "");
     setSmtpPort(String(mailSettings.config.smtpPort ?? 587));
     setSmtpSecure(mailSettings.config.smtpSecure ?? false);

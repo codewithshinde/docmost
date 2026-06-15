@@ -54,6 +54,7 @@ import {
   AvailabilitySchedules,
   EventTypes,
   Bookings,
+  UserMailAccounts,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
 
@@ -336,3 +337,10 @@ export type UpdatableEventType = Updateable<Omit<EventTypes, 'id'>>;
 export type Booking = Selectable<Bookings>;
 export type InsertableBooking = Insertable<Bookings>;
 export type UpdatableBooking = Updateable<Omit<Bookings, 'id'>>;
+
+// User Mail Accounts
+export type UserMailAccount = Selectable<UserMailAccounts>;
+export type InsertableUserMailAccount = Insertable<UserMailAccounts>;
+export type UpdatableUserMailAccount = Updateable<
+  Omit<UserMailAccounts, 'id'>
+>;

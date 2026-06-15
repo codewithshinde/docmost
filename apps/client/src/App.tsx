@@ -48,6 +48,9 @@ import AiChat from "@/ee/ai-chat/pages/ai-chat.tsx";
 import VerifyEmail from "@/ee/pages/verify-email.tsx";
 import LabelPage from "@/pages/label/label-page";
 import ChatPage from "@/pages/chat/chat-page.tsx";
+import Inbox from "@/pages/mail/inbox.tsx";
+import EmailSettings from "@/pages/settings/account/email-settings.tsx";
+import CalendarPage from "@/pages/calendar/calendar.tsx";
 
 export default function App() {
   const { t } = useTranslation();
@@ -95,6 +98,8 @@ export default function App() {
           <Route path={"/ai/chat/:chatId"} element={<AiChat />} />
           <Route path={"/chat"} element={<ChatPage />} />
           <Route path={"/chat/:channelId"} element={<ChatPage />} />
+          <Route path={"/mail"} element={<Inbox />} />
+          <Route path={"/calendar"} element={<CalendarPage />} />
           <Route path={"/spaces"} element={<SpacesPage />} />
           <Route path={"/favorites"} element={<FavoritesPage />} />
           <Route path={"/labels/:labelName"} element={<LabelPage />} />
@@ -111,6 +116,7 @@ export default function App() {
               element={<AccountPreferences />}
             />
             <Route path={"account/api-keys"} element={<UserApiKeys />} />
+            <Route path={"account/email"} element={<EmailSettings />} />
             <Route path={"workspace"} element={<WorkspaceSettings />} />
             <Route path={"members"} element={<WorkspaceMembers />} />
             <Route path={"api-keys"} element={<WorkspaceApiKeys />} />
@@ -122,7 +128,10 @@ export default function App() {
             <Route path={"ai"} element={<AiSettings />} />
             <Route path={"ai/mcp"} element={<AiSettings />} />
             <Route path={"integrations"} element={<IntegrationsSettings />} />
-            <Route path={"scheduling"} element={<SchedulingSettings />} />
+            <Route
+              path={"account/availability"}
+              element={<SchedulingSettings />}
+            />
             <Route path={"audit"} element={<AuditLogs />} />
             <Route path={"verifications"} element={<VerifiedPages />} />
             {isCloud() && <Route path={"billing"} element={<Billing />} />}

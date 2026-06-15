@@ -58,9 +58,17 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto, workspaceId: string) {
-    const user = await this.userRepo.findByEmail(loginDto.email, workspaceId, {
-      includePassword: true,
-    });
+    if (!loginDto.email && !loginDto.username) {
+      throw new BadRequestException('Email or username is required');
+    }
+
+    const user = loginDto.username
+      ? await this.userRepo.findByUsername(loginDto.username, workspaceId, {
+          includePassword: true,
+        })
+      : await this.userRepo.findByEmail(loginDto.email, workspaceId, {
+          includePassword: true,
+        });
 
     const errorMessage = 'Email or password does not match';
     if (!user || isUserDisabled(user)) {
@@ -76,13 +84,15 @@ export class AuthService {
       throw new UnauthorizedException(errorMessage);
     }
 
-    throwIfEmailNotVerified({
-      isCloud: this.environmentService.isCloud(),
-      emailVerifiedAt: user.emailVerifiedAt,
-      email: user.email,
-      workspaceId,
-      appSecret: this.environmentService.getAppSecret(),
-    });
+    if (user.email) {
+      throwIfEmailNotVerified({
+        isCloud: this.environmentService.isCloud(),
+        emailVerifiedAt: user.emailVerifiedAt,
+        email: user.email,
+        workspaceId,
+        appSecret: this.environmentService.getAppSecret(),
+      });
+    }
 
     user.lastLoginAt = new Date();
     await this.userRepo.updateLastLogin(user.id, workspaceId);
@@ -159,13 +169,15 @@ export class AuthService {
       resourceId: userId,
     });
 
-    const emailTemplate = ChangePasswordEmail({ username: user.name });
-    await this.mailService.sendToQueue({
-      workspaceId,
-      to: user.email,
-      subject: 'Your password has been changed',
-      template: emailTemplate,
-    });
+    if (user.email) {
+      const emailTemplate = ChangePasswordEmail({ username: user.name });
+      await this.mailService.sendToQueue({
+        workspaceId,
+        to: user.email,
+        subject: 'Your password has been changed',
+        template: emailTemplate,
+      });
+    }
   }
 
   async forgotPassword(
@@ -270,13 +282,15 @@ export class AuthService {
       resourceId: user.id,
     });
 
-    const emailTemplate = ChangePasswordEmail({ username: user.name });
-    await this.mailService.sendToQueue({
-      workspaceId: workspace.id,
-      to: user.email,
-      subject: 'Your password has been changed',
-      template: emailTemplate,
-    });
+    if (user.email) {
+      const emailTemplate = ChangePasswordEmail({ username: user.name });
+      await this.mailService.sendToQueue({
+        workspaceId: workspace.id,
+        to: user.email,
+        subject: 'Your password has been changed',
+        template: emailTemplate,
+      });
+    }
 
     if (this.environmentService.isCloud() && !user.emailVerifiedAt) {
       await this.userRepo.updateUser(

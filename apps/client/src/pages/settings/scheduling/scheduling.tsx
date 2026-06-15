@@ -14,7 +14,6 @@ import {
 import { useTranslation } from "react-i18next";
 import SettingsTitle from "@/components/settings/settings-title.tsx";
 import { getAppName } from "@/lib/config.ts";
-import useUserRole from "@/hooks/use-user-role.tsx";
 import {
   useCreateEventTypeMutation,
   useEventTypesQuery,
@@ -30,7 +29,6 @@ const DEFAULT_RULES = [1, 2, 3, 4, 5].map((day) => ({
 
 export default function SchedulingSettings() {
   const { t } = useTranslation();
-  const { isAdmin } = useUserRole();
   const { data: schedules } = useSchedulesQuery();
   const { data: eventTypes } = useEventTypesQuery();
   const saveScheduleMutation = useSaveScheduleMutation();
@@ -42,16 +40,14 @@ export default function SchedulingSettings() {
   const [durationMinutes, setDurationMinutes] = useState<number | string>(30);
   const [scheduleId, setScheduleId] = useState<string | null>(null);
 
-  if (!isAdmin) return null;
-
   return (
     <>
       <Helmet>
         <title>
-          {t("Scheduling")} - {getAppName()}
+          {t("Availability")} - {getAppName()}
         </title>
       </Helmet>
-      <SettingsTitle title={t("Scheduling")} />
+      <SettingsTitle title={t("Availability")} />
 
       <Stack gap="md">
         <Card withBorder radius="md" p="lg">

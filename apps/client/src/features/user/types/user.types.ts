@@ -3,7 +3,8 @@ import { IWorkspace } from "@/features/workspace/types/workspace.types";
 export interface IUser {
   id: string;
   name: string;
-  email: string;
+  email?: string;
+  username?: string;
   emailVerifiedAt: Date;
   avatarUrl: string;
   timezone: string;

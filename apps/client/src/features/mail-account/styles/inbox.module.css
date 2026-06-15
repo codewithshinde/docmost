@@ -1,0 +1,166 @@
+.page {
+  height: calc(100vh - 45px);
+  margin: calc(-1 * var(--mantine-spacing-md));
+  display: flex;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 8px;
+  color: var(--mantine-color-dimmed);
+  text-align: center;
+  padding: var(--mantine-spacing-xl);
+}
+
+.listPane {
+  width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  height: 100%;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--mantine-spacing-md);
+  height: 45px;
+  flex-shrink: 0;
+  border-bottom: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+}
+
+.listScroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--mantine-color-dimmed);
+  padding: var(--mantine-spacing-xl);
+  text-align: center;
+}
+
+.loaderRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--mantine-spacing-md);
+}
+
+.messageRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px var(--mantine-spacing-md);
+  cursor: pointer;
+  border-bottom: 1px solid
+    light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-6)
+    );
+  }
+
+  &[data-active="true"] {
+    background-color: light-dark(
+      var(--mantine-color-blue-0),
+      var(--mantine-color-dark-5)
+    );
+  }
+}
+
+.messageRowTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.messageFrom {
+  font-weight: 500;
+  font-size: var(--mantine-font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &[data-unread="true"] {
+    font-weight: 700;
+  }
+}
+
+.messageDate {
+  flex-shrink: 0;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-dimmed);
+}
+
+.messageSubject {
+  font-size: var(--mantine-font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+
+  &[data-unread="true"] {
+    font-weight: 600;
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  }
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  flex-shrink: 0;
+}
+
+.readerPane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.readerHeader {
+  padding: var(--mantine-spacing-md);
+  border-bottom: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readerScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--mantine-spacing-md);
+}
+
+.readerBody {
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.5;
+  word-break: break-word;
+}

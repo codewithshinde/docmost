@@ -17,7 +17,7 @@ export function AuthLayout({
   logo,
   name,
 }: AuthLayoutProps) {
-  const appName = name || "Docmost";
+  const appName = name || "Likh";
 
   return (
     <>

@@ -11,6 +11,7 @@ import {
   getPendingInvitations,
   getWorkspaceMembers,
   createInvitation,
+  createMember,
   resendInvitation,
   revokeInvitation,
   getWorkspace,
@@ -24,6 +25,7 @@ import { IPagination, QueryParams } from "@/lib/types.ts";
 import { notifications } from "@mantine/notifications";
 import {
   ICreateInvite,
+  ICreateMember,
   IInvitation,
   IPublicWorkspace,
   IVersion,
@@ -167,6 +169,25 @@ export function useCreateInvitationMutation() {
       notifications.show({ message: t("Invitation sent") });
       queryClient.refetchQueries({
         queryKey: ["invitations"],
+      });
+    },
+    onError: (error) => {
+      const errorMessage = error["response"]?.data?.message;
+      notifications.show({ message: errorMessage, color: "red" });
+    },
+  });
+}
+
+export function useCreateMemberMutation() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  return useMutation<IUser, Error, ICreateMember>({
+    mutationFn: (data) => createMember(data),
+    onSuccess: () => {
+      notifications.show({ message: t("Member created successfully") });
+      queryClient.invalidateQueries({
+        queryKey: ["workspaceMembers"],
       });
     },
     onError: (error) => {

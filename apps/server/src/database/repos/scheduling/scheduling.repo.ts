@@ -83,12 +83,15 @@ export class SchedulingRepo {
   }) {
     return this.db
       .selectFrom('bookings')
-      .selectAll()
-      .where('workspaceId', '=', input.workspaceId)
-      .where('hostUserId', '=', input.hostUserId)
-      .where('status', '!=', 'cancelled')
-      .where('startsAt', '<', input.end)
-      .where('endsAt', '>', input.start)
+      .leftJoin('eventTypes', 'eventTypes.id', 'bookings.eventTypeId')
+      .selectAll('bookings')
+      .select('eventTypes.name as eventTypeName')
+      .where('bookings.workspaceId', '=', input.workspaceId)
+      .where('bookings.hostUserId', '=', input.hostUserId)
+      .where('bookings.status', '!=', 'cancelled')
+      .where('bookings.startsAt', '<', input.end)
+      .where('bookings.endsAt', '>', input.start)
+      .orderBy('bookings.startsAt', 'asc')
       .execute();
   }
 

@@ -17,6 +17,7 @@ import {
   IconShieldCheck,
   IconPlug,
   IconCalendarTime,
+  IconMail,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./settings.module.css";
@@ -68,6 +69,16 @@ const groupedData: DataGroup[] = [
         label: "Preferences",
         icon: IconBrush,
         path: "/settings/account/preferences",
+      },
+      {
+        label: "Availability",
+        icon: IconCalendarTime,
+        path: "/settings/account/availability",
+      },
+      {
+        label: "Email",
+        icon: IconMail,
+        path: "/settings/account/email",
       },
       {
         label: "API keys",
@@ -122,12 +133,6 @@ const groupedData: DataGroup[] = [
         label: "Integrations",
         icon: IconPlug,
         path: "/settings/integrations",
-        role: "admin",
-      },
-      {
-        label: "Scheduling",
-        icon: IconCalendarTime,
-        path: "/settings/scheduling",
         role: "admin",
       },
       {

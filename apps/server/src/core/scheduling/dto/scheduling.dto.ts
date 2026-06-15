@@ -83,3 +83,16 @@ export class CreateBookingDto extends EventTypeIdDto {
   @IsString()
   notes?: string;
 }
+
+export class ListBookingsDto {
+  @IsISO8601()
+  start: string;
+
+  @IsISO8601()
+  end: string;
+}
+
+export class UserEventTypesDto {
+  @IsUUID()
+  userId: string;
+}

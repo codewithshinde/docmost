@@ -1,0 +1,29 @@
+.calendar {
+  width: 100%;
+}
+
+.calendar :global(table) {
+  width: 100%;
+}
+
+.dayIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bookingItem {
+  padding: var(--mantine-spacing-sm);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-radius: var(--mantine-radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.slotsGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

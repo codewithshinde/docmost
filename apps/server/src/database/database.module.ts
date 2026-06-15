@@ -49,6 +49,7 @@ import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integrati
 import { WebhookRepo } from '@docmost/db/repos/webhook/webhook.repo';
 import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.repo';
 import { SchedulingRepo } from '@docmost/db/repos/scheduling/scheduling.repo';
+import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
 
 @Global()
 @Module({
@@ -129,6 +130,7 @@ import { SchedulingRepo } from '@docmost/db/repos/scheduling/scheduling.repo';
     WebhookRepo,
     WebhookDeliveryRepo,
     SchedulingRepo,
+    MailAccountRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -171,6 +173,7 @@ import { SchedulingRepo } from '@docmost/db/repos/scheduling/scheduling.repo';
     WebhookRepo,
     WebhookDeliveryRepo,
     SchedulingRepo,
+    MailAccountRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {

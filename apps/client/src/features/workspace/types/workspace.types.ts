@@ -78,6 +78,15 @@ export interface ICreateInvite {
   groupIds: string[];
 }
 
+export interface ICreateMember {
+  name: string;
+  email?: string;
+  username?: string;
+  password: string;
+  role: string;
+  groupIds?: string[];
+}
+
 export interface IInvitation {
   id: string;
   role: string;
