@@ -14,6 +14,10 @@ export interface IAddPageWatchersJob {
   workspaceId: string;
 }
 
+export interface IWebhookDeliveryJob {
+  deliveryId: string;
+}
+
 export interface IStripeSeatsSyncJob {
   workspaceId: string;
 }

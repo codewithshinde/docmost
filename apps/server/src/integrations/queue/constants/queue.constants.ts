@@ -23,6 +23,7 @@ export enum QueueJob {
 
   PAGE_BACKLINKS = 'page-backlinks',
   ADD_PAGE_WATCHERS = 'add-page-watchers',
+  WEBHOOK_DELIVERY = 'webhook-delivery',
 
   STRIPE_SEATS_SYNC = 'sync-stripe-seats',
   TRIAL_ENDED = 'trial-ended',

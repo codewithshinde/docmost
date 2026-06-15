@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
@@ -18,7 +19,10 @@ import {
 } from '../../core/casl/interfaces/workspace-ability.type';
 import { IntegrationSettingsService } from './integration-settings.service';
 import { IntegrationKey } from './integration.constants';
-import { UpdateCallSettingsDto } from './dto/integration.dto';
+import {
+  UpdateCallSettingsDto,
+  UpdateMailSettingsDto,
+} from './dto/integration.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('integrations')
@@ -99,6 +103,134 @@ export class IntegrationController {
     return {
       ...view,
       effective: this.integrationSettingsService.toPublicCallConfig(runtime),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('mail')
+  async getMailSettings(
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    this.assertCanManage(user, workspace);
+    const view = await this.integrationSettingsService.getView(
+      workspace.id,
+      IntegrationKey.MAIL,
+    );
+    const runtime = await this.integrationSettingsService.getMailRuntimeConfig(
+      workspace.id,
+    );
+    return {
+      ...view,
+      effective: this.integrationSettingsService.toPublicMailConfig(runtime),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('mail/update')
+  async updateMailSettings(
+    @Body() dto: UpdateMailSettingsDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    this.assertCanManage(user, workspace);
+
+    const current = await this.integrationSettingsService.getView(
+      workspace.id,
+      IntegrationKey.MAIL,
+    );
+
+    const config: Record<string, any> = {};
+    for (const key of [
+      'provider',
+      'fromAddress',
+      'fromName',
+      'smtpHost',
+      'smtpPort',
+      'smtpSecure',
+      'smtpIgnoreTls',
+      'mailgunDomain',
+      'mailgunApiBaseUrl',
+      'sesRegion',
+    ]) {
+      if (dto[key] !== undefined) config[key] = dto[key];
+    }
+
+    const view = await this.integrationSettingsService.save(
+      workspace.id,
+      IntegrationKey.MAIL,
+      {
+        enabled: dto.enabled,
+        config: { ...current.config, ...config },
+        secrets: {
+          smtpUsername: dto.smtpUsername,
+          smtpPassword: dto.smtpPassword,
+          postmarkToken: dto.postmarkToken,
+          sendgridApiKey: dto.sendgridApiKey,
+          mailgunApiKey: dto.mailgunApiKey,
+          sesAccessKeyId: dto.sesAccessKeyId,
+          sesSecretAccessKey: dto.sesSecretAccessKey,
+        },
+      },
+      user.id,
+    );
+
+    const runtime = await this.integrationSettingsService.getMailRuntimeConfig(
+      workspace.id,
+    );
+    return {
+      ...view,
+      effective: this.integrationSettingsService.toPublicMailConfig(runtime),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('mail/test')
+  async testMailSettings(
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    this.assertCanManage(user, workspace);
+    const runtime = await this.integrationSettingsService.getMailRuntimeConfig(
+      workspace.id,
+    );
+
+    if (!runtime.configured) {
+      return {
+        ok: false,
+        message: 'Mail is missing required provider settings or sender identity',
+      };
+    }
+
+    if (runtime.provider === 'smtp') {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: runtime.smtpHost,
+          port: runtime.smtpPort,
+          secure: runtime.smtpSecure,
+          ignoreTLS: runtime.smtpIgnoreTls,
+          auth:
+            runtime.smtpUsername && runtime.smtpPassword
+              ? {
+                  user: runtime.smtpUsername,
+                  pass: runtime.smtpPassword,
+                }
+              : undefined,
+        });
+        await transporter.verify();
+        return { ok: true, message: 'Successfully connected to SMTP server' };
+      } catch (err) {
+        return {
+          ok: false,
+          message:
+            err instanceof Error ? err.message : 'SMTP connection failed',
+        };
+      }
+    }
+
+    return {
+      ok: true,
+      message: `${runtime.provider} mail settings are complete`,
     };
   }
 }

@@ -7,7 +7,10 @@ import {
   CallRuntimeConfig,
   IntegrationKey,
   IntegrationKeyName,
+  MailProvider,
+  MailRuntimeConfig,
   PublicCallConfig,
+  PublicMailConfig,
 } from './integration.constants';
 
 export interface SettingView {
@@ -168,6 +171,140 @@ export class IntegrationSettingsService {
       configured: runtime.configured,
       livekitUrl: runtime.livekitUrl,
       jitsiDomain: runtime.jitsiDomain,
+    };
+  }
+
+  // ---- Mail -----------------------------------------------------------------
+
+  private firstNumber(...vals: (number | string | null | undefined)[]): number | null {
+    for (const v of vals) {
+      if (v === undefined || v === null || v === '') continue;
+      const parsed = typeof v === 'number' ? v : Number(v);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+  }
+
+  async getMailRuntimeConfig(workspaceId?: string): Promise<MailRuntimeConfig> {
+    const row = workspaceId
+      ? await this.repo.findByKey(workspaceId, IntegrationKey.MAIL)
+      : undefined;
+    const config = (row?.config as Record<string, any>) ?? {};
+    const secrets = this.encryption.decryptJson(row?.secrets);
+
+    const envDriver = this.environmentService.getMailDriver()?.toLowerCase();
+    const provider: MailProvider =
+      (config.provider as MailProvider) || (envDriver as MailProvider) || 'log';
+
+    const fromAddress = this.firstNonEmpty(
+      config.fromAddress,
+      this.environmentService.getMailFromAddress(),
+    );
+    const fromName = this.firstNonEmpty(
+      config.fromName,
+      this.environmentService.getMailFromName(),
+    );
+
+    const smtpHost = this.firstNonEmpty(
+      config.smtpHost,
+      this.environmentService.getSmtpHost(),
+    );
+    const smtpPort = this.firstNumber(
+      config.smtpPort,
+      this.environmentService.getSmtpPort(),
+    );
+    const smtpSecure =
+      config.smtpSecure !== undefined
+        ? !!config.smtpSecure
+        : this.environmentService.getSmtpSecure();
+    const smtpIgnoreTls =
+      config.smtpIgnoreTls !== undefined
+        ? !!config.smtpIgnoreTls
+        : this.environmentService.getSmtpIgnoreTLS();
+    const smtpUsername = this.firstNonEmpty(
+      secrets.smtpUsername,
+      this.environmentService.getSmtpUsername(),
+    );
+    const smtpPassword = this.firstNonEmpty(
+      secrets.smtpPassword,
+      this.environmentService.getSmtpPassword(),
+    );
+
+    const postmarkToken = this.firstNonEmpty(
+      secrets.postmarkToken,
+      this.environmentService.getPostmarkToken(),
+    );
+    const sendgridApiKey = this.firstNonEmpty(
+      secrets.sendgridApiKey,
+      this.environmentService.getSendGridApiKey(),
+    );
+    const mailgunApiKey = this.firstNonEmpty(
+      secrets.mailgunApiKey,
+      this.environmentService.getMailgunApiKey(),
+    );
+    const mailgunDomain = this.firstNonEmpty(
+      config.mailgunDomain,
+      this.environmentService.getMailgunDomain(),
+    );
+    const mailgunApiBaseUrl = this.firstNonEmpty(
+      config.mailgunApiBaseUrl,
+      this.environmentService.getMailgunApiBaseUrl(),
+    );
+    const sesAccessKeyId = this.firstNonEmpty(
+      secrets.sesAccessKeyId,
+      this.environmentService.getSesAccessKeyId(),
+    );
+    const sesSecretAccessKey = this.firstNonEmpty(
+      secrets.sesSecretAccessKey,
+      this.environmentService.getSesSecretAccessKey(),
+    );
+    const sesRegion = this.firstNonEmpty(
+      config.sesRegion,
+      this.environmentService.getSesRegion(),
+    );
+
+    const configured =
+      provider === 'log' ||
+      (provider === 'smtp' && Boolean(smtpHost && smtpPort && fromAddress)) ||
+      (provider === 'postmark' && Boolean(postmarkToken && fromAddress)) ||
+      (provider === 'sendgrid' && Boolean(sendgridApiKey && fromAddress)) ||
+      (provider === 'mailgun' &&
+        Boolean(mailgunApiKey && mailgunDomain && fromAddress)) ||
+      (provider === 'ses' &&
+        Boolean(sesAccessKeyId && sesSecretAccessKey && sesRegion && fromAddress));
+
+    const enabled = row ? row.enabled && configured : configured;
+
+    return {
+      provider,
+      enabled,
+      configured,
+      fromAddress,
+      fromName,
+      smtpHost,
+      smtpPort,
+      smtpSecure,
+      smtpIgnoreTls,
+      smtpUsername,
+      smtpPassword,
+      postmarkToken,
+      sendgridApiKey,
+      mailgunApiKey,
+      mailgunDomain,
+      mailgunApiBaseUrl,
+      sesAccessKeyId,
+      sesSecretAccessKey,
+      sesRegion,
+    };
+  }
+
+  toPublicMailConfig(runtime: MailRuntimeConfig): PublicMailConfig {
+    return {
+      provider: runtime.provider,
+      enabled: runtime.enabled,
+      configured: runtime.configured,
+      fromAddress: runtime.fromAddress,
+      fromName: runtime.fromName,
     };
   }
 }

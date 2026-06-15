@@ -17,6 +17,10 @@ import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';
 import { ChatNotificationService } from '../../notification/services/chat.notification';
 import {
+  WebhookEvents,
+  WebhookService,
+} from '../../../integrations/webhook/webhook.service';
+import {
   GetChannelMessagesDto,
   GetThreadMessagesDto,
   SendMessageDto,
@@ -33,6 +37,7 @@ export class MessageService {
     private readonly messageAttachmentRepo: MessageAttachmentRepo,
     private readonly chatWsService: ChatWsService,
     private readonly chatNotificationService: ChatNotificationService,
+    private readonly webhookService: WebhookService,
     @InjectKysely() private readonly db: KyselyDB,
   ) {}
 
@@ -165,6 +170,14 @@ export class MessageService {
         },
         mentionedUserIds,
       )
+      .catch(() => {});
+
+    this.webhookService
+      .enqueue(workspace.id, WebhookEvents.CHAT_MESSAGE_CREATED, {
+        message: fullMessage,
+        channelId: dto.channelId,
+        actorId: user.id,
+      })
       .catch(() => {});
 
     return fullMessage;

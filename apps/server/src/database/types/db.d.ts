@@ -721,6 +721,76 @@ export interface IntegrationSettings {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface Webhooks {
+  id: Generated<string>;
+  workspaceId: string;
+  name: string;
+  url: string;
+  events: Generated<Json>;
+  secret: string;
+  enabled: Generated<boolean>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface WebhookDeliveries {
+  id: Generated<string>;
+  workspaceId: string;
+  webhookId: string;
+  event: string;
+  payload: Json;
+  status: Generated<string>;
+  statusCode: number | null;
+  responseBody: string | null;
+  error: string | null;
+  attempts: Generated<number>;
+  deliveredAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface AvailabilitySchedules {
+  id: Generated<string>;
+  workspaceId: string;
+  userId: string;
+  name: string;
+  timeZone: Generated<string>;
+  rules: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface EventTypes {
+  id: Generated<string>;
+  workspaceId: string;
+  userId: string;
+  scheduleId: string | null;
+  name: string;
+  slug: string;
+  description: string | null;
+  durationMinutes: Generated<number>;
+  minimumNoticeMinutes: Generated<number>;
+  enabled: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Bookings {
+  id: Generated<string>;
+  workspaceId: string;
+  eventTypeId: string;
+  hostUserId: string;
+  bookerName: string;
+  bookerEmail: string;
+  startsAt: Timestamp;
+  endsAt: Timestamp;
+  status: Generated<string>;
+  notes: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface DB {
   aiChats: AiChats;
   aiChatMessages: AiChatMessages;
@@ -729,8 +799,10 @@ export interface DB {
   audit: Audit;
   authAccounts: AuthAccounts;
   authProviders: AuthProviders;
+  availabilitySchedules: AvailabilitySchedules;
   backlinks: Backlinks;
   billing: Billing;
+  bookings: Bookings;
   calls: Calls;
   callParticipants: CallParticipants;
   channels: Channels;
@@ -738,6 +810,7 @@ export interface DB {
   comments: Comments;
   favorites: Favorites;
   fileTasks: FileTasks;
+  eventTypes: EventTypes;
   groups: Groups;
   groupUsers: GroupUsers;
   integrationSettings: IntegrationSettings;
@@ -769,6 +842,8 @@ export interface DB {
   userSessions: UserSessions;
   userTokens: UserTokens;
   watchers: Watchers;
+  webhooks: Webhooks;
+  webhookDeliveries: WebhookDeliveries;
   workspaceInvitations: WorkspaceInvitations;
   workspaces: Workspaces;
 }

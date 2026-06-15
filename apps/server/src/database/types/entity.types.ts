@@ -49,6 +49,11 @@ import {
   CallParticipants,
   PushSubscriptions,
   IntegrationSettings,
+  Webhooks,
+  WebhookDeliveries,
+  AvailabilitySchedules,
+  EventTypes,
+  Bookings,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
 
@@ -308,3 +313,26 @@ export type InsertableIntegrationSetting = Insertable<IntegrationSettings>;
 export type UpdatableIntegrationSetting = Updateable<
   Omit<IntegrationSettings, 'id'>
 >;
+
+// Webhooks
+export type Webhook = Selectable<Webhooks>;
+export type InsertableWebhook = Insertable<Webhooks>;
+export type UpdatableWebhook = Updateable<Omit<Webhooks, 'id'>>;
+export type WebhookDelivery = Selectable<WebhookDeliveries>;
+export type InsertableWebhookDelivery = Insertable<WebhookDeliveries>;
+export type UpdatableWebhookDelivery = Updateable<
+  Omit<WebhookDeliveries, 'id'>
+>;
+
+// Scheduling
+export type AvailabilitySchedule = Selectable<AvailabilitySchedules>;
+export type InsertableAvailabilitySchedule = Insertable<AvailabilitySchedules>;
+export type UpdatableAvailabilitySchedule = Updateable<
+  Omit<AvailabilitySchedules, 'id'>
+>;
+export type EventType = Selectable<EventTypes>;
+export type InsertableEventType = Insertable<EventTypes>;
+export type UpdatableEventType = Updateable<Omit<EventTypes, 'id'>>;
+export type Booking = Selectable<Bookings>;
+export type InsertableBooking = Insertable<Bookings>;
+export type UpdatableBooking = Updateable<Omit<Bookings, 'id'>>;

@@ -29,6 +29,7 @@ import { AuditModule } from './integrations/audit/audit.module';
 import { ThrottleModule } from './integrations/throttle/throttle.module';
 import { CryptoModule } from './integrations/crypto/crypto.module';
 import { IntegrationModule } from './integrations/integration/integration.module';
+import { WebhookModule } from './integrations/webhook/webhook.module';
 
 const enterpriseModules = [];
 try {
@@ -89,6 +90,7 @@ try {
     ThrottleModule,
     CryptoModule,
     IntegrationModule,
+    WebhookModule,
     ...enterpriseModules,
   ],
   controllers: [AppController],

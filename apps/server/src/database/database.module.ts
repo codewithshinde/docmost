@@ -46,6 +46,9 @@ import { CallRepo } from '@docmost/db/repos/chat/call.repo';
 import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
 import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
 import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integration-settings.repo';
+import { WebhookRepo } from '@docmost/db/repos/webhook/webhook.repo';
+import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.repo';
+import { SchedulingRepo } from '@docmost/db/repos/scheduling/scheduling.repo';
 
 @Global()
 @Module({
@@ -123,6 +126,9 @@ import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integrati
     CallParticipantRepo,
     PushSubscriptionRepo,
     IntegrationSettingsRepo,
+    WebhookRepo,
+    WebhookDeliveryRepo,
+    SchedulingRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -162,6 +168,9 @@ import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integrati
     CallParticipantRepo,
     PushSubscriptionRepo,
     IntegrationSettingsRepo,
+    WebhookRepo,
+    WebhookDeliveryRepo,
+    SchedulingRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {

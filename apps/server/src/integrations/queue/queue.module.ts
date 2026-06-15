@@ -4,10 +4,12 @@ import { EnvironmentService } from '../environment/environment.service';
 import { createRetryStrategy, parseRedisUrl } from '../../common/helpers';
 import { QueueName } from './constants';
 import { GeneralQueueProcessor } from './processors/general-queue.processor';
+import { CryptoModule } from '../crypto/crypto.module';
 
 @Global()
 @Module({
   imports: [
+    CryptoModule,
     BullModule.forRootAsync({
       useFactory: (environmentService: EnvironmentService) => {
         const redisConfig = parseRedisUrl(environmentService.getRedisUrl());

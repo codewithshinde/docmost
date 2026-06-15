@@ -98,7 +98,7 @@ export class NotificationService {
     try {
       const user = await this.db
         .selectFrom('users')
-        .select(['email', 'settings'])
+        .select(['email', 'settings', 'workspaceId'])
         .where('id', '=', userId)
         .where('deletedAt', 'is', null)
         .where('deactivatedAt', 'is', null)
@@ -115,6 +115,7 @@ export class NotificationService {
       }
 
       await this.mailService.sendToQueue({
+        workspaceId: user.workspaceId,
         to: user.email,
         subject,
         template,

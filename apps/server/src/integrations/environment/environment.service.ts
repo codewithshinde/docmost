@@ -199,6 +199,37 @@ export class EnvironmentService {
     return this.configService.get<string>('POSTMARK_TOKEN');
   }
 
+  getSendGridApiKey(): string {
+    return this.configService.get<string>('SENDGRID_API_KEY');
+  }
+
+  getMailgunApiKey(): string {
+    return this.configService.get<string>('MAILGUN_API_KEY');
+  }
+
+  getMailgunDomain(): string {
+    return this.configService.get<string>('MAILGUN_DOMAIN');
+  }
+
+  getMailgunApiBaseUrl(): string {
+    return this.configService.get<string>(
+      'MAILGUN_API_BASE_URL',
+      'https://api.mailgun.net',
+    );
+  }
+
+  getSesAccessKeyId(): string {
+    return this.configService.get<string>('SES_ACCESS_KEY_ID');
+  }
+
+  getSesSecretAccessKey(): string {
+    return this.configService.get<string>('SES_SECRET_ACCESS_KEY');
+  }
+
+  getSesRegion(): string {
+    return this.configService.get<string>('SES_REGION');
+  }
+
   getDrawioUrl(): string {
     return this.configService.get<string>('DRAWIO_URL');
   }

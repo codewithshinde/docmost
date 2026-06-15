@@ -192,6 +192,7 @@ export class WorkspaceInvitationService {
           invitation.email,
           invitation.token,
           authUser.name,
+          workspace.id,
           workspace.hostname,
         );
       });
@@ -323,6 +324,7 @@ export class WorkspaceInvitationService {
       });
 
       await this.mailService.sendToQueue({
+        workspaceId: workspace.id,
         to: invitedByUser.email,
         subject: `${newUser.name} has accepted your Docmost invite`,
         template: emailTemplate,
@@ -387,6 +389,7 @@ export class WorkspaceInvitationService {
       invitation.email,
       invitation.token,
       invitedByUser.name,
+      workspace.id,
       workspace.hostname,
     );
 
@@ -459,6 +462,7 @@ export class WorkspaceInvitationService {
     inviteeEmail: string,
     inviteToken: string,
     invitedByName: string,
+    workspaceId: string,
     hostname?: string,
   ): Promise<void> {
     const inviteLink = await this.buildInviteLink({
@@ -472,6 +476,7 @@ export class WorkspaceInvitationService {
     });
 
     await this.mailService.sendToQueue({
+      workspaceId,
       to: inviteeEmail,
       subject: `${invitedByName} invited you to Docmost`,
       template: emailTemplate,
