@@ -709,6 +709,18 @@ export interface PushSubscriptions {
   createdAt: Generated<Timestamp>;
 }
 
+export interface IntegrationSettings {
+  id: Generated<string>;
+  workspaceId: string;
+  key: string;
+  enabled: Generated<boolean>;
+  config: Generated<Json>;
+  secrets: string | null;
+  updatedById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface DB {
   aiChats: AiChats;
   aiChatMessages: AiChatMessages;
@@ -728,6 +740,7 @@ export interface DB {
   fileTasks: FileTasks;
   groups: Groups;
   groupUsers: GroupUsers;
+  integrationSettings: IntegrationSettings;
   labels: Labels;
   messages: Messages;
   messageAttachments: MessageAttachments;

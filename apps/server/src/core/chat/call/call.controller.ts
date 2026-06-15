@@ -24,8 +24,14 @@ export class CallController {
 
   @HttpCode(HttpStatus.OK)
   @Post('config')
-  getConfig() {
-    return this.callService.getConfig();
+  getConfig(@AuthWorkspace() workspace: Workspace) {
+    return this.callService.getConfig(workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('test')
+  testConnection(@AuthWorkspace() workspace: Workspace) {
+    return this.callService.testConnection(workspace);
   }
 
   @HttpCode(HttpStatus.OK)

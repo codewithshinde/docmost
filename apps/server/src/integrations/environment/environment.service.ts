@@ -387,4 +387,16 @@ export class EnvironmentService {
   getLiveKitApiSecret(): string | undefined {
     return this.configService.get<string>('LIVEKIT_API_SECRET');
   }
+
+  getJitsiDomain(): string | undefined {
+    return this.configService.get<string>('JITSI_DOMAIN');
+  }
+
+  getJitsiAppId(): string | undefined {
+    return this.configService.get<string>('JITSI_APP_ID');
+  }
+
+  getJitsiAppSecret(): string | undefined {
+    return this.configService.get<string>('JITSI_APP_SECRET');
+  }
 }

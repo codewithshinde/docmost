@@ -48,6 +48,7 @@ import {
   Calls,
   CallParticipants,
   PushSubscriptions,
+  IntegrationSettings,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
 
@@ -300,3 +301,10 @@ export type UpdatableCallParticipant = Updateable<Omit<CallParticipants, 'id'>>;
 // Push Subscription
 export type PushSubscription = Selectable<PushSubscriptions>;
 export type InsertablePushSubscription = Insertable<PushSubscriptions>;
+
+// Integration Settings
+export type IntegrationSetting = Selectable<IntegrationSettings>;
+export type InsertableIntegrationSetting = Insertable<IntegrationSettings>;
+export type UpdatableIntegrationSetting = Updateable<
+  Omit<IntegrationSettings, 'id'>
+>;

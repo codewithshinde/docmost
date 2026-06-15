@@ -45,6 +45,7 @@ import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment
 import { CallRepo } from '@docmost/db/repos/chat/call.repo';
 import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
 import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
+import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integration-settings.repo';
 
 @Global()
 @Module({
@@ -121,6 +122,7 @@ import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscr
     CallRepo,
     CallParticipantRepo,
     PushSubscriptionRepo,
+    IntegrationSettingsRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -159,6 +161,7 @@ import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscr
     CallRepo,
     CallParticipantRepo,
     PushSubscriptionRepo,
+    IntegrationSettingsRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {

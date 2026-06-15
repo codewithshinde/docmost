@@ -5,6 +5,7 @@ import {
   RoomAudioRenderer,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
+import { JitsiMeeting } from "@jitsi/react-sdk";
 import { Alert, Center, Loader } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +15,7 @@ import { notifications } from "@mantine/notifications";
 import { joinCall, leaveCall } from "../services/call-service";
 import { ACTIVE_CALL_KEY } from "../queries/call-query";
 import { activeCallChannelIdAtom } from "../atoms/chat-atoms";
+import { IJoinCallResponse } from "../types/chat.types";
 import classes from "./call-panel.module.css";
 
 interface CallPanelProps {
@@ -25,9 +27,7 @@ export function CallPanel({ channelId }: CallPanelProps) {
   const queryClient = useQueryClient();
   const setActiveCallChannelId = useSetAtom(activeCallChannelIdAtom);
 
-  const [token, setToken] = useState<string | null>(null);
-  const [serverUrl, setServerUrl] = useState<string | null>(null);
-  const [callId, setCallId] = useState<string | null>(null);
+  const [session, setSession] = useState<IJoinCallResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,21 +37,21 @@ export function CallPanel({ channelId }: CallPanelProps) {
       try {
         const res = await joinCall(channelId);
         if (cancelled) return;
-        if (!res.token || !res.livekitUrl) {
+        if (res.provider === "livekit" && (!res.token || !res.livekitUrl)) {
           setError(t("Calls are not configured on this server."));
           return;
         }
-        setToken(res.token);
-        setServerUrl(res.livekitUrl);
-        setCallId(res.call.id);
+        if (res.provider === "jitsi" && !res.jitsiDomain) {
+          setError(t("Calls are not configured on this server."));
+          return;
+        }
+        setSession(res);
         queryClient.invalidateQueries({
           queryKey: [...ACTIVE_CALL_KEY, channelId],
         });
       } catch (err: any) {
         if (cancelled) return;
-        setError(
-          err?.response?.data?.message ?? t("Unable to join the call."),
-        );
+        setError(err?.response?.data?.message ?? t("Unable to join the call."));
       }
     })();
 
@@ -62,11 +62,11 @@ export function CallPanel({ channelId }: CallPanelProps) {
   }, [channelId]);
 
   const handleClose = async () => {
-    if (callId) {
+    if (session?.call?.id) {
       try {
-        await leaveCall(callId);
+        await leaveCall(session.call.id);
       } catch {
-        // ignore — server will reconcile when the room empties
+        // ignore — server reconciles when the room empties
       }
       queryClient.invalidateQueries({
         queryKey: [...ACTIVE_CALL_KEY, channelId],
@@ -92,7 +92,7 @@ export function CallPanel({ channelId }: CallPanelProps) {
     );
   }
 
-  if (!token || !serverUrl) {
+  if (!session) {
     return (
       <div className={classes.panel}>
         <Center style={{ height: "100%" }}>
@@ -102,11 +102,30 @@ export function CallPanel({ channelId }: CallPanelProps) {
     );
   }
 
+  if (session.provider === "jitsi") {
+    return (
+      <div className={classes.panel}>
+        <JitsiMeeting
+          domain={session.jitsiDomain ?? "meet.jit.si"}
+          roomName={session.call.roomName}
+          jwt={session.token ?? undefined}
+          getIFrameRef={(node) => {
+            node.style.height = "100%";
+            node.style.width = "100%";
+          }}
+          onReadyToClose={() => {
+            handleClose();
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={classes.panel}>
       <LiveKitRoom
-        token={token}
-        serverUrl={serverUrl}
+        token={session.token ?? ""}
+        serverUrl={session.livekitUrl ?? ""}
         connect
         video
         audio

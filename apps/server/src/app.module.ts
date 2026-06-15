@@ -27,6 +27,8 @@ import { LoggerModule } from './common/logger/logger.module';
 import { ClsModule } from 'nestjs-cls';
 import { AuditModule } from './integrations/audit/audit.module';
 import { ThrottleModule } from './integrations/throttle/throttle.module';
+import { CryptoModule } from './integrations/crypto/crypto.module';
+import { IntegrationModule } from './integrations/integration/integration.module';
 
 const enterpriseModules = [];
 try {
@@ -85,6 +87,8 @@ try {
     SecurityModule,
     TelemetryModule,
     ThrottleModule,
+    CryptoModule,
+    IntegrationModule,
     ...enterpriseModules,
   ],
   controllers: [AppController],

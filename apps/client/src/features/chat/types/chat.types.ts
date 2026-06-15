@@ -125,14 +125,20 @@ export interface ICall {
   participants?: ICallParticipant[];
 }
 
+export type CallProvider = "livekit" | "jitsi";
+
 export interface ICallConfig {
-  provider: string;
+  provider: CallProvider;
   enabled: boolean;
+  configured: boolean;
   livekitUrl: string | null;
+  jitsiDomain: string | null;
 }
 
 export interface IJoinCallResponse {
   call: ICall;
-  token: string;
+  provider: CallProvider;
+  token: string | null;
   livekitUrl: string | null;
+  jitsiDomain: string | null;
 }

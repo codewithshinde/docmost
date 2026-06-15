@@ -1,12 +1,18 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { AccessToken, VideoGrant } from 'livekit-server-sdk';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { AccessToken, RoomServiceClient, VideoGrant } from 'livekit-server-sdk';
+import * as jwt from 'jsonwebtoken';
 import { CallRepo } from '@docmost/db/repos/chat/call.repo';
 import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
 import { User, Workspace } from '@docmost/db/types/entity.types';
 import { ChannelService } from '../channel/channel.service';
 import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';
-import { EnvironmentService } from '../../../integrations/environment/environment.service';
+import { IntegrationSettingsService } from '../../../integrations/integration/integration-settings.service';
+import { CallRuntimeConfig } from '../../../integrations/integration/integration.constants';
 import { CallScreenShareDto } from './dto/call.dto';
 
 @Injectable()
@@ -16,18 +22,14 @@ export class CallService {
     private readonly callParticipantRepo: CallParticipantRepo,
     private readonly channelService: ChannelService,
     private readonly chatWsService: ChatWsService,
-    private readonly environmentService: EnvironmentService,
+    private readonly integrationSettingsService: IntegrationSettingsService,
   ) {}
 
-  getConfig() {
-    const url = this.environmentService.getLiveKitUrl();
-    const apiKey = this.environmentService.getLiveKitApiKey();
-    const apiSecret = this.environmentService.getLiveKitApiSecret();
-    return {
-      provider: 'livekit',
-      enabled: Boolean(url && apiKey && apiSecret),
-      livekitUrl: url ?? null,
-    };
+  async getConfig(workspace: Workspace) {
+    const runtime = await this.integrationSettingsService.getCallRuntimeConfig(
+      workspace.id,
+    );
+    return this.integrationSettingsService.toPublicCallConfig(runtime);
   }
 
   async getActiveCall(channelId: string, user: User, workspace: Workspace) {
@@ -43,6 +45,16 @@ export class CallService {
       workspace,
     );
 
+    const runtime = await this.integrationSettingsService.getCallRuntimeConfig(
+      workspace.id,
+    );
+
+    if (!runtime.enabled || !runtime.configured) {
+      throw new BadRequestException(
+        'Calls are not configured on this server',
+      );
+    }
+
     let call = await this.callRepo.findActiveCallForChannel(channelId);
     const isNewCall = !call;
 
@@ -52,16 +64,14 @@ export class CallService {
         channelId: channel.id,
         startedById: user.id,
         status: 'active',
-        provider: 'livekit',
-        roomName: channel.id,
+        provider: runtime.provider,
+        roomName: `${workspace.id}-${channel.id}`,
       });
       call = await this.callRepo.findActiveCallForChannel(channelId);
     }
 
-    const existingParticipant = await this.callParticipantRepo.getActiveParticipant(
-      call.id,
-      user.id,
-    );
+    const existingParticipant =
+      await this.callParticipantRepo.getActiveParticipant(call.id, user.id);
 
     if (!existingParticipant) {
       await this.callParticipantRepo.insertParticipant({
@@ -88,12 +98,14 @@ export class CallService {
       );
     }
 
-    const token = await this.generateToken(call.roomName, user);
+    const token = await this.generateToken(runtime, call.roomName, user);
 
     return {
       call,
+      provider: runtime.provider,
       token,
-      livekitUrl: this.environmentService.getLiveKitUrl(),
+      livekitUrl: runtime.livekitUrl,
+      jitsiDomain: runtime.jitsiDomain,
     };
   }
 
@@ -112,9 +124,8 @@ export class CallService {
       { callId: call.id, userId: user.id },
     );
 
-    const activeParticipants = await this.callParticipantRepo.getActiveParticipants(
-      call.id,
-    );
+    const activeParticipants =
+      await this.callParticipantRepo.getActiveParticipants(call.id);
 
     if (activeParticipants.length === 0 && call.status === 'active') {
       await this.callRepo.endCall(call.id, workspace.id);
@@ -152,32 +163,106 @@ export class CallService {
     return { success: true };
   }
 
-  private async generateToken(roomName: string, user: User): Promise<string> {
-    const apiKey = this.environmentService.getLiveKitApiKey();
-    const apiSecret = this.environmentService.getLiveKitApiSecret();
+  async testConnection(workspace: Workspace) {
+    const runtime = await this.integrationSettingsService.getCallRuntimeConfig(
+      workspace.id,
+    );
 
-    if (!apiKey || !apiSecret) {
-      throw new BadRequestException(
-        'Calls are not configured on this server',
+    if (runtime.provider === 'livekit') {
+      if (
+        !runtime.livekitUrl ||
+        !runtime.livekitApiKey ||
+        !runtime.livekitApiSecret
+      ) {
+        return { ok: false, message: 'Missing LiveKit URL, API key or secret' };
+      }
+      try {
+        const httpUrl = runtime.livekitUrl.replace(/^ws/i, 'http');
+        const client = new RoomServiceClient(
+          httpUrl,
+          runtime.livekitApiKey,
+          runtime.livekitApiSecret,
+        );
+        await client.listRooms();
+        return { ok: true, message: 'Successfully connected to LiveKit' };
+      } catch (err) {
+        return {
+          ok: false,
+          message:
+            err instanceof Error
+              ? err.message
+              : 'Failed to connect to LiveKit',
+        };
+      }
+    }
+
+    // jitsi
+    if (!runtime.jitsiDomain) {
+      return { ok: false, message: 'Missing Jitsi domain' };
+    }
+    return {
+      ok: true,
+      message: `Jitsi is configured (${runtime.jitsiDomain})`,
+    };
+  }
+
+  private async generateToken(
+    runtime: CallRuntimeConfig,
+    roomName: string,
+    user: User,
+  ): Promise<string | null> {
+    if (runtime.provider === 'livekit') {
+      if (!runtime.livekitApiKey || !runtime.livekitApiSecret) {
+        throw new BadRequestException('Calls are not configured on this server');
+      }
+
+      const at = new AccessToken(
+        runtime.livekitApiKey,
+        runtime.livekitApiSecret,
+        {
+          identity: user.id,
+          name: user.name,
+          ttl: '10m',
+        },
+      );
+
+      const grant: VideoGrant = {
+        room: roomName,
+        roomJoin: true,
+        canPublish: true,
+        canSubscribe: true,
+        canPublishData: true,
+      };
+
+      at.addGrant(grant);
+      return at.toJwt();
+    }
+
+    // jitsi: only needs a signed JWT when an app id + secret are configured
+    // (self-hosted with auth or JaaS). Otherwise anonymous join is used.
+    if (runtime.jitsiAppId && runtime.jitsiAppSecret) {
+      const now = Math.floor(Date.now() / 1000);
+      return jwt.sign(
+        {
+          aud: 'jitsi',
+          iss: runtime.jitsiAppId,
+          sub: runtime.jitsiDomain ?? '*',
+          room: roomName,
+          iat: now,
+          exp: now + 60 * 60,
+          context: {
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+            },
+          },
+        },
+        runtime.jitsiAppSecret,
+        { algorithm: 'HS256' },
       );
     }
 
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity: user.id,
-      name: user.name,
-      ttl: '10m',
-    });
-
-    const grant: VideoGrant = {
-      room: roomName,
-      roomJoin: true,
-      canPublish: true,
-      canSubscribe: true,
-      canPublishData: true,
-    };
-
-    at.addGrant(grant);
-
-    return at.toJwt();
+    return null;
   }
 }
