@@ -2,15 +2,18 @@ import { useTranslation } from "react-i18next";
 import {
   Badge,
   Button,
+  CopyButton,
   Drawer,
   Group,
   Loader,
   Stack,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconCalendarTime,
   IconCheck,
+  IconCopy,
   IconHelp,
   IconMapPin,
   IconVideo,
@@ -123,16 +126,38 @@ export function EventDetailsDrawer({
           {event.meetingUrl && (
             <Group gap="xs" wrap="nowrap">
               <IconVideo size={18} />
-              <Button
-                component="a"
-                href={event.meetingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="light"
-                size="xs"
-              >
-                {t("Join video call")}
-              </Button>
+              <Group gap="xs">
+                <Button
+                  component="a"
+                  href={event.meetingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="light"
+                  size="xs"
+                >
+                  {t("Join video call")}
+                </Button>
+                <CopyButton value={event.meetingUrl} timeout={2000}>
+                  {({ copied, copy }) => (
+                    <Tooltip
+                      label={copied ? t("Copied!") : t("Copy meeting link")}
+                      withArrow
+                    >
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        color={copied ? "teal" : "gray"}
+                        onClick={copy}
+                        leftSection={
+                          copied ? <IconCheck size={14} /> : <IconCopy size={14} />
+                        }
+                      >
+                        {copied ? t("Copied") : t("Copy link")}
+                      </Button>
+                    </Tooltip>
+                  )}
+                </CopyButton>
+              </Group>
             </Group>
           )}
 

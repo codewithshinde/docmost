@@ -62,7 +62,7 @@ export class TeamService {
     user: User,
     workspace: Workspace,
   ): Promise<Team> {
-    await this.assertMember(teamId, user.id);
+    const member = await this.assertMember(teamId, user.id);
 
     const team = await this.teamRepo.findById(teamId, workspace.id, {
       includeMemberCount: true,
@@ -72,7 +72,7 @@ export class TeamService {
       throw new NotFoundException('Team not found');
     }
 
-    return team;
+    return { ...team, memberRole: member.role } as Team;
   }
 
   async createTeam(

@@ -237,7 +237,8 @@ export function EventFormModal({
         />
 
         <Checkbox
-          label={t("Add video call")}
+          label={t("Generate meeting link (video call)")}
+          description={t("A shareable meeting link will be created and shown in the event details")}
           checked={addVideoCall}
           onChange={(e) => setAddVideoCall(e.currentTarget.checked)}
         />
