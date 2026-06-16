@@ -36,8 +36,9 @@ export function useUpdateCallSettingsMutation() {
   const queryClient = useQueryClient();
   return useMutation<ICallSettingsView, Error, IUpdateCallSettings>({
     mutationFn: updateCallSettings,
-    onSuccess: () => {
+    onSuccess: (settings) => {
       queryClient.invalidateQueries({ queryKey: CALL_SETTINGS_KEY });
+      queryClient.setQueryData(CALL_CONFIG_KEY, settings.effective);
       // refresh the gating used by the chat call button
       queryClient.invalidateQueries({ queryKey: CALL_CONFIG_KEY });
       notifications.show({ message: "Call settings saved", color: "green" });

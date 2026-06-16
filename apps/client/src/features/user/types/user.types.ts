@@ -8,6 +8,11 @@ export interface IUser {
   emailVerifiedAt: Date;
   avatarUrl: string;
   timezone: string;
+  phone?: string | null;
+  address?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  designation?: string | null;
   settings: IUserSettings;
   invitedById: string;
   lastLoginAt: string;

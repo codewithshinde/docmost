@@ -219,6 +219,10 @@ export default function IntegrationsSettings() {
             <Badge color="green" variant="light">
               {t("Connected")}
             </Badge>
+          ) : settings?.effective?.configured ? (
+            <Badge color="yellow" variant="light">
+              {t("Configured, disabled")}
+            </Badge>
           ) : (
             <Badge color="gray" variant="light">
               {t("Not configured")}
@@ -257,6 +261,9 @@ export default function IntegrationsSettings() {
                 />
                 <PasswordInput
                   label={t("API key")}
+                  description={
+                    hasSecret("livekitApiKey") ? t("A key is saved. Enter a new value only to replace it.") : undefined
+                  }
                   placeholder={
                     hasSecret("livekitApiKey") ? SECRET_PLACEHOLDER : ""
                   }
@@ -265,6 +272,9 @@ export default function IntegrationsSettings() {
                 />
                 <PasswordInput
                   label={t("API secret")}
+                  description={
+                    hasSecret("livekitApiSecret") ? t("A secret is saved. Enter a new value only to replace it.") : undefined
+                  }
                   placeholder={
                     hasSecret("livekitApiSecret") ? SECRET_PLACEHOLDER : ""
                   }

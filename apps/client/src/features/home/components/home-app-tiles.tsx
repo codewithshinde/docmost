@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import { useAtomValue } from "jotai";
 import type { CSSProperties } from "react";
 import { workspaceAtom } from "@/features/user/atoms/current-user-atom";
+import useUserRole from "@/hooks/use-user-role";
 import { useUnreadCountsQuery } from "@/features/chat/queries/channel-query";
 import { useMailUnreadCountQuery } from "@/features/mail-account/queries/mail-account-query";
 import { useHasFeature } from "@/ee/hooks/use-feature";
@@ -36,6 +37,7 @@ type Tile = {
 export default function HomeAppTiles() {
   const { t } = useTranslation();
   const workspace = useAtomValue(workspaceAtom);
+  const { isAdmin } = useUserRole();
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const { data: unreadCounts } = useUnreadCountsQuery();
   const { data: mailUnread } = useMailUnreadCountQuery();
@@ -116,6 +118,7 @@ export default function HomeAppTiles() {
       path: "/settings",
       icon: IconSettings,
       color: "var(--mantine-color-gray-7)",
+      enabled: isAdmin,
     },
   ];
 

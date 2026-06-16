@@ -359,6 +359,11 @@ export interface Users {
   hasGeneratedPassword: Generated<boolean | null>;
   name: string | null;
   password: string | null;
+  phone: string | null;
+  address: string | null;
+  emergencyContactName: string | null;
+  emergencyContactPhone: string | null;
+  designation: string | null;
   role: string | null;
   scimExternalId: string | null;
   settings: Json | null;

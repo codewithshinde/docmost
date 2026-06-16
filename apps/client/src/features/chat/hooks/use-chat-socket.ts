@@ -33,6 +33,13 @@ export function useChatSocket() {
         case ChatWsEvent.MESSAGE_CREATED: {
           const message = payload as IMessage;
           addMessageToCache(queryClient, message);
+          queryClient.invalidateQueries({ queryKey: UNREAD_COUNTS_KEY });
+          queryClient.invalidateQueries({ queryKey: CHANNELS_KEY });
+          if (channelId) {
+            queryClient.invalidateQueries({
+              queryKey: [...CHANNELS_KEY, channelId],
+            });
+          }
           break;
         }
 

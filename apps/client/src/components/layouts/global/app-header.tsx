@@ -53,6 +53,8 @@ export function AppHeader() {
   const aiChatEnabled = workspace?.settings?.ai?.chat === true;
 
   const isPageRoute = location.pathname.includes("/p/");
+  const showSearch =
+    location.pathname.startsWith("/spaces") || location.pathname.includes("/p/");
 
   const items = links.map((link) => (
     <Link key={link.label} to={link.link} className={classes.link}>
@@ -108,14 +110,16 @@ export function AppHeader() {
           </Group>
         </Group>
 
-        <div>
-          <Group visibleFrom="sm">
-            <SearchControl onClick={searchSpotlight.open} />
-          </Group>
-          <Group hiddenFrom="sm">
-            <SearchMobileControl onSearch={searchSpotlight.open} />
-          </Group>
-        </div>
+        {showSearch && (
+          <div>
+            <Group visibleFrom="sm">
+              <SearchControl onClick={searchSpotlight.open} />
+            </Group>
+            <Group hiddenFrom="sm">
+              <SearchMobileControl onSearch={searchSpotlight.open} />
+            </Group>
+          </div>
+        )}
 
         <Group px={"xl"} wrap="nowrap">
           {aiChatEnabled && (

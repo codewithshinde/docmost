@@ -3,6 +3,7 @@ import ChangeEmail from "@/features/user/components/change-email";
 import ChangePassword from "@/features/user/components/change-password";
 import { Divider } from "@mantine/core";
 import AccountAvatar from "@/features/user/components/account-avatar";
+import AccountDetailsForm from "@/features/user/components/account-details-form";
 import SettingsTitle from "@/components/settings/settings-title.tsx";
 import { getAppName } from "@/lib/config.ts";
 import { Helmet } from "react-helmet-async";
@@ -25,6 +26,10 @@ export default function AccountSettings() {
       <AccountAvatar />
 
       <AccountNameForm />
+
+      <Divider my="lg" />
+
+      <AccountDetailsForm />
 
       <Divider my="lg" />
 
