@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsArray,
   IsString,
+  IsBoolean,
   IsUUID,
   MaxLength,
   Min,
@@ -26,6 +27,43 @@ export class DeleteTaskAttachmentDto {
 
   @IsUUID()
   attachmentId: string;
+}
+
+export class ProjectStatusDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  @MaxLength(120)
+  label: string;
+
+  @IsString()
+  @MaxLength(40)
+  color: string;
+
+  @IsBoolean()
+  isDone: boolean;
+}
+
+export class ProjectSprintDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  @MaxLength(120)
+  name: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }
 
 export class CreateTeamProjectDto {
@@ -60,6 +98,23 @@ export class UpdateTeamProjectDto extends TeamProjectIdDto {
   @IsOptional()
   @IsIn(['table', 'kanban', 'calendar'])
   view?: string;
+
+  @IsOptional()
+  @IsString()
+  logoUrl?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  statuses?: ProjectStatusDto[];
+
+  @IsOptional()
+  @IsArray()
+  sprints?: ProjectSprintDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  projectTags?: string[];
 }
 
 export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
@@ -82,7 +137,8 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
   tags?: string[];
 
   @IsOptional()
-  @IsIn(['todo', 'in_progress', 'blocked', 'done'])
+  @IsString()
+  @MaxLength(120)
   status?: string;
 
   @IsOptional()
@@ -134,7 +190,8 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
   tags?: string[];
 
   @IsOptional()
-  @IsIn(['todo', 'in_progress', 'blocked', 'done'])
+  @IsString()
+  @MaxLength(120)
   status?: string;
 
   @IsOptional()

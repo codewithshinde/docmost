@@ -63,7 +63,7 @@ export async function uploadIcon(
       "Content-Type": "multipart/form-data",
     },
   });
-  return req.data;
+  return req as unknown as IAttachment;
 }
 
 export async function uploadUserAvatar(file: File): Promise<IAttachment> {

@@ -33,6 +33,16 @@ export class TeamProjectRepo {
       .execute();
   }
 
+  async findProjectWithStatusById(projectId: string, workspaceId: string) {
+    return this.db
+      .selectFrom('teamProjects')
+      .selectAll()
+      .where('id', '=', projectId)
+      .where('workspaceId', '=', workspaceId)
+      .where('deletedAt', 'is', null)
+      .executeTakeFirst();
+  }
+
   async getUserProjects(userId: string, workspaceId: string) {
     return this.db
       .selectFrom('teamProjects')

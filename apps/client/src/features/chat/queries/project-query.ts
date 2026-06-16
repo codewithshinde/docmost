@@ -21,6 +21,8 @@ import {
   uploadTaskAttachment,
 } from "../services/project-service";
 import {
+  IProjectStatus,
+  ISprint,
   ITeamProject,
   ITeamProjectTask,
   ITeamProjectTaskComment,
@@ -107,6 +109,10 @@ export function useUpdateProjectMutation() {
       description?: string;
       view?: ProjectView;
       teamId: string;
+      logoUrl?: string | null;
+      statuses?: IProjectStatus[];
+      sprints?: ISprint[];
+      projectTags?: string[];
     }
   >({
     mutationFn: ({ teamId: _teamId, ...data }) => updateProject(data),

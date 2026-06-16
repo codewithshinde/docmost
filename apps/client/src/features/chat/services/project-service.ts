@@ -1,5 +1,7 @@
 import api from "@/lib/api-client";
 import {
+  IProjectStatus,
+  ISprint,
   ITeamProject,
   ITeamProjectTask,
   ITeamProjectTaskComment,
@@ -34,6 +36,10 @@ export async function updateProject(data: {
   name?: string;
   description?: string;
   view?: ProjectView;
+  logoUrl?: string | null;
+  statuses?: IProjectStatus[];
+  sprints?: ISprint[];
+  projectTags?: string[];
 }): Promise<ITeamProject> {
   const req = await api.post<ITeamProject>("/projects/update", data);
   return req.data;
@@ -123,7 +129,7 @@ export async function uploadTaskAttachment(
   const req = await api.post("/attachments/task-upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return req.data;
+  return req as unknown as { id: string; fileName: string; fileSize: number; mimeType: string };
 }
 
 export async function deleteTaskAttachment(

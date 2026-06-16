@@ -293,6 +293,8 @@ export default function TeamHubPage() {
         <Paper withBorder radius="sm" p="md">
           <TeamProjectsPanel teamId={teamId} members={members} />
         </Paper>
+
+
       </SimpleGrid>
 
       <TeamSettingsModal

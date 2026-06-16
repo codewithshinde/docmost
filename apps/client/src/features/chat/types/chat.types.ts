@@ -34,9 +34,31 @@ export interface ITeamMember {
 }
 
 export type ProjectView = "table" | "kanban" | "calendar";
-export type ProjectTaskStatus = "todo" | "in_progress" | "blocked" | "done";
+export type ProjectTaskStatus = string;
 export type ProjectTaskPriority = "low" | "medium" | "high" | "urgent";
 export type ProjectIssueType = "task" | "bug" | "story" | "epic";
+
+export interface IProjectStatus {
+  id: string;
+  label: string;
+  color: string;
+  isDone: boolean;
+}
+
+export interface ISprint {
+  id: string;
+  name: string;
+  startDate?: string;
+  endDate?: string;
+  active?: boolean;
+}
+
+export const DEFAULT_PROJECT_STATUSES: IProjectStatus[] = [
+  { id: "todo", label: "To Do", color: "gray", isDone: false },
+  { id: "in_progress", label: "In Progress", color: "blue", isDone: false },
+  { id: "blocked", label: "Blocked", color: "red", isDone: false },
+  { id: "done", label: "Done", color: "green", isDone: true },
+];
 
 export interface ITeamProject {
   id: string;
@@ -45,6 +67,10 @@ export interface ITeamProject {
   name: string;
   description: string | null;
   view: ProjectView;
+  statuses?: IProjectStatus[];
+  sprints?: ISprint[];
+  logoUrl?: string | null;
+  projectTags?: string[];
   createdById: string | null;
   taskCount?: number;
   doneTaskCount?: number;

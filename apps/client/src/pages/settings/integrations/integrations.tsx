@@ -238,6 +238,13 @@ export default function IntegrationsSettings() {
 
         {!isLoading && (
           <Stack gap="md">
+            <Switch
+              label={t("Enable calls for this workspace")}
+              description={t("Allow members to start voice and video calls in channels.")}
+              checked={enabled}
+              onChange={(e) => setEnabled(e.currentTarget.checked)}
+            />
+
             <Select
               label={t("Provider")}
               value={provider}
@@ -256,13 +263,16 @@ export default function IntegrationsSettings() {
                 <TextInput
                   label={t("LiveKit URL")}
                   placeholder="wss://your-livekit-host"
+                  description={t("WebSocket URL of your LiveKit server")}
                   value={livekitUrl}
                   onChange={(e) => setLivekitUrl(e.currentTarget.value)}
                 />
                 <PasswordInput
                   label={t("API key")}
                   description={
-                    hasSecret("livekitApiKey") ? t("A key is saved. Enter a new value only to replace it.") : undefined
+                    hasSecret("livekitApiKey")
+                      ? t("A key is already saved — leave blank to keep it.")
+                      : t("Found in your LiveKit dashboard under API Keys")
                   }
                   placeholder={
                     hasSecret("livekitApiKey") ? SECRET_PLACEHOLDER : ""
@@ -273,7 +283,9 @@ export default function IntegrationsSettings() {
                 <PasswordInput
                   label={t("API secret")}
                   description={
-                    hasSecret("livekitApiSecret") ? t("A secret is saved. Enter a new value only to replace it.") : undefined
+                    hasSecret("livekitApiSecret")
+                      ? t("A secret is already saved — leave blank to keep it.")
+                      : t("Found in your LiveKit dashboard under API Keys")
                   }
                   placeholder={
                     hasSecret("livekitApiSecret") ? SECRET_PLACEHOLDER : ""
@@ -308,19 +320,13 @@ export default function IntegrationsSettings() {
               </>
             )}
 
-            <Switch
-              label={t("Enable calls for this workspace")}
-              checked={enabled}
-              onChange={(e) => setEnabled(e.currentTarget.checked)}
-            />
-
             <Alert
               icon={<IconInfoCircle size={16} />}
               color="blue"
               variant="light"
             >
               {t(
-                "Save your credentials first, then use Test connection to verify them.",
+                "Enable the toggle, enter your credentials, then Save. Use Test connection to verify the server is reachable.",
               )}
             </Alert>
 
@@ -335,6 +341,7 @@ export default function IntegrationsSettings() {
                 variant="default"
                 onClick={handleTest}
                 loading={testing}
+                disabled={!settings?.effective?.configured}
               >
                 {t("Test connection")}
               </Button>

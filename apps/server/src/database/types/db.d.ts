@@ -792,6 +792,10 @@ export interface TeamProjects {
   name: string;
   description: string | null;
   view: Generated<string>;
+  statuses: Generated<Json>;
+  sprints: Generated<Json>;
+  logoUrl: string | null;
+  projectTags: Generated<Json>;
   createdById: string | null;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;

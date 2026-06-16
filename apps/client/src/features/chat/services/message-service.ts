@@ -72,5 +72,5 @@ export async function uploadChatAttachment(
       },
     },
   );
-  return req.data;
+  return req as unknown as IUploadedAttachment;
 }

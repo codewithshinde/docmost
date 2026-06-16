@@ -72,6 +72,10 @@ export class ProjectService {
       ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.description !== undefined && { description: dto.description }),
       ...(dto.view !== undefined && { view: dto.view }),
+      ...(dto.logoUrl !== undefined && { logoUrl: dto.logoUrl }),
+      ...(dto.statuses !== undefined && { statuses: dto.statuses as any }),
+      ...(dto.sprints !== undefined && { sprints: dto.sprints as any }),
+      ...(dto.projectTags !== undefined && { projectTags: dto.projectTags as any }),
       teamId: project.teamId,
       workspaceId: workspace.id,
     });
