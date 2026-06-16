@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { ExpressionBuilder, sql } from 'kysely';
-import { jsonObjectFrom } from 'kysely/helpers/postgres';
+import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import { KyselyDB } from '@docmost/db/types/kysely.types';
 import {
   InsertableTeamProject,
@@ -138,6 +138,27 @@ export class TeamProjectRepo {
             ])
             .whereRef('users.id', '=', 'teamProjectTasks.assigneeId'),
         ).as('assignee'),
+        jsonArrayFrom(
+          eb
+            .selectFrom('teamProjectTaskAttachments')
+            .innerJoin(
+              'attachments',
+              'attachments.id',
+              'teamProjectTaskAttachments.attachmentId',
+            )
+            .select([
+              'attachments.id',
+              'attachments.fileName',
+              'attachments.fileSize',
+              'attachments.mimeType',
+              'attachments.type',
+            ])
+            .whereRef(
+              'teamProjectTaskAttachments.taskId',
+              '=',
+              'teamProjectTasks.id',
+            ),
+        ).as('attachments'),
       ])
       .where('teamProjectTasks.projectId', '=', projectId)
       .where('teamProjectTasks.workspaceId', '=', workspaceId)

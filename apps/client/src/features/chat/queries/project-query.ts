@@ -11,12 +11,14 @@ import {
   createProjectTask,
   deleteProject,
   deleteProjectTask,
+  deleteTaskAttachment,
   getProjectTasks,
   getProjectTaskComments,
   getTeamProjects,
   getUserProjects,
   updateProject,
   updateProjectTask,
+  uploadTaskAttachment,
 } from "../services/project-service";
 import {
   ITeamProject,
@@ -246,6 +248,43 @@ export function useDeleteProjectTaskMutation() {
         queryKey: [...PROJECTS_KEY, "team", variables.teamId],
       });
       queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, "me"] });
+    },
+    onError: showError,
+  });
+}
+
+export function useUploadTaskAttachmentMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    { id: string; fileName: string; fileSize: number; mimeType: string },
+    Error,
+    { taskId: string; projectId: string; file: File }
+  >({
+    mutationFn: ({ taskId, file }) => uploadTaskAttachment(file, taskId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...PROJECTS_KEY, variables.projectId, "tasks"],
+      });
+    },
+    onError: showError,
+  });
+}
+
+export function useDeleteTaskAttachmentMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    { taskId: string; projectId: string; attachmentId: string }
+  >({
+    mutationFn: ({ taskId, attachmentId }) =>
+      deleteTaskAttachment(taskId, attachmentId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [...PROJECTS_KEY, variables.projectId, "tasks"],
+      });
     },
     onError: showError,
   });

@@ -20,6 +20,14 @@ export class TeamProjectTaskIdDto {
   taskId: string;
 }
 
+export class DeleteTaskAttachmentDto {
+  @IsUUID()
+  taskId: string;
+
+  @IsUUID()
+  attachmentId: string;
+}
+
 export class CreateTeamProjectDto {
   @IsUUID()
   teamId: string;

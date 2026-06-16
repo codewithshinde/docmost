@@ -55,6 +55,14 @@ export interface ITeamProject {
   updatedAt: string;
 }
 
+export interface ITaskAttachment {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  type: string;
+}
+
 export interface ITeamProjectTask {
   id: string;
   workspaceId: string;
@@ -76,6 +84,7 @@ export interface ITeamProjectTask {
   createdById: string | null;
   createdAt: string;
   updatedAt: string;
+  attachments?: ITaskAttachment[] | null;
 }
 
 export interface ITeamProjectTaskComment {

@@ -112,3 +112,23 @@ export async function createProjectTaskComment(data: {
   );
   return req.data;
 }
+
+export async function uploadTaskAttachment(
+  file: File,
+  taskId: string,
+): Promise<{ id: string; fileName: string; fileSize: number; mimeType: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("taskId", taskId);
+  const req = await api.post("/attachments/task-upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return req.data;
+}
+
+export async function deleteTaskAttachment(
+  taskId: string,
+  attachmentId: string,
+): Promise<void> {
+  await api.post("/projects/tasks/attachments/delete", { taskId, attachmentId });
+}

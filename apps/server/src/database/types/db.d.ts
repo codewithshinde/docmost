@@ -834,6 +834,13 @@ export interface TeamProjectTaskComments {
   deletedAt: Timestamp | null;
 }
 
+export interface TeamProjectTaskAttachments {
+  id: Generated<string>;
+  taskId: string;
+  attachmentId: string;
+  createdAt: Generated<Timestamp>;
+}
+
 export interface TeamGroups {
   id: Generated<string>;
   workspaceId: string;
@@ -906,6 +913,7 @@ export interface DB {
   teamGroups: TeamGroups;
   teamMembers: TeamMembers;
   teamProjects: TeamProjects;
+  teamProjectTaskAttachments: TeamProjectTaskAttachments;
   teamProjectTaskComments: TeamProjectTaskComments;
   teamProjectTasks: TeamProjectTasks;
   templates: Templates;

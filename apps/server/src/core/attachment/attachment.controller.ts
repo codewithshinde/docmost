@@ -62,6 +62,10 @@ import {
 } from '../../integrations/audit/audit.service';
 import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
 import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment.repo';
+import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
+import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
+import { TaskAttachmentRepo } from '@docmost/db/repos/chat/task-attachment.repo';
+import { TeamProjectRepo } from '@docmost/db/repos/chat/team-project.repo';
 
 @Controller()
 export class AttachmentController {
@@ -80,6 +84,10 @@ export class AttachmentController {
     @Inject(AUDIT_SERVICE) private readonly auditService: IAuditService,
     private readonly channelMemberRepo: ChannelMemberRepo,
     private readonly messageAttachmentRepo: MessageAttachmentRepo,
+    private readonly channelRepo: ChannelRepo,
+    private readonly teamMemberRepo: TeamMemberRepo,
+    private readonly taskAttachmentRepo: TaskAttachmentRepo,
+    private readonly teamProjectRepo: TeamProjectRepo,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -202,12 +210,29 @@ export class AttachmentController {
       throw new BadRequestException('A valid channelId is required');
     }
 
-    const channelMember = await this.channelMemberRepo.getChannelMember(
+    let channelMember = await this.channelMemberRepo.getChannelMember(
       channelId,
       user.id,
     );
     if (!channelMember) {
-      throw new ForbiddenException('You do not have access to this channel');
+      const channel = await this.channelRepo.findById(channelId, workspace.id);
+      if (channel?.type === 'public' && channel.teamId) {
+        const teamMember = await this.teamMemberRepo.getTeamMember(
+          channel.teamId,
+          user.id,
+        );
+        if (teamMember) {
+          await this.channelMemberRepo.ensureChannelMember({
+            channelId,
+            userId: user.id,
+            role: 'member',
+          });
+          channelMember = { channelId, userId: user.id } as any;
+        }
+      }
+      if (!channelMember) {
+        throw new ForbiddenException('You do not have access to this channel');
+      }
     }
 
     try {
@@ -215,6 +240,78 @@ export class AttachmentController {
         filePromise: file,
         userId: user.id,
         workspaceId: workspace.id,
+      });
+
+      return res.send(fileResponse);
+    } catch (err: any) {
+      if (err?.statusCode === 413) {
+        const errMessage = `File too large. Exceeds the ${this.environmentService.getFileUploadSizeLimit()} limit`;
+        this.logger.error(errMessage);
+        throw new BadRequestException(errMessage);
+      }
+      this.logger.error(err);
+      throw new BadRequestException('Error processing file upload.');
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('attachments/task-upload')
+  @UseInterceptors(FileInterceptor)
+  async uploadTaskAttachment(
+    @Req() req: any,
+    @Res() res: FastifyReply,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    const maxFileSize = bytes(this.environmentService.getFileUploadSizeLimit());
+
+    let file = null;
+    try {
+      file = await req.file({
+        limits: { fileSize: maxFileSize, fields: 3, files: 1 },
+      });
+    } catch (err: any) {
+      this.logger.error(err.message);
+      if (err?.statusCode === 413) {
+        throw new BadRequestException(
+          `File too large. Exceeds the ${this.environmentService.getFileUploadSizeLimit()} limit`,
+        );
+      }
+    }
+
+    if (!file) {
+      throw new BadRequestException('Failed to upload file');
+    }
+
+    const taskId = file.fields?.taskId?.value;
+    if (!taskId || !isValidUUID(taskId)) {
+      throw new BadRequestException('A valid taskId is required');
+    }
+
+    const task = await this.teamProjectRepo.findTaskById(taskId, workspace.id);
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    const teamMember = await this.teamMemberRepo.getTeamMember(
+      task.teamId,
+      user.id,
+    );
+    if (!teamMember) {
+      throw new ForbiddenException('You do not have access to this task');
+    }
+
+    try {
+      const fileResponse = await this.attachmentService.uploadChatAttachment({
+        filePromise: file,
+        userId: user.id,
+        workspaceId: workspace.id,
+      });
+
+      await this.taskAttachmentRepo.insertTaskAttachment({
+        taskId,
+        attachmentId: fileResponse.id,
       });
 
       return res.send(fileResponse);
@@ -256,12 +353,32 @@ export class AttachmentController {
         throw new NotFoundException();
       }
 
-      const channelMember = await this.channelMemberRepo.getChannelMember(
+      let channelMember = await this.channelMemberRepo.getChannelMember(
         messageAttachment.channelId,
         user.id,
       );
       if (!channelMember) {
-        throw new NotFoundException();
+        const channel = await this.channelRepo.findById(
+          messageAttachment.channelId,
+          workspace.id,
+        );
+        if (channel?.type === 'public' && channel.teamId) {
+          const teamMember = await this.teamMemberRepo.getTeamMember(
+            channel.teamId,
+            user.id,
+          );
+          if (teamMember) {
+            await this.channelMemberRepo.ensureChannelMember({
+              channelId: messageAttachment.channelId,
+              userId: user.id,
+              role: 'member',
+            });
+            channelMember = { channelId: messageAttachment.channelId, userId: user.id } as any;
+          }
+        }
+        if (!channelMember) {
+          throw new NotFoundException();
+        }
       }
     } else if (attachment.aiChatId) {
       // Chat-owned attachment: only the user who uploaded (and therefore

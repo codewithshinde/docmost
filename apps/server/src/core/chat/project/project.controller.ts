@@ -15,6 +15,7 @@ import {
   CreateTeamProjectDto,
   CreateTeamProjectTaskCommentDto,
   CreateTeamProjectTaskDto,
+  DeleteTaskAttachmentDto,
   TeamProjectIdDto,
   TeamProjectTaskIdDto,
   UpdateTeamProjectDto,
@@ -136,5 +137,16 @@ export class ProjectController {
     @AuthWorkspace() workspace: Workspace,
   ) {
     return this.projectService.createTaskComment(dto, user, workspace);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('tasks/attachments/delete')
+  async deleteTaskAttachment(
+    @Body() dto: DeleteTaskAttachmentDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    await this.projectService.deleteTaskAttachment(dto, user, workspace);
+    return { success: true };
   }
 }

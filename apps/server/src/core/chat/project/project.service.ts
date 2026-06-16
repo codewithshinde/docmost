@@ -16,9 +16,11 @@ import {
   CreateTeamProjectDto,
   CreateTeamProjectTaskCommentDto,
   CreateTeamProjectTaskDto,
+  DeleteTaskAttachmentDto,
   UpdateTeamProjectDto,
   UpdateTeamProjectTaskDto,
 } from './dto/project.dto';
+import { TaskAttachmentRepo } from '@docmost/db/repos/chat/task-attachment.repo';
 
 @Injectable()
 export class ProjectService {
@@ -26,6 +28,7 @@ export class ProjectService {
     private readonly projectRepo: TeamProjectRepo,
     private readonly teamMemberRepo: TeamMemberRepo,
     private readonly userRepo: UserRepo,
+    private readonly taskAttachmentRepo: TaskAttachmentRepo,
   ) {}
 
   async getTeamProjects(teamId: string, user: User, workspace: Workspace) {
@@ -176,6 +179,15 @@ export class ProjectService {
       userId: user.id,
       content: dto.content,
     });
+  }
+
+  async deleteTaskAttachment(
+    dto: DeleteTaskAttachmentDto,
+    user: User,
+    workspace: Workspace,
+  ): Promise<void> {
+    await this.getTaskForMember(dto.taskId, user, workspace);
+    await this.taskAttachmentRepo.deleteTaskAttachment(dto.taskId, dto.attachmentId);
   }
 
   private async getProjectForMember(

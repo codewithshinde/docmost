@@ -41,6 +41,7 @@ import {
   TeamGroups,
   TeamMembers,
   TeamProjects,
+  TeamProjectTaskAttachments,
   TeamProjectTaskComments,
   TeamProjectTasks,
   Channels,
@@ -282,6 +283,10 @@ export type UpdatableTeamProject = Updateable<Omit<TeamProjects, 'id'>>;
 export type TeamProjectTask = Selectable<TeamProjectTasks>;
 export type InsertableTeamProjectTask = Insertable<TeamProjectTasks>;
 export type UpdatableTeamProjectTask = Updateable<Omit<TeamProjectTasks, 'id'>>;
+export type TeamProjectTaskAttachment = Selectable<TeamProjectTaskAttachments>;
+export type InsertableTeamProjectTaskAttachment =
+  Insertable<TeamProjectTaskAttachments>;
+
 export type TeamProjectTaskComment = Selectable<TeamProjectTaskComments>;
 export type InsertableTeamProjectTaskComment =
   Insertable<TeamProjectTaskComments>;

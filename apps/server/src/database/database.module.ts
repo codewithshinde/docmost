@@ -52,6 +52,7 @@ import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.
 import { CalendarEventRepo } from '@docmost/db/repos/calendar/calendar-event.repo';
 import { CalendarAttendeeRepo } from '@docmost/db/repos/calendar/calendar-attendee.repo';
 import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
+import { TaskAttachmentRepo } from '@docmost/db/repos/chat/task-attachment.repo';
 
 @Global()
 @Module({
@@ -135,6 +136,7 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     CalendarEventRepo,
     CalendarAttendeeRepo,
     MailAccountRepo,
+    TaskAttachmentRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -180,6 +182,7 @@ import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.rep
     CalendarEventRepo,
     CalendarAttendeeRepo,
     MailAccountRepo,
+    TaskAttachmentRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {
