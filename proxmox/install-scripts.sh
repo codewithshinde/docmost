@@ -64,6 +64,11 @@ pct exec $CTID -- bash -c "
     git clone https://github.com/codewithshinde/docmost.git /opt/docmost
     cd /opt/docmost
 
+    # Create data directory for local storage and set wide permissions
+    echo 'Setting up local storage directory...'
+    mkdir -p /opt/docmost/data/storage
+    chmod -R 777 /opt/docmost/data
+
     # Generate the .env configuration file
     echo 'Setting up environment...'
     cat <<EOF > .env
@@ -71,12 +76,19 @@ DATABASE_URL=postgresql://docmost:docmost_strong_password@127.0.0.1:5432/docmost
 REDIS_URL=redis://127.0.0.1:6379
 PORT=3000
 APP_SECRET=\$(openssl rand -hex 32)
+STORAGE_DRIVER=local
+LOCAL_STORAGE_DIR=/opt/docmost/data/storage
 EOF
 
     # Build the application
     echo 'Building application (this may take a few minutes)...'
     pnpm install
     pnpm build
+
+    # Create a dedicated user and lock down permissions
+    echo 'Applying user permissions...'
+    useradd -r -s /bin/false docmostuser || true
+    chown -R docmostuser:docmostuser /opt/docmost
 
     # Create a Systemd service to keep it running
     echo 'Creating background service...'
@@ -87,7 +99,7 @@ After=network.target postgresql.service redis-server.service
 
 [Service]
 Type=simple
-User=root
+User=docmostuser
 WorkingDirectory=/opt/docmost
 EnvironmentFile=/opt/docmost/.env
 ExecStart=/usr/bin/pnpm start
