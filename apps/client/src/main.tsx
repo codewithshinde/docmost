@@ -34,7 +34,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-if (isCloud() && isPostHogEnabled) {
+if (isCloud() && isPostHogEnabled()) {
   posthog.init(getPostHogKey(), {
     api_host: getPostHogHost(),
     defaults: "2025-05-24",

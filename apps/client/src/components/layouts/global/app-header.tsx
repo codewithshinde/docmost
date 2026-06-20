@@ -53,6 +53,8 @@ export function AppHeader() {
   const aiChatEnabled = workspace?.settings?.ai?.chat === true;
 
   const isPageRoute = location.pathname.includes("/p/");
+  const showSearch =
+    location.pathname.startsWith("/spaces") || location.pathname.includes("/p/");
 
   const items = links.map((link) => (
     <Link key={link.label} to={link.link} className={classes.link}>
@@ -84,11 +86,11 @@ export function AppHeader() {
             />
           </Tooltip>
 
-          <Link to="/home" className={classes.brand} aria-label="Docmost">
+          <Link to="/home" className={classes.brand} aria-label="Likh">
             <Box hiddenFrom="sm" className={classes.brandIcon}>
               <img
                 src="/icons/favicon-32x32.png"
-                alt="Docmost"
+                alt="Likh"
                 width={22}
                 height={22}
               />
@@ -99,7 +101,7 @@ export function AppHeader() {
               style={{ userSelect: "none" }}
               visibleFrom="sm"
             >
-              Docmost
+              Likh
             </Text>
           </Link>
 
@@ -108,14 +110,16 @@ export function AppHeader() {
           </Group>
         </Group>
 
-        <div>
-          <Group visibleFrom="sm">
-            <SearchControl onClick={searchSpotlight.open} />
-          </Group>
-          <Group hiddenFrom="sm">
-            <SearchMobileControl onSearch={searchSpotlight.open} />
-          </Group>
-        </div>
+        {showSearch && (
+          <div>
+            <Group visibleFrom="sm">
+              <SearchControl onClick={searchSpotlight.open} />
+            </Group>
+            <Group hiddenFrom="sm">
+              <SearchMobileControl onSearch={searchSpotlight.open} />
+            </Group>
+          </div>
+        )}
 
         <Group px={"xl"} wrap="nowrap">
           {aiChatEnabled && (

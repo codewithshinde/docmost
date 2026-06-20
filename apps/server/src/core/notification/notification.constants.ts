@@ -10,6 +10,12 @@ export const NotificationType = {
   PAGE_VERIFIED: 'page.verified',
   PAGE_APPROVAL_REQUESTED: 'page.approval_requested',
   PAGE_APPROVAL_REJECTED: 'page.approval_rejected',
+  CHAT_MENTION: 'chat.mention',
+  CHAT_DIRECT_MESSAGE: 'chat.direct_message',
+  CALENDAR_EVENT_INVITE: 'calendar.event_invite',
+  CALENDAR_EVENT_UPDATED: 'calendar.event_updated',
+  CALENDAR_EVENT_CANCELLED: 'calendar.event_cancelled',
+  CALENDAR_EVENT_RESPONSE: 'calendar.event_response',
 } as const;
 
 export type NotificationType =
@@ -20,7 +26,10 @@ export type NotificationSettingKey =
   | 'page.userMention'
   | 'comment.userMention'
   | 'comment.created'
-  | 'comment.resolved';
+  | 'comment.resolved'
+  | 'chat.mention'
+  | 'chat.directMessage'
+  | 'calendar.eventInvite';
 
 export const NotificationTypeToSettingKey: Partial<
   Record<NotificationType, NotificationSettingKey>
@@ -30,6 +39,12 @@ export const NotificationTypeToSettingKey: Partial<
   [NotificationType.COMMENT_USER_MENTION]: 'comment.userMention',
   [NotificationType.COMMENT_CREATED]: 'comment.created',
   [NotificationType.COMMENT_RESOLVED]: 'comment.resolved',
+  [NotificationType.CHAT_MENTION]: 'chat.mention',
+  [NotificationType.CHAT_DIRECT_MESSAGE]: 'chat.directMessage',
+  [NotificationType.CALENDAR_EVENT_INVITE]: 'calendar.eventInvite',
+  [NotificationType.CALENDAR_EVENT_UPDATED]: 'calendar.eventInvite',
+  [NotificationType.CALENDAR_EVENT_CANCELLED]: 'calendar.eventInvite',
+  [NotificationType.CALENDAR_EVENT_RESPONSE]: 'calendar.eventInvite',
 };
 
 export type NotificationTab = 'direct' | 'updates' | 'all';
@@ -40,6 +55,12 @@ export const DIRECT_NOTIFICATION_TYPES: NotificationType[] = [
   NotificationType.COMMENT_RESOLVED,
   NotificationType.PAGE_USER_MENTION,
   NotificationType.PAGE_PERMISSION_GRANTED,
+  NotificationType.CHAT_MENTION,
+  NotificationType.CHAT_DIRECT_MESSAGE,
+  NotificationType.CALENDAR_EVENT_INVITE,
+  NotificationType.CALENDAR_EVENT_UPDATED,
+  NotificationType.CALENDAR_EVENT_CANCELLED,
+  NotificationType.CALENDAR_EVENT_RESPONSE,
 ];
 
 export const UPDATES_NOTIFICATION_TYPES: NotificationType[] = [

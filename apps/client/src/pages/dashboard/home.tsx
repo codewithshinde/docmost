@@ -1,6 +1,8 @@
 import { Container, Space } from "@mantine/core";
 import HomeTabs from "@/features/home/components/home-tabs";
 import HomeAiPrompt from "@/features/home/components/home-ai-prompt";
+import HomeAppTiles from "@/features/home/components/home-app-tiles";
+import DashboardCalendarBlock from "@/features/home/components/dashboard-calendar-block";
 import SpaceCarousel from "@/features/space/components/space-carousel.tsx";
 import { getAppName } from "@/lib/config.ts";
 import { Helmet } from "react-helmet-async";
@@ -16,8 +18,16 @@ export default function Home() {
           {t("Home")} - {getAppName()}
         </title>
       </Helmet>
-      <Container size={"900"} pt="xl">
+      <Container size={"900"} pt="md">
+        <HomeAppTiles />
+
+        <Space h="md" />
+
         <HomeAiPrompt />
+
+        <Space h="xl" />
+
+        <DashboardCalendarBlock />
 
         <Space h="xl" />
 

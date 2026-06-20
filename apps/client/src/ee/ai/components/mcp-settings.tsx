@@ -50,9 +50,7 @@ export default function McpSettings() {
     <Stack gap="lg">
       {!hasAccess && (
         <Alert icon={<IconInfoCircle />} title={upgradeLabel} color="blue">
-          {t(
-            "MCP is only available in the Docmost enterprise edition. Contact sales@docmost.com.",
-          )}
+          {t("MCP is not enabled for this workspace.")}
         </Alert>
       )}
 
@@ -66,7 +64,13 @@ export default function McpSettings() {
             <Trans
               i18nKey="View the <anchor>MCP documentation</anchor>."
               components={{
-                anchor: <Anchor href="https://docmost.com/docs/user-guide/mcp" target="_blank" size="sm" />,
+                anchor: (
+                  <Anchor
+                    href="https://docmost.com/docs/user-guide/mcp"
+                    target="_blank"
+                    size="sm"
+                  />
+                ),
               }}
             />
           </Text>

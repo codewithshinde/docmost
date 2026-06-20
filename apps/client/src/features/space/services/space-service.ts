@@ -17,6 +17,11 @@ export async function getSpaces(
   return req.data;
 }
 
+export async function getTeamSpaces(teamId: string): Promise<ISpace[]> {
+  const req = await api.post<ISpace[]>("/spaces/team", { teamId });
+  return req.data;
+}
+
 export async function getSpaceById(spaceId: string): Promise<ISpace> {
   const req = await api.post<ISpace>("/spaces/info", { spaceId });
   return req.data;

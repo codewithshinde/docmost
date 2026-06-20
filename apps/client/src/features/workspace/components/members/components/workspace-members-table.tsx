@@ -80,7 +80,7 @@ export default function WorkspaceMembersTable() {
                           {user.name}
                         </Text>
                         <Text fz="xs" c="dimmed">
-                          {user.email}
+                          {user.email || user.username}
                         </Text>
                       </div>
                     </Group>

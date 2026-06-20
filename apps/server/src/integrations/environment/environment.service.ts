@@ -151,7 +151,7 @@ export class EnvironmentService {
   }
 
   getMailFromName(): string {
-    return this.configService.get<string>('MAIL_FROM_NAME', 'Docmost');
+    return this.configService.get<string>('MAIL_FROM_NAME', 'Likh');
   }
 
   getMailBlockedRecipientDomains(): string[] {
@@ -197,6 +197,37 @@ export class EnvironmentService {
 
   getPostmarkToken(): string {
     return this.configService.get<string>('POSTMARK_TOKEN');
+  }
+
+  getSendGridApiKey(): string {
+    return this.configService.get<string>('SENDGRID_API_KEY');
+  }
+
+  getMailgunApiKey(): string {
+    return this.configService.get<string>('MAILGUN_API_KEY');
+  }
+
+  getMailgunDomain(): string {
+    return this.configService.get<string>('MAILGUN_DOMAIN');
+  }
+
+  getMailgunApiBaseUrl(): string {
+    return this.configService.get<string>(
+      'MAILGUN_API_BASE_URL',
+      'https://api.mailgun.net',
+    );
+  }
+
+  getSesAccessKeyId(): string {
+    return this.configService.get<string>('SES_ACCESS_KEY_ID');
+  }
+
+  getSesSecretAccessKey(): string {
+    return this.configService.get<string>('SES_SECRET_ACCESS_KEY');
+  }
+
+  getSesRegion(): string {
+    return this.configService.get<string>('SES_REGION');
   }
 
   getDrawioUrl(): string {
@@ -359,5 +390,44 @@ export class EnvironmentService {
       .split(',')
       .map((o) => o.trim())
       .filter(Boolean);
+  }
+
+  getVapidPublicKey(): string | undefined {
+    return this.configService.get<string>('VAPID_PUBLIC_KEY');
+  }
+
+  getVapidPrivateKey(): string | undefined {
+    return this.configService.get<string>('VAPID_PRIVATE_KEY');
+  }
+
+  getVapidSubject(): string {
+    return this.configService.get<string>(
+      'VAPID_SUBJECT',
+      `mailto:support@docmost.com`,
+    );
+  }
+
+  getLiveKitUrl(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_URL');
+  }
+
+  getLiveKitApiKey(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_API_KEY');
+  }
+
+  getLiveKitApiSecret(): string | undefined {
+    return this.configService.get<string>('LIVEKIT_API_SECRET');
+  }
+
+  getJitsiDomain(): string | undefined {
+    return this.configService.get<string>('JITSI_DOMAIN');
+  }
+
+  getJitsiAppId(): string | undefined {
+    return this.configService.get<string>('JITSI_APP_ID');
+  }
+
+  getJitsiAppSecret(): string | undefined {
+    return this.configService.get<string>('JITSI_APP_SECRET');
   }
 }

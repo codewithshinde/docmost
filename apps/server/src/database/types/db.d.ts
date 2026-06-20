@@ -327,6 +327,7 @@ export interface Spaces {
   name: string | null;
   settings: Json | null;
   slug: string;
+  teamId: string | null;
   updatedAt: Generated<Timestamp>;
   visibility: Generated<string>;
   workspaceId: string;
@@ -349,7 +350,7 @@ export interface Users {
   createdAt: Generated<Timestamp>;
   deactivatedAt: Timestamp | null;
   deletedAt: Timestamp | null;
-  email: string;
+  email: string | null;
   emailVerifiedAt: Timestamp | null;
   id: Generated<string>;
   invitedById: string | null;
@@ -359,11 +360,17 @@ export interface Users {
   hasGeneratedPassword: Generated<boolean | null>;
   name: string | null;
   password: string | null;
+  phone: string | null;
+  address: string | null;
+  emergencyContactName: string | null;
+  emergencyContactPhone: string | null;
+  designation: string | null;
   role: string | null;
   scimExternalId: string | null;
   settings: Json | null;
   timezone: string | null;
   updatedAt: Generated<Timestamp>;
+  username: string | null;
   workspaceId: string | null;
 }
 
@@ -590,6 +597,284 @@ export interface UserSessions {
   createdAt: Generated<Timestamp>;
 }
 
+export interface Teams {
+  id: Generated<string>;
+  workspaceId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  type: Generated<string>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamMembers {
+  id: Generated<string>;
+  teamId: string;
+  userId: string;
+  role: Generated<string>;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface Channels {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string | null;
+  name: string | null;
+  slug: string | null;
+  topic: string | null;
+  purpose: string | null;
+  type: string;
+  createdById: string | null;
+  lastPostAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface ChannelMembers {
+  id: Generated<string>;
+  channelId: string;
+  userId: string;
+  role: Generated<string>;
+  lastReadMessageId: string | null;
+  lastReadAt: Timestamp | null;
+  notifyLevel: Generated<string>;
+  muted: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Messages {
+  id: Generated<string>;
+  workspaceId: string;
+  channelId: string;
+  userId: string | null;
+  rootId: string | null;
+  content: string | null;
+  type: Generated<string>;
+  editedAt: Timestamp | null;
+  deletedAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface MessageReactions {
+  id: Generated<string>;
+  messageId: string;
+  userId: string;
+  emoji: string;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface MessageMentions {
+  id: Generated<string>;
+  messageId: string;
+  userId: string;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface MessageAttachments {
+  id: Generated<string>;
+  messageId: string;
+  attachmentId: string;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface Calls {
+  id: Generated<string>;
+  workspaceId: string;
+  channelId: string;
+  startedById: string | null;
+  status: Generated<string>;
+  provider: Generated<string>;
+  roomName: string;
+  startedAt: Generated<Timestamp>;
+  endedAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface CallParticipants {
+  id: Generated<string>;
+  callId: string;
+  userId: string;
+  joinedAt: Generated<Timestamp>;
+  leftAt: Timestamp | null;
+  screenSharing: Generated<boolean>;
+}
+
+export interface PushSubscriptions {
+  id: Generated<string>;
+  userId: string;
+  workspaceId: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  userAgent: string | null;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface IntegrationSettings {
+  id: Generated<string>;
+  workspaceId: string;
+  key: string;
+  enabled: Generated<boolean>;
+  config: Generated<Json>;
+  secrets: string | null;
+  updatedById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Webhooks {
+  id: Generated<string>;
+  workspaceId: string;
+  name: string;
+  url: string;
+  events: Generated<Json>;
+  secret: string;
+  enabled: Generated<boolean>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface WebhookDeliveries {
+  id: Generated<string>;
+  workspaceId: string;
+  webhookId: string;
+  event: string;
+  payload: Json;
+  status: Generated<string>;
+  statusCode: number | null;
+  responseBody: string | null;
+  error: string | null;
+  attempts: Generated<number>;
+  deliveredAt: Timestamp | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface CalendarEvents {
+  id: Generated<string>;
+  workspaceId: string;
+  organizerId: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  meetingUrl: string | null;
+  startsAt: Timestamp;
+  endsAt: Timestamp;
+  allDay: Generated<boolean>;
+  visibility: Generated<string>;
+  status: Generated<string>;
+  color: string | null;
+  externalUid: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface CalendarEventAttendees {
+  id: Generated<string>;
+  eventId: string;
+  userId: string;
+  role: Generated<string>;
+  responseStatus: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface TeamProjects {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  name: string;
+  description: string | null;
+  view: Generated<string>;
+  statuses: Generated<Json>;
+  sprints: Generated<Json>;
+  logoUrl: string | null;
+  projectTags: Generated<Json>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamProjectTasks {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  title: string;
+  description: string | null;
+  issueType: Generated<string>;
+  tags: Generated<Json>;
+  status: Generated<string>;
+  priority: Generated<string>;
+  assigneeId: string | null;
+  sprint: string | null;
+  storyPoints: number | null;
+  externalLinks: Generated<Json>;
+  dueAt: Timestamp | null;
+  sortOrder: Generated<number>;
+  parentTaskId: string | null;
+  linkedTaskIds: Generated<Json>;
+  createdById: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamProjectTaskComments {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  taskId: string;
+  userId: string | null;
+  content: string;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
+}
+
+export interface TeamProjectTaskAttachments {
+  id: Generated<string>;
+  taskId: string;
+  attachmentId: string;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface TeamGroups {
+  id: Generated<string>;
+  workspaceId: string;
+  teamId: string;
+  groupId: string;
+  role: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface UserMailAccounts {
+  id: Generated<string>;
+  userId: string;
+  emailAddress: string;
+  imapHost: string;
+  imapPort: Generated<number>;
+  imapSecure: Generated<boolean>;
+  smtpHost: string | null;
+  smtpPort: number | null;
+  smtpSecure: Generated<boolean>;
+  username: string | null;
+  secrets: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface DB {
   aiChats: AiChats;
   aiChatMessages: AiChatMessages;
@@ -600,12 +885,23 @@ export interface DB {
   authProviders: AuthProviders;
   backlinks: Backlinks;
   billing: Billing;
+  calendarEvents: CalendarEvents;
+  calendarEventAttendees: CalendarEventAttendees;
+  calls: Calls;
+  callParticipants: CallParticipants;
+  channels: Channels;
+  channelMembers: ChannelMembers;
   comments: Comments;
   favorites: Favorites;
   fileTasks: FileTasks;
   groups: Groups;
   groupUsers: GroupUsers;
+  integrationSettings: IntegrationSettings;
   labels: Labels;
+  messages: Messages;
+  messageAttachments: MessageAttachments;
+  messageMentions: MessageMentions;
+  messageReactions: MessageReactions;
   notifications: Notifications;
   pageAccess: PageAccess;
   pageTransclusionReferences: PageTransclusionReferences;
@@ -616,16 +912,27 @@ export interface DB {
   pageVerifications: PageVerifications;
   pageVerifiers: PageVerifiers;
   pages: Pages;
+  pushSubscriptions: PushSubscriptions;
   scimTokens: ScimTokens;
   shares: Shares;
   spaceMembers: SpaceMembers;
   spaces: Spaces;
+  teams: Teams;
+  teamGroups: TeamGroups;
+  teamMembers: TeamMembers;
+  teamProjects: TeamProjects;
+  teamProjectTaskAttachments: TeamProjectTaskAttachments;
+  teamProjectTaskComments: TeamProjectTaskComments;
+  teamProjectTasks: TeamProjectTasks;
   templates: Templates;
+  userMailAccounts: UserMailAccounts;
   userMfa: UserMfa;
   users: Users;
   userSessions: UserSessions;
   userTokens: UserTokens;
   watchers: Watchers;
+  webhooks: Webhooks;
+  webhookDeliveries: WebhookDeliveries;
   workspaceInvitations: WorkspaceInvitations;
   workspaces: Workspaces;
 }

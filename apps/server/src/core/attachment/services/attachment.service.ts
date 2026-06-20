@@ -140,6 +140,36 @@ export class AttachmentService {
     return attachment;
   }
 
+  async uploadChatAttachment(opts: {
+    filePromise: Promise<MultipartFile>;
+    userId: string;
+    workspaceId: string;
+  }): Promise<Attachment> {
+    const { filePromise, userId, workspaceId } = opts;
+    const preparedFile: PreparedFile = await prepareFile(filePromise, {
+      skipBuffer: true,
+    });
+
+    const attachmentId = uuid7();
+    const filePath = `${getAttachmentFolderPath(AttachmentType.Chat, workspaceId)}/${attachmentId}/${preparedFile.fileName}`;
+
+    const { stream, getBytesRead } = createByteCountingStream(
+      preparedFile.multiPartFile.file,
+    );
+
+    await this.uploadToDrive(filePath, stream);
+    preparedFile.fileSize = getBytesRead();
+
+    return this.saveAttachment({
+      attachmentId,
+      preparedFile,
+      filePath,
+      type: AttachmentType.Chat,
+      userId,
+      workspaceId,
+    });
+  }
+
   async uploadImage(
     filePromise: Promise<MultipartFile>,
     type:

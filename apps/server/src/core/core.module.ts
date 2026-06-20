@@ -23,7 +23,19 @@ import { NotificationModule } from './notification/notification.module';
 import { WatcherModule } from './watcher/watcher.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { SessionModule } from './session/session.module';
+import { SsoModule } from './sso/sso.module';
+import { TemplateModule } from './template/template.module';
+import { ApiKeyModule } from './api-key/api-key.module';
+import { AuditCoreModule } from './audit/audit.module';
 import { ClsMiddleware } from 'nestjs-cls';
+import { TeamModule } from './chat/team/team.module';
+import { ChannelModule } from './chat/channel/channel.module';
+import { MessageModule } from './chat/message/message.module';
+import { ReactionModule } from './chat/reaction/reaction.module';
+import { CallModule } from './chat/call/call.module';
+import { CalendarModule } from './calendar/calendar.module';
+import { MailAccountModule } from './mail-account/mail-account.module';
+import { ProjectModule } from './chat/project/project.module';
 
 @Module({
   imports: [
@@ -44,6 +56,18 @@ import { ClsMiddleware } from 'nestjs-cls';
     NotificationModule,
     WatcherModule,
     SessionModule,
+    SsoModule,
+    TemplateModule,
+    ApiKeyModule,
+    AuditCoreModule,
+    TeamModule,
+    ChannelModule,
+    MessageModule,
+    ReactionModule,
+    CallModule,
+    ProjectModule,
+    CalendarModule,
+    MailAccountModule,
   ],
 })
 export class CoreModule implements NestModule {

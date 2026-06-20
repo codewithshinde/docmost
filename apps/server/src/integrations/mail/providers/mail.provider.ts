@@ -1,17 +1,37 @@
 import { EnvironmentService } from '../../environment/environment.service';
-import { MailOption, PostmarkConfig, SMTPConfig } from '../interfaces';
-import { SmtpDriver, PostmarkDriver, LogDriver } from '../drivers';
+import {
+  MailgunConfig,
+  MailOption,
+  PostmarkConfig,
+  SendGridConfig,
+  SesConfig,
+  SMTPConfig,
+} from '../interfaces';
+import {
+  SmtpDriver,
+  PostmarkDriver,
+  SendGridDriver,
+  MailgunDriver,
+  SesDriver,
+  LogDriver,
+} from '../drivers';
 import { MailDriver } from '../drivers/interfaces/mail-driver.interface';
 import { MailConfig } from '../interfaces';
 import { MAIL_CONFIG_TOKEN, MAIL_DRIVER_TOKEN } from '../mail.constants';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-function createMailDriver(mail: MailConfig): MailDriver {
+export function createMailDriver(mail: MailConfig): MailDriver {
   switch (mail.driver) {
     case MailOption.SMTP:
       return new SmtpDriver(mail.config as SMTPConfig);
     case MailOption.Postmark:
       return new PostmarkDriver(mail.config as PostmarkConfig);
+    case MailOption.SendGrid:
+      return new SendGridDriver(mail.config as SendGridConfig);
+    case MailOption.Mailgun:
+      return new MailgunDriver(mail.config as MailgunConfig);
+    case MailOption.SES:
+      return new SesDriver(mail.config as SesConfig);
     case MailOption.Log:
       return new LogDriver();
     default:
@@ -55,6 +75,34 @@ export const mailDriverConfigProvider = {
           config: {
             postmarkToken: environmentService.getPostmarkToken(),
           } as PostmarkConfig,
+        };
+
+      case MailOption.SendGrid:
+        return {
+          driver,
+          config: {
+            apiKey: environmentService.getSendGridApiKey(),
+          } as SendGridConfig,
+        };
+
+      case MailOption.Mailgun:
+        return {
+          driver,
+          config: {
+            apiKey: environmentService.getMailgunApiKey(),
+            domain: environmentService.getMailgunDomain(),
+            apiBaseUrl: environmentService.getMailgunApiBaseUrl(),
+          } as MailgunConfig,
+        };
+
+      case MailOption.SES:
+        return {
+          driver,
+          config: {
+            accessKeyId: environmentService.getSesAccessKeyId(),
+            secretAccessKey: environmentService.getSesSecretAccessKey(),
+            region: environmentService.getSesRegion(),
+          } as SesConfig,
         };
 
       case MailOption.Log:

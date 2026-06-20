@@ -23,7 +23,6 @@ import CreateWorkspace from "@/ee/pages/create-workspace.tsx";
 import { isCloud } from "@/lib/config.ts";
 import { useTranslation } from "react-i18next";
 import Security from "@/ee/security/pages/security.tsx";
-import License from "@/ee/licence/pages/license.tsx";
 import { useRedirectToCloudSelect } from "@/ee/hooks/use-redirect-to-cloud-select.tsx";
 import SharedPage from "@/pages/share/shared-page.tsx";
 import PdfRenderPage from "@/ee/pdf-export/pdf-render-page.tsx";
@@ -38,6 +37,7 @@ import SpaceTrash from "@/pages/space/space-trash.tsx";
 import UserApiKeys from "@/ee/api-key/pages/user-api-keys";
 import WorkspaceApiKeys from "@/ee/api-key/pages/workspace-api-keys";
 import AiSettings from "@/ee/ai/pages/ai-settings.tsx";
+import IntegrationsSettings from "@/pages/settings/integrations/integrations.tsx";
 import AuditLogs from "@/ee/audit/pages/audit-logs.tsx";
 import VerifiedPages from "@/ee/page-verification/pages/verified-pages.tsx";
 import TemplateList from "@/ee/template/pages/template-list";
@@ -46,6 +46,14 @@ import FavoritesPage from "@/pages/favorites/favorites-page";
 import AiChat from "@/ee/ai-chat/pages/ai-chat.tsx";
 import VerifyEmail from "@/ee/pages/verify-email.tsx";
 import LabelPage from "@/pages/label/label-page";
+import ChatPage from "@/pages/chat/chat-page.tsx";
+import Inbox from "@/pages/mail/inbox.tsx";
+import EmailSettings from "@/pages/settings/account/email-settings.tsx";
+import CalendarPage from "@/pages/calendar/calendar.tsx";
+import TeamsPage from "@/pages/teams/teams";
+import TeamHubPage from "@/pages/teams/team-hub";
+import ProjectsPage from "@/pages/projects/projects";
+import AdminConsole from "@/pages/settings/admin-console";
 
 export default function App() {
   const { t } = useTranslation();
@@ -91,28 +99,31 @@ export default function App() {
           <Route path={"/home"} element={<Home />} />
           <Route path={"/ai"} element={<AiChat />} />
           <Route path={"/ai/chat/:chatId"} element={<AiChat />} />
+          <Route path={"/chat"} element={<ChatPage />} />
+          <Route path={"/chat/:channelId"} element={<ChatPage />} />
+          <Route path={"/teams"} element={<TeamsPage />} />
+          <Route path={"/teams/:teamId"} element={<TeamHubPage />} />
+          <Route path={"/projects"} element={<ProjectsPage />} />
+          <Route path={"/mail"} element={<Inbox />} />
+          <Route path={"/calendar"} element={<CalendarPage />} />
           <Route path={"/spaces"} element={<SpacesPage />} />
           <Route path={"/favorites"} element={<FavoritesPage />} />
           <Route path={"/labels/:labelName"} element={<LabelPage />} />
           <Route path={"/templates"} element={<TemplateList />} />
-          <Route
-            path={"/templates/:templateId"}
-            element={<TemplateEditor />}
-          />
+          <Route path={"/templates/:templateId"} element={<TemplateEditor />} />
           <Route path={"/s/:spaceSlug"} element={<SpaceHome />} />
           <Route path={"/s/:spaceSlug/trash"} element={<SpaceTrash />} />
-          <Route
-            path={"/s/:spaceSlug/p/:pageSlug"}
-            element={<Page />}
-          />
+          <Route path={"/s/:spaceSlug/p/:pageSlug"} element={<Page />} />
 
           <Route path={"/settings"}>
+            <Route index element={<AdminConsole />} />
             <Route path={"account/profile"} element={<AccountSettings />} />
             <Route
               path={"account/preferences"}
               element={<AccountPreferences />}
             />
             <Route path={"account/api-keys"} element={<UserApiKeys />} />
+            <Route path={"account/email"} element={<EmailSettings />} />
             <Route path={"workspace"} element={<WorkspaceSettings />} />
             <Route path={"members"} element={<WorkspaceMembers />} />
             <Route path={"api-keys"} element={<WorkspaceApiKeys />} />
@@ -123,9 +134,9 @@ export default function App() {
             <Route path={"security"} element={<Security />} />
             <Route path={"ai"} element={<AiSettings />} />
             <Route path={"ai/mcp"} element={<AiSettings />} />
+            <Route path={"integrations"} element={<IntegrationsSettings />} />
             <Route path={"audit"} element={<AuditLogs />} />
             <Route path={"verifications"} element={<VerifiedPages />} />
-            {!isCloud() && <Route path={"license"} element={<License />} />}
             {isCloud() && <Route path={"billing"} element={<Billing />} />}
           </Route>
         </Route>

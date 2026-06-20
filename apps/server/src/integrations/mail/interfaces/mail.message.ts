@@ -1,5 +1,7 @@
 export interface MailMessage {
   from?: string;
+  fromName?: string;
+  workspaceId?: string;
   to: string;
   subject: string;
   text?: string;

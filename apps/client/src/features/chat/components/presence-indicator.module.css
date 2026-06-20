@@ -1,0 +1,25 @@
+.dot {
+  display: inline-block;
+  border-radius: 50%;
+  background-color: var(--mantine-color-gray-5);
+  border: 2px solid var(--mantine-color-body);
+  box-sizing: content-box;
+}
+
+.dot[data-online] {
+  background-color: var(--mantine-color-green-6);
+}
+
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.dotAnchor {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  display: inline-flex;
+  line-height: 0;
+}

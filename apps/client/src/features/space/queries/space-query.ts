@@ -18,6 +18,7 @@ import {
   getSpaceById,
   getSpaceMembers,
   getSpaces,
+  getTeamSpaces,
   removeSpaceMember,
   createSpace,
   updateSpace,
@@ -39,6 +40,16 @@ export function useGetSpacesQuery(
     queryFn: () => getSpaces(params),
     placeholderData: keepPreviousData,
     refetchOnMount: true,
+  });
+}
+
+export function useTeamSpacesQuery(
+  teamId?: string,
+): UseQueryResult<ISpace[], Error> {
+  return useQuery({
+    queryKey: ["spaces", "team", teamId],
+    queryFn: () => getTeamSpaces(teamId),
+    enabled: !!teamId,
   });
 }
 
@@ -83,10 +94,15 @@ export function useCreateSpaceMutation() {
 
   return useMutation<ISpace, Error, Partial<ISpace>>({
     mutationFn: (data) => createSpace(data),
-    onSuccess: () => {
+    onSuccess: (_createdSpace, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["spaces"],
       });
+      if (variables.teamId) {
+        queryClient.invalidateQueries({
+          queryKey: ["spaces", "team", variables.teamId],
+        });
+      }
       notifications.show({ message: t("Space created successfully") });
     },
     onError: (error) => {
@@ -191,10 +207,7 @@ export function useDeleteSpaceMutation() {
   });
 }
 
-export function useSpaceMembersInfiniteQuery(
-  spaceId: string,
-  query?: string,
-) {
+export function useSpaceMembersInfiniteQuery(spaceId: string, query?: string) {
   return useInfiniteQuery({
     queryKey: ["spaceMembers", spaceId, query],
     queryFn: ({ pageParam }) =>

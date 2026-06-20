@@ -27,10 +27,32 @@ import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
 import { LabelRepo } from '@docmost/db/repos/label/label.repo';
 import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
 import { TemplateRepo } from '@docmost/db/repos/template/template.repo';
+import { AuthProviderRepo } from '@docmost/db/repos/auth-provider/auth-provider.repo';
+import { ApiKeyRepo } from '@docmost/db/repos/api-key/api-key.repo';
+import { AuditRepo } from '@docmost/db/repos/audit/audit.repo';
 import { PageListener } from '@docmost/db/listeners/page.listener';
 import { PostgresJSDialect } from 'kysely-postgres-js';
 import * as postgres from 'postgres';
 import { normalizePostgresUrl } from '../common/helpers';
+import { TeamRepo } from '@docmost/db/repos/chat/team.repo';
+import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
+import { TeamProjectRepo } from '@docmost/db/repos/chat/team-project.repo';
+import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
+import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
+import { MessageReactionRepo } from '@docmost/db/repos/chat/message-reaction.repo';
+import { MessageMentionRepo } from '@docmost/db/repos/chat/message-mention.repo';
+import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment.repo';
+import { CallRepo } from '@docmost/db/repos/chat/call.repo';
+import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
+import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
+import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integration-settings.repo';
+import { WebhookRepo } from '@docmost/db/repos/webhook/webhook.repo';
+import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.repo';
+import { CalendarEventRepo } from '@docmost/db/repos/calendar/calendar-event.repo';
+import { CalendarAttendeeRepo } from '@docmost/db/repos/calendar/calendar-attendee.repo';
+import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
+import { TaskAttachmentRepo } from '@docmost/db/repos/chat/task-attachment.repo';
 
 @Global()
 @Module({
@@ -92,7 +114,29 @@ import { normalizePostgresUrl } from '../common/helpers';
     WatcherRepo,
     LabelRepo,
     TemplateRepo,
+    AuthProviderRepo,
+    ApiKeyRepo,
+    AuditRepo,
     PageListener,
+    TeamRepo,
+    TeamMemberRepo,
+    TeamProjectRepo,
+    ChannelRepo,
+    ChannelMemberRepo,
+    MessageRepo,
+    MessageReactionRepo,
+    MessageMentionRepo,
+    MessageAttachmentRepo,
+    CallRepo,
+    CallParticipantRepo,
+    PushSubscriptionRepo,
+    IntegrationSettingsRepo,
+    WebhookRepo,
+    WebhookDeliveryRepo,
+    CalendarEventRepo,
+    CalendarAttendeeRepo,
+    MailAccountRepo,
+    TaskAttachmentRepo,
   ],
   exports: [
     WorkspaceRepo,
@@ -117,6 +161,28 @@ import { normalizePostgresUrl } from '../common/helpers';
     WatcherRepo,
     LabelRepo,
     TemplateRepo,
+    AuthProviderRepo,
+    ApiKeyRepo,
+    AuditRepo,
+    TeamRepo,
+    TeamMemberRepo,
+    TeamProjectRepo,
+    ChannelRepo,
+    ChannelMemberRepo,
+    MessageRepo,
+    MessageReactionRepo,
+    MessageMentionRepo,
+    MessageAttachmentRepo,
+    CallRepo,
+    CallParticipantRepo,
+    PushSubscriptionRepo,
+    IntegrationSettingsRepo,
+    WebhookRepo,
+    WebhookDeliveryRepo,
+    CalendarEventRepo,
+    CalendarAttendeeRepo,
+    MailAccountRepo,
+    TaskAttachmentRepo,
   ],
 })
 export class DatabaseModule implements OnApplicationBootstrap {
@@ -131,9 +197,7 @@ export class DatabaseModule implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     await this.establishConnection();
 
-    if (this.environmentService.getNodeEnv() === 'production') {
-      await this.migrationService.migrateToLatest();
-    }
+    await this.migrationService.migrateToLatest();
   }
 
   async establishConnection() {

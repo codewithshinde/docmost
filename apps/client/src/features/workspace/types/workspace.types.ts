@@ -32,12 +32,20 @@ export interface IWorkspace {
   isScimEnabled?: boolean;
 }
 
+export type IUpdateWorkspace = Partial<IWorkspace> & {
+  brandPrimaryColor?: string | null;
+  brandFaviconUrl?: string | null;
+  brandCustomCss?: string | null;
+  hidePoweredBy?: boolean;
+};
+
 export interface IWorkspaceSettings {
   ai?: IWorkspaceAiSettings;
   sharing?: IWorkspaceSharingSettings;
   api?: IWorkspaceApiSettings;
   templates?: IWorkspaceTemplateSettings;
   spaces?: IWorkspaceSpaceSettings;
+  branding?: IWorkspaceBrandingSettings;
 }
 
 export interface IWorkspaceApiSettings {
@@ -63,10 +71,26 @@ export interface IWorkspaceSpaceSettings {
   allowPersonal?: boolean;
 }
 
+export interface IWorkspaceBrandingSettings {
+  primaryColor?: string | null;
+  faviconUrl?: string | null;
+  customCss?: string | null;
+  hidePoweredBy?: boolean;
+}
+
 export interface ICreateInvite {
   role: string;
   emails: string[];
   groupIds: string[];
+}
+
+export interface ICreateMember {
+  name: string;
+  email?: string;
+  username?: string;
+  password: string;
+  role: string;
+  groupIds?: string[];
 }
 
 export interface IInvitation {
@@ -97,6 +121,7 @@ export interface IPublicWorkspace {
   hostname: string;
   enforceSso: boolean;
   authProviders: IAuthProvider[];
+  branding?: IWorkspaceBrandingSettings | null;
 }
 
 export interface IVersion {

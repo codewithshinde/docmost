@@ -1,0 +1,77 @@
+.list {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.virtualContent {
+  min-height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.virtualRow {
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.dateSeparator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: var(--mantine-spacing-md) var(--mantine-spacing-md) 4px;
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+}
+
+.dateSeparator::before,
+.dateSeparator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: light-dark(
+    var(--mantine-color-gray-3),
+    var(--mantine-color-dark-4)
+  );
+}
+
+.unreadDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: var(--mantine-spacing-sm) var(--mantine-spacing-md) 4px;
+  color: var(--mantine-color-red-6);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.unreadDivider::before,
+.unreadDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--mantine-color-red-4);
+}
+
+.loaderRow {
+  display: flex;
+  justify-content: center;
+  padding: var(--mantine-spacing-sm);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  color: var(--mantine-color-dimmed);
+  padding: var(--mantine-spacing-xl);
+  text-align: center;
+}

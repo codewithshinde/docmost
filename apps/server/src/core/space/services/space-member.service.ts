@@ -44,9 +44,15 @@ export class SpaceMemberService {
     workspaceId: string,
     trx?: KyselyTransaction,
   ): Promise<void> {
-    //if (existingSpaceUser) {
-    //           throw new BadRequestException('User already added to this space');
-    //         }
+    const existing = await this.spaceMemberRepo.getSpaceMemberByTypeId(
+      spaceId,
+      { userId },
+      trx,
+    );
+    if (existing) {
+      return;
+    }
+
     await this.spaceMemberRepo.insertSpaceMember(
       {
         userId: userId,
@@ -99,7 +105,6 @@ export class SpaceMemberService {
     authUser: User,
     workspaceId: string,
   ): Promise<void> {
-
     const space = await this.spaceRepo.findById(dto.spaceId, workspaceId);
     if (!space) {
       throw new NotFoundException('Space not found');

@@ -16,3 +16,17 @@ export const TREE_EVENTS = new Set([
   'deleteTreeNode',
   'refetchRootTreeNodeEvent',
 ]);
+
+export const CHAT_EVENT = 'chat';
+
+export function getTeamRoomName(teamId: string): string {
+  return `team-${teamId}`;
+}
+
+export function getChannelRoomName(channelId: string): string {
+  return `channel-${channelId}`;
+}
+
+export function getCallRoomName(callId: string): string {
+  return `call-${callId}`;
+}

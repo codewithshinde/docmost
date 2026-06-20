@@ -28,12 +28,14 @@ import {
 import { UpdateSpaceDto } from './dto/update-space.dto';
 import { findHighestUserSpaceRole } from '@docmost/db/repos/space/utils';
 import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
 import {
   WorkspaceCaslAction,
   WorkspaceCaslSubject,
 } from '../casl/interfaces/workspace-ability.type';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import { CreateSpaceDto } from './dto/create-space.dto';
+import { TeamIdDto } from '../chat/team/dto/team.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('spaces')
@@ -42,6 +44,7 @@ export class SpaceController {
     private readonly spaceService: SpaceService,
     private readonly spaceMemberService: SpaceMemberService,
     private readonly spaceMemberRepo: SpaceMemberRepo,
+    private readonly teamMemberRepo: TeamMemberRepo,
     private readonly spaceAbility: SpaceAbilityFactory,
     private readonly workspaceAbility: WorkspaceAbilityFactory,
   ) {}
@@ -88,6 +91,21 @@ export class SpaceController {
     }
 
     return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('team')
+  async getTeamSpaces(
+    @Body() dto: TeamIdDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    const member = await this.teamMemberRepo.getTeamMember(dto.teamId, user.id);
+    if (!member) {
+      throw new ForbiddenException();
+    }
+
+    return this.spaceService.getTeamSpaces(dto.teamId, workspace.id);
   }
 
   @HttpCode(HttpStatus.OK)

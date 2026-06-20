@@ -2,10 +2,11 @@ import {
   IsOptional,
   IsString,
   Matches,
+  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
-import {Transform, TransformFnParams} from "class-transformer";
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class CreateSpaceDto {
   @MinLength(2)
@@ -25,4 +26,8 @@ export class CreateSpaceDto {
       'Space slug must start with a letter or number and may contain hyphens and underscores',
   })
   slug: string;
+
+  @IsOptional()
+  @IsUUID()
+  teamId?: string;
 }

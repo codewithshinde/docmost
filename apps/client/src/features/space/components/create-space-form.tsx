@@ -1,4 +1,12 @@
-import { Group, Box, Button, TextInput, Stack, Textarea, Text } from "@mantine/core";
+import {
+  Group,
+  Box,
+  Button,
+  TextInput,
+  Stack,
+  Textarea,
+  Text,
+} from "@mantine/core";
 import React, { useEffect } from "react";
 import { useForm } from "@mantine/form";
 import { zod4Resolver } from "mantine-form-zod-resolver";
@@ -24,7 +32,7 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-export function CreateSpaceForm() {
+export function CreateSpaceForm({ teamId }: { teamId?: string }) {
   const { t } = useTranslation();
   const createSpaceMutation = useCreateSpaceMutation();
   const navigate = useNavigate();
@@ -63,6 +71,7 @@ export function CreateSpaceForm() {
       name: data.name,
       slug: data.slug,
       description: data.description,
+      teamId,
     };
 
     const createdSpace = await createSpaceMutation.mutateAsync(spaceData);

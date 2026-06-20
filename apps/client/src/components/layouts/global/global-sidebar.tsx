@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { ScrollArea, Text, Divider, Modal, UnstyledButton, Tooltip } from "@mantine/core";
+import {
+  ScrollArea,
+  Text,
+  Divider,
+  Modal,
+  UnstyledButton,
+  Tooltip,
+  Badge,
+} from "@mantine/core";
 import {
   IconHome,
   IconClock,
@@ -8,6 +16,8 @@ import {
   IconSettings,
   IconUserPlus,
   IconTemplate,
+  IconMessageCircle2,
+  IconCalendar,
 } from "@tabler/icons-react";
 import { Link, useLocation } from "react-router-dom";
 import classes from "./global-sidebar.module.css";
@@ -24,6 +34,7 @@ import { AvatarIconType } from "@/features/attachments/types/attachment.types";
 import { useHasFeature } from "@/ee/hooks/use-feature";
 import { Feature } from "@/ee/features";
 import { useUpgradeLabel } from "@/ee/hooks/use-upgrade-label";
+import { useUnreadCountsQuery } from "@/features/chat/queries/channel-query";
 
 export default function GlobalSidebar() {
   const { t } = useTranslation();
@@ -33,10 +44,26 @@ export default function GlobalSidebar() {
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
   const hasTemplates = useHasFeature(Feature.TEMPLATES);
   const upgradeLabel = useUpgradeLabel();
+  const { data: unreadCounts } = useUnreadCountsQuery();
+  const totalUnread = (unreadCounts ?? []).reduce(
+    (sum, entry) => sum + entry.unreadCount,
+    0,
+  );
   const mainNavItems = [
     { label: "Home", icon: IconHome, path: "/home" },
     { label: "Favorites", icon: IconStar, path: "/favorites" },
     { label: "Spaces", icon: IconLayoutGrid, path: "/spaces" },
+    {
+      label: "Chat",
+      icon: IconMessageCircle2,
+      path: "/chat",
+      badge: totalUnread > 0 ? totalUnread : undefined,
+    },
+    {
+      label: "Calendar",
+      icon: IconCalendar,
+      path: "/calendar",
+    },
     {
       label: "Templates",
       icon: IconTemplate,
@@ -44,12 +71,18 @@ export default function GlobalSidebar() {
       disabled: !hasTemplates,
     },
   ];
-  const { data: favoriteSpacesData, isPending: isFavoritesPending } = useFavoritesQuery("space");
-  const favoriteSpaces = favoriteSpacesData?.pages.flatMap((p) => p.items) ?? [];
+  const { data: favoriteSpacesData, isPending: isFavoritesPending } =
+    useFavoritesQuery("space");
+  const favoriteSpaces =
+    favoriteSpacesData?.pages.flatMap((p) => p.items) ?? [];
   const sortedFavoriteSpaces = [...favoriteSpaces]
     .filter((fav) => fav.space)
     .sort((a, b) => {
-      const cmp = (a.space!.name ?? "").localeCompare(b.space!.name ?? "", undefined, { sensitivity: "base" });
+      const cmp = (a.space!.name ?? "").localeCompare(
+        b.space!.name ?? "",
+        undefined,
+        { sensitivity: "base" },
+      );
       return cmp !== 0 ? cmp : a.id.localeCompare(b.id);
     });
   const [inviteOpened, { open: openInvite, close: closeInvite }] =
@@ -98,6 +131,11 @@ export default function GlobalSidebar() {
               >
                 <item.icon className={classes.linkIcon} stroke={2} />
                 <span>{t(item.label)}</span>
+                {!!item.badge && (
+                  <Badge size="xs" variant="filled" color="red" ml="auto">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </Badge>
+                )}
               </Link>
             ),
           )}
@@ -105,7 +143,9 @@ export default function GlobalSidebar() {
 
         <Divider my="xs" />
         <div className={classes.section}>
-          <Text component="h2" className={classes.sectionHeader}>{t("Favorite spaces")}</Text>
+          <Text component="h2" className={classes.sectionHeader}>
+            {t("Favorite spaces")}
+          </Text>
           {!isFavoritesPending && sortedFavoriteSpaces.length === 0 ? (
             <Text size="xs" c="dimmed" pl="xs" py={4}>
               {t("Favorite spaces appear here")}
@@ -146,14 +186,10 @@ export default function GlobalSidebar() {
             </>
           )}
         </div>
-
       </ScrollArea>
 
       <div className={classes.bottomSection}>
-        <UnstyledButton
-          className={classes.link}
-          onClick={openInvite}
-        >
+        <UnstyledButton className={classes.link} onClick={openInvite}>
           <IconUserPlus className={classes.linkIcon} stroke={2} />
           <span>{t("Invite People")}</span>
         </UnstyledButton>

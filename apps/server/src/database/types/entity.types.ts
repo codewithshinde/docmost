@@ -37,6 +37,28 @@ import {
   Watchers,
   Audit as _Audit,
   Templates,
+  Teams,
+  TeamGroups,
+  TeamMembers,
+  TeamProjects,
+  TeamProjectTaskAttachments,
+  TeamProjectTaskComments,
+  TeamProjectTasks,
+  Channels,
+  ChannelMembers,
+  Messages,
+  MessageReactions,
+  MessageMentions,
+  MessageAttachments,
+  Calls,
+  CallParticipants,
+  PushSubscriptions,
+  IntegrationSettings,
+  Webhooks,
+  WebhookDeliveries,
+  CalendarEvents,
+  CalendarEventAttendees,
+  UserMailAccounts,
 } from './db';
 import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
 
@@ -50,10 +72,7 @@ export type UpdatableAiChat = Updateable<Omit<AiChats, 'id'>>;
 // full-text search. It is omitted from the public type so it never leaks
 // into HTTP responses or the chat history fed to the language model.
 export type AiChatMessage = Omit<Selectable<AiChatMessages>, 'tsv'>;
-export type InsertableAiChatMessage = Omit<
-  Insertable<AiChatMessages>,
-  'tsv'
->;
+export type InsertableAiChatMessage = Omit<Insertable<AiChatMessages>, 'tsv'>;
 
 // Workspace
 export type Workspace = Selectable<Workspaces>;
@@ -152,11 +171,14 @@ export type UpdatableFavorite = Updateable<Omit<Favorites, 'id'>>;
 // Page Transclusion
 export type PageTransclusion = Selectable<PageTransclusions>;
 export type InsertablePageTransclusion = Insertable<PageTransclusions>;
-export type UpdatablePageTransclusion = Updateable<Omit<PageTransclusions, 'id'>>;
+export type UpdatablePageTransclusion = Updateable<
+  Omit<PageTransclusions, 'id'>
+>;
 
 // Page Transclusion Reference
 export type PageTransclusionReference = Selectable<PageTransclusionReferences>;
-export type InsertablePageTransclusionReference = Insertable<PageTransclusionReferences>;
+export type InsertablePageTransclusionReference =
+  Insertable<PageTransclusionReferences>;
 export type UpdatablePageTransclusionReference = Updateable<
   Omit<PageTransclusionReferences, 'id'>
 >;
@@ -218,7 +240,9 @@ export type UpdatablePagePermission = Updateable<Omit<_PagePermissions, 'id'>>;
 // Page Verification
 export type PageVerification = Selectable<_PageVerifications>;
 export type InsertablePageVerification = Insertable<_PageVerifications>;
-export type UpdatablePageVerification = Updateable<Omit<_PageVerifications, 'id'>>;
+export type UpdatablePageVerification = Updateable<
+  Omit<_PageVerifications, 'id'>
+>;
 
 // Page Verifier
 export type PageVerifier = Selectable<_PageVerifiers>;
@@ -238,3 +262,105 @@ export type UpdatableAudit = Updateable<Omit<_Audit, 'id'>>;
 export type Template = Selectable<Templates>;
 export type InsertableTemplate = Insertable<Templates>;
 export type UpdatableTemplate = Updateable<Omit<Templates, 'id'>>;
+
+// Team
+export type Team = Selectable<Teams>;
+export type InsertableTeam = Insertable<Teams>;
+export type UpdatableTeam = Updateable<Omit<Teams, 'id'>>;
+
+// Team Member
+export type TeamMember = Selectable<TeamMembers>;
+export type InsertableTeamMember = Insertable<TeamMembers>;
+export type UpdatableTeamMember = Updateable<Omit<TeamMembers, 'id'>>;
+
+export type TeamGroup = Selectable<TeamGroups>;
+
+// Team projects
+export type TeamProject = Selectable<TeamProjects>;
+export type InsertableTeamProject = Insertable<TeamProjects>;
+export type UpdatableTeamProject = Updateable<Omit<TeamProjects, 'id'>>;
+
+export type TeamProjectTask = Selectable<TeamProjectTasks>;
+export type InsertableTeamProjectTask = Insertable<TeamProjectTasks>;
+export type UpdatableTeamProjectTask = Updateable<Omit<TeamProjectTasks, 'id'>>;
+export type TeamProjectTaskAttachment = Selectable<TeamProjectTaskAttachments>;
+export type InsertableTeamProjectTaskAttachment =
+  Insertable<TeamProjectTaskAttachments>;
+
+export type TeamProjectTaskComment = Selectable<TeamProjectTaskComments>;
+export type InsertableTeamProjectTaskComment =
+  Insertable<TeamProjectTaskComments>;
+
+// Channel
+export type Channel = Selectable<Channels>;
+export type InsertableChannel = Insertable<Channels>;
+export type UpdatableChannel = Updateable<Omit<Channels, 'id'>>;
+
+// Channel Member
+export type ChannelMember = Selectable<ChannelMembers>;
+export type InsertableChannelMember = Insertable<ChannelMembers>;
+export type UpdatableChannelMember = Updateable<Omit<ChannelMembers, 'id'>>;
+
+// Message
+export type Message = Selectable<Messages>;
+export type InsertableMessage = Insertable<Messages>;
+export type UpdatableMessage = Updateable<Omit<Messages, 'id'>>;
+
+// Message Reaction
+export type MessageReaction = Selectable<MessageReactions>;
+export type InsertableMessageReaction = Insertable<MessageReactions>;
+
+// Message Mention
+export type MessageMention = Selectable<MessageMentions>;
+export type InsertableMessageMention = Insertable<MessageMentions>;
+
+// Message Attachment
+export type MessageAttachment = Selectable<MessageAttachments>;
+export type InsertableMessageAttachment = Insertable<MessageAttachments>;
+
+// Call
+export type Call = Selectable<Calls>;
+export type InsertableCall = Insertable<Calls>;
+export type UpdatableCall = Updateable<Omit<Calls, 'id'>>;
+
+// Call Participant
+export type CallParticipant = Selectable<CallParticipants>;
+export type InsertableCallParticipant = Insertable<CallParticipants>;
+export type UpdatableCallParticipant = Updateable<Omit<CallParticipants, 'id'>>;
+
+// Push Subscription
+export type PushSubscription = Selectable<PushSubscriptions>;
+export type InsertablePushSubscription = Insertable<PushSubscriptions>;
+
+// Integration Settings
+export type IntegrationSetting = Selectable<IntegrationSettings>;
+export type InsertableIntegrationSetting = Insertable<IntegrationSettings>;
+export type UpdatableIntegrationSetting = Updateable<
+  Omit<IntegrationSettings, 'id'>
+>;
+
+// Webhooks
+export type Webhook = Selectable<Webhooks>;
+export type InsertableWebhook = Insertable<Webhooks>;
+export type UpdatableWebhook = Updateable<Omit<Webhooks, 'id'>>;
+export type WebhookDelivery = Selectable<WebhookDeliveries>;
+export type InsertableWebhookDelivery = Insertable<WebhookDeliveries>;
+export type UpdatableWebhookDelivery = Updateable<
+  Omit<WebhookDeliveries, 'id'>
+>;
+
+// Calendar
+export type CalendarEvent = Selectable<CalendarEvents>;
+export type InsertableCalendarEvent = Insertable<CalendarEvents>;
+export type UpdatableCalendarEvent = Updateable<Omit<CalendarEvents, 'id'>>;
+export type CalendarEventAttendee = Selectable<CalendarEventAttendees>;
+export type InsertableCalendarEventAttendee =
+  Insertable<CalendarEventAttendees>;
+export type UpdatableCalendarEventAttendee = Updateable<
+  Omit<CalendarEventAttendees, 'id'>
+>;
+
+// User Mail Accounts
+export type UserMailAccount = Selectable<UserMailAccounts>;
+export type InsertableUserMailAccount = Insertable<UserMailAccounts>;
+export type UpdatableUserMailAccount = Updateable<Omit<UserMailAccounts, 'id'>>;

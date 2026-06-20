@@ -22,6 +22,7 @@ export class UserRepo {
   public baseFields: Array<keyof Users> = [
     'id',
     'email',
+    'username',
     'name',
     'emailVerifiedAt',
     'avatarUrl',
@@ -82,6 +83,28 @@ export class UserRepo {
       .executeTakeFirst();
   }
 
+  async findByUsername(
+    username: string,
+    workspaceId: string,
+    opts?: {
+      includePassword?: boolean;
+      includeUserMfa?: boolean;
+      includeScimExternalId?: boolean;
+      trx?: KyselyTransaction;
+    },
+  ): Promise<User> {
+    const db = dbOrTx(this.db, opts?.trx);
+    return db
+      .selectFrom('users')
+      .select(this.baseFields)
+      .$if(opts?.includePassword, (qb) => qb.select('password'))
+      .$if(opts?.includeUserMfa, (qb) => qb.select(this.withUserMfa))
+      .$if(opts?.includeScimExternalId, (qb) => qb.select('scimExternalId'))
+      .where(sql`LOWER(username)`, '=', sql`LOWER(${username})`)
+      .where('workspaceId', '=', workspaceId)
+      .executeTakeFirst();
+  }
+
   async updateUser(
     updatableUser: UpdatableUser,
     userId: string,
@@ -115,8 +138,11 @@ export class UserRepo {
   ): Promise<User> {
     const user: InsertableUser = {
       name:
-        insertableUser.name || insertableUser.email.split('@')[0].toLowerCase(),
-      email: insertableUser.email.toLowerCase(),
+        insertableUser.name ||
+        insertableUser.email?.split('@')[0].toLowerCase() ||
+        insertableUser.username,
+      email: insertableUser.email?.toLowerCase() ?? null,
+      username: insertableUser.username?.toLowerCase() ?? null,
       password: await hashPassword(insertableUser.password),
       locale: 'en-US',
       role: insertableUser?.role,
