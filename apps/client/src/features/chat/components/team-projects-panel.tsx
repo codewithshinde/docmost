@@ -2,12 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Anchor,
-  Avatar,
   Badge,
   Box,
   Button,
   Divider,
-  Drawer,
   Group,
   Loader,
   Menu,
@@ -15,6 +13,7 @@ import {
   MultiSelect,
   NumberInput,
   Paper,
+  Popover,
   Progress,
   ScrollArea,
   Select,
@@ -425,7 +424,7 @@ export function ProjectTasksView({
         overflow: "hidden",
       }}
     >
-      {/* Toolbar */}
+      {/* Toolbar — single compact row */}
       <Box
         px="md"
         py="xs"
@@ -435,7 +434,8 @@ export function ProjectTasksView({
           background: "var(--mantine-color-body)",
         }}
       >
-        <Group justify="space-between" wrap="nowrap" mb="xs">
+        <Group justify="space-between" wrap="nowrap" gap="xs">
+          {/* Left: create + filter */}
           <Group gap="xs" wrap="nowrap">
             <Button
               size="xs"
@@ -444,8 +444,105 @@ export function ProjectTasksView({
             >
               {t("Create issue")}
             </Button>
+
+            <Popover
+              position="bottom-start"
+              withinPortal
+              shadow="md"
+              withArrow
+            >
+              <Popover.Target>
+                <Button
+                  size="xs"
+                  variant={hasFilters ? "light" : "subtle"}
+                  color={hasFilters ? "blue" : "gray"}
+                  leftSection={<IconFilter size={12} />}
+                  rightSection={
+                    hasFilters ? (
+                      <Badge size="xs" circle variant="filled" color="blue">
+                        {[filterPriority, filterType, filterSprint, filterAssignee].filter(Boolean).length}
+                      </Badge>
+                    ) : null
+                  }
+                >
+                  {t("Filter")}
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Stack gap="xs" w={220}>
+                  <Select
+                    size="xs"
+                    label={t("Priority")}
+                    placeholder={t("Any")}
+                    clearable
+                    data={priorityOptions.map((o) => ({
+                      value: o.value,
+                      label: t(o.label),
+                    }))}
+                    value={filterPriority}
+                    onChange={setFilterPriority}
+                  />
+                  <Select
+                    size="xs"
+                    label={t("Type")}
+                    placeholder={t("Any")}
+                    clearable
+                    data={issueTypeOptions.map((o) => ({
+                      value: o.value,
+                      label: t(o.label),
+                    }))}
+                    value={filterType}
+                    onChange={setFilterType}
+                  />
+                  {sprintOptions.length > 0 && (
+                    <Select
+                      size="xs"
+                      label={t("Sprint")}
+                      placeholder={t("Any")}
+                      clearable
+                      data={sprintOptions}
+                      value={filterSprint}
+                      onChange={setFilterSprint}
+                    />
+                  )}
+                  {members && members.length > 0 && (
+                    <Select
+                      size="xs"
+                      label={t("Assignee")}
+                      placeholder={t("Anyone")}
+                      clearable
+                      data={memberOptions}
+                      value={filterAssignee}
+                      onChange={setFilterAssignee}
+                    />
+                  )}
+                  {hasFilters && (
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      color="gray"
+                      onClick={() => {
+                        setFilterPriority(null);
+                        setFilterType(null);
+                        setFilterSprint(null);
+                        setFilterAssignee(null);
+                      }}
+                    >
+                      {t("Clear filters")}
+                    </Button>
+                  )}
+                </Stack>
+              </Popover.Dropdown>
+            </Popover>
+
+            <Text size="xs" c="dimmed">
+              {filteredTasks.length}{" "}
+              {t("issue", { count: filteredTasks.length })}
+            </Text>
           </Group>
-          <Group gap="xs" wrap="nowrap">
+
+          {/* Right: view toggles */}
+          <Group gap={4} wrap="nowrap">
             {viewOptions.map((opt) => (
               <Tooltip key={opt.value} label={t(opt.label)} withArrow>
                 <ActionIcon
@@ -463,76 +560,6 @@ export function ProjectTasksView({
               </Tooltip>
             ))}
           </Group>
-        </Group>
-
-        {/* Filter bar */}
-        <Group gap="xs" wrap="wrap">
-          <Select
-            size="xs"
-            w={130}
-            placeholder={t("Priority")}
-            clearable
-            leftSection={<IconFilter size={12} />}
-            data={priorityOptions.map((o) => ({
-              value: o.value,
-              label: t(o.label),
-            }))}
-            value={filterPriority}
-            onChange={setFilterPriority}
-          />
-          <Select
-            size="xs"
-            w={120}
-            placeholder={t("Type")}
-            clearable
-            data={issueTypeOptions.map((o) => ({
-              value: o.value,
-              label: t(o.label),
-            }))}
-            value={filterType}
-            onChange={setFilterType}
-          />
-          {sprintOptions.length > 0 && (
-            <Select
-              size="xs"
-              w={150}
-              placeholder={t("Sprint")}
-              clearable
-              data={sprintOptions}
-              value={filterSprint}
-              onChange={setFilterSprint}
-            />
-          )}
-          {members && members.length > 0 && (
-            <Select
-              size="xs"
-              w={150}
-              placeholder={t("Assignee")}
-              clearable
-              data={memberOptions}
-              value={filterAssignee}
-              onChange={setFilterAssignee}
-            />
-          )}
-          {hasFilters && (
-            <Button
-              size="xs"
-              variant="subtle"
-              color="gray"
-              onClick={() => {
-                setFilterPriority(null);
-                setFilterType(null);
-                setFilterSprint(null);
-                setFilterAssignee(null);
-              }}
-            >
-              {t("Clear")}
-            </Button>
-          )}
-          <Text size="xs" c="dimmed" ml="auto">
-            {filteredTasks.length}{" "}
-            {t("issue", { count: filteredTasks.length })}
-          </Text>
         </Group>
       </Box>
 
@@ -570,17 +597,12 @@ export function ProjectTasksView({
         )}
       </Box>
 
-      {/* Task detail drawer */}
-      <Drawer
+      {/* Task detail modal */}
+      <Modal
         opened={!!selectedTask}
         onClose={() => setSelectedTaskId(null)}
-        position="right"
-        size={540}
-        withOverlay={false}
-        styles={{
-          inner: { pointerEvents: "none" },
-          content: { pointerEvents: "all" },
-        }}
+        size="xl"
+        padding="lg"
         title={
           selectedTask ? (
             <Group gap="xs">
@@ -596,13 +618,16 @@ export function ProjectTasksView({
                   return <Icon size={14} />;
                 })()}
               </ThemeIcon>
-              <Text size="sm" fw={500} c="dimmed">
-                {issueTypeConfig[selectedTask.issueType]?.label} ·{" "}
-                {project.name}
+              <Text size="sm" fw={600}>
+                {issueTypeConfig[selectedTask.issueType]?.label}
               </Text>
+              <Text size="sm" c="dimmed">· {project.name}</Text>
             </Group>
           ) : null
         }
+        styles={{
+          body: { padding: "0 24px 24px" },
+        }}
       >
         {selectedTask && (
           <TaskDetailPanel
@@ -614,14 +639,28 @@ export function ProjectTasksView({
             projectStatuses={projectStatuses}
             projectSprints={projectSprints}
             projectTags={projectTags}
+            allTasks={tasks}
             onUpdateTask={(data) => handleUpdateTask(selectedTask, data)}
             onDeleteTask={() => {
               handleDeleteTask(selectedTask);
               setSelectedTaskId(null);
             }}
+            onOpenTask={(taskId) => setSelectedTaskId(taskId)}
+            onCreateSubtask={async ({ title, parentTaskId }) => {
+              await createTaskMutation.mutateAsync({
+                teamId,
+                projectId: project.id,
+                title,
+                parentTaskId,
+                issueType: "task",
+                priority: "medium",
+                status: projectStatuses[0]?.id ?? "todo",
+                tags: [],
+              });
+            }}
           />
         )}
-      </Drawer>
+      </Modal>
 
       {/* Create task modal */}
       <CreateTaskModal
@@ -665,19 +704,20 @@ function KanbanBoard({
   const [dragOver, setDragOver] = useState<string | null>(null);
 
   return (
-    <Box
-      style={{
-        height: "100%",
-        overflowX: "auto",
-        overflowY: "hidden",
-        padding: "12px 16px",
+    <ScrollArea
+      style={{ height: "100%" }}
+      scrollbars="x"
+      offsetScrollbars
+      styles={{
+        viewport: { padding: "12px 16px" },
+        scrollbar: { zIndex: 10 },
       }}
     >
       <Group
         align="flex-start"
         wrap="nowrap"
         gap="md"
-        style={{ height: "100%", minWidth: projectStatuses.length * 280 }}
+        style={{ height: "calc(100% - 24px)", minWidth: projectStatuses.length * 280 }}
       >
         {projectStatuses.map((status) => {
           const colTasks = tasks.filter((t) => t.status === status.id);
@@ -770,7 +810,7 @@ function KanbanBoard({
           );
         })}
       </Group>
-    </Box>
+    </ScrollArea>
   );
 }
 
@@ -1151,8 +1191,11 @@ function TaskDetailPanel({
   projectStatuses,
   projectSprints,
   projectTags,
+  allTasks,
   onUpdateTask,
   onDeleteTask,
+  onOpenTask,
+  onCreateSubtask,
 }: {
   task: ITeamProjectTask;
   projectId: string;
@@ -1162,8 +1205,11 @@ function TaskDetailPanel({
   projectStatuses: IProjectStatus[];
   projectSprints: ISprint[];
   projectTags: string[];
+  allTasks: ITeamProjectTask[];
   onUpdateTask: (data: Partial<ITeamProjectTask>) => void;
   onDeleteTask: () => void;
+  onOpenTask: (taskId: string) => void;
+  onCreateSubtask: (data: { title: string; parentTaskId: string }) => void;
 }) {
   const { t } = useTranslation();
   const [editingTitle, setEditingTitle] = useState(false);
@@ -1244,7 +1290,7 @@ function TaskDetailPanel({
   ];
 
   return (
-    <ScrollArea h="calc(100vh - 80px)" pr="xs">
+    <ScrollArea mah="75vh" pr="xs">
       <Stack gap="md">
         {/* Created/Updated timestamps */}
         <Group gap="md" wrap="nowrap">
@@ -1502,6 +1548,25 @@ function TaskDetailPanel({
             </Stack>
           </Box>
         )}
+
+        {/* Sub-tasks */}
+        <SubtasksSection
+          task={task}
+          allTasks={allTasks}
+          projectId={projectId}
+          teamId={teamId}
+          projectStatuses={projectStatuses}
+          onOpenTask={onOpenTask}
+          onCreateSubtask={onCreateSubtask}
+        />
+
+        {/* Linked tickets */}
+        <LinkedTasksSection
+          task={task}
+          allTasks={allTasks}
+          onUpdateTask={onUpdateTask}
+          onOpenTask={onOpenTask}
+        />
 
         <Divider />
 
@@ -1927,6 +1992,238 @@ function CreateTaskModal({
         </Group>
       </Stack>
     </Modal>
+  );
+}
+
+// ─── Sub-tasks Section ────────────────────────────────────────────────────────
+
+function SubtasksSection({
+  task,
+  allTasks,
+  projectId,
+  teamId,
+  projectStatuses,
+  onOpenTask,
+  onCreateSubtask,
+}: {
+  task: ITeamProjectTask;
+  allTasks: ITeamProjectTask[];
+  projectId: string;
+  teamId: string;
+  projectStatuses: IProjectStatus[];
+  onOpenTask: (taskId: string) => void;
+  onCreateSubtask: (data: { title: string; parentTaskId: string }) => void;
+}) {
+  const { t } = useTranslation();
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [adding, setAdding] = useState(false);
+
+  const subtasks = allTasks.filter((t) => t.parentTaskId === task.id);
+
+  const handleAdd = () => {
+    const title = newSubtaskTitle.trim();
+    if (!title) return;
+    onCreateSubtask({ title, parentTaskId: task.id });
+    setNewSubtaskTitle("");
+    setAdding(false);
+  };
+
+  return (
+    <Box>
+      <Group justify="space-between" mb={6}>
+        <Text size="xs" c="dimmed" fw={500}>
+          <Group gap={4}>
+            <IconCheckbox size={12} />
+            {t("Sub-tasks")}
+            {subtasks.length > 0 && (
+              <Badge size="xs" variant="light">{subtasks.length}</Badge>
+            )}
+          </Group>
+        </Text>
+        <Button
+          size="compact-xs"
+          variant="subtle"
+          leftSection={<IconPlus size={12} />}
+          onClick={() => setAdding(true)}
+        >
+          {t("Add")}
+        </Button>
+      </Group>
+      <Stack gap={4}>
+        {subtasks.map((sub) => {
+          const statusCfg = getStatusCfg(sub.status, projectStatuses);
+          return (
+            <Paper
+              key={sub.id}
+              withBorder
+              radius="sm"
+              px="xs"
+              py={6}
+              onClick={() => onOpenTask(sub.id)}
+              style={{ cursor: "pointer" }}
+            >
+              <Group gap="xs" wrap="nowrap">
+                <Box
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: `var(--mantine-color-${statusCfg.color}-5)`,
+                    flexShrink: 0,
+                  }}
+                />
+                <Text size="xs" style={{ flex: 1 }} truncate>
+                  {sub.title}
+                </Text>
+                <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                  {statusCfg.label}
+                </Text>
+              </Group>
+            </Paper>
+          );
+        })}
+        {adding && (
+          <Group gap="xs" wrap="nowrap">
+            <TextInput
+              size="xs"
+              value={newSubtaskTitle}
+              onChange={(e) => setNewSubtaskTitle(e.currentTarget.value)}
+              placeholder={t("Sub-task title")}
+              autoFocus
+              style={{ flex: 1 }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAdd();
+                if (e.key === "Escape") { setAdding(false); setNewSubtaskTitle(""); }
+              }}
+            />
+            <Button size="xs" onClick={handleAdd} disabled={!newSubtaskTitle.trim()}>
+              {t("Add")}
+            </Button>
+            <ActionIcon size="xs" variant="subtle" onClick={() => { setAdding(false); setNewSubtaskTitle(""); }}>
+              <IconX size={12} />
+            </ActionIcon>
+          </Group>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
+// ─── Linked Tasks Section ─────────────────────────────────────────────────────
+
+function LinkedTasksSection({
+  task,
+  allTasks,
+  onUpdateTask,
+  onOpenTask,
+}: {
+  task: ITeamProjectTask;
+  allTasks: ITeamProjectTask[];
+  onUpdateTask: (data: Partial<ITeamProjectTask>) => void;
+  onOpenTask: (taskId: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [searchValue, setSearchValue] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const linkedIds: string[] = task.linkedTaskIds ?? [];
+  const linkedTasks = allTasks.filter(
+    (t) => linkedIds.includes(t.id) && t.id !== task.id,
+  );
+
+  const linkableOptions = allTasks.filter(
+    (t) => t.id !== task.id && !linkedIds.includes(t.id) && !t.parentTaskId,
+  );
+
+  const filtered = searchValue.trim()
+    ? linkableOptions.filter((t) =>
+        t.title.toLowerCase().includes(searchValue.toLowerCase()),
+      )
+    : linkableOptions.slice(0, 8);
+
+  const handleLink = (otherId: string) => {
+    onUpdateTask({ linkedTaskIds: [...linkedIds, otherId] });
+    setSearchValue("");
+    setMenuOpen(false);
+  };
+
+  const handleUnlink = (otherId: string) => {
+    onUpdateTask({ linkedTaskIds: linkedIds.filter((id) => id !== otherId) });
+  };
+
+  return (
+    <Box>
+      <Group justify="space-between" mb={6}>
+        <Text size="xs" c="dimmed" fw={500}>
+          <Group gap={4}>
+            <IconFile size={12} />
+            {t("Linked issues")}
+            {linkedTasks.length > 0 && (
+              <Badge size="xs" variant="light">{linkedTasks.length}</Badge>
+            )}
+          </Group>
+        </Text>
+        <Menu
+          opened={menuOpen}
+          onOpen={() => setMenuOpen(true)}
+          onClose={() => { setMenuOpen(false); setSearchValue(""); }}
+          withinPortal
+          position="bottom-end"
+          shadow="md"
+        >
+          <Menu.Target>
+            <Button size="compact-xs" variant="subtle" leftSection={<IconPlus size={12} />}>
+              {t("Link")}
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Box px="xs" pb="xs">
+              <TextInput
+                size="xs"
+                placeholder={t("Search issues...")}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.currentTarget.value)}
+                autoFocus
+              />
+            </Box>
+            {filtered.length === 0 && (
+              <Text size="xs" c="dimmed" px="xs" pb="xs">
+                {t("No issues found")}
+              </Text>
+            )}
+            {filtered.map((opt) => (
+              <Menu.Item key={opt.id} onClick={() => handleLink(opt.id)}>
+                <Text size="xs" truncate maw={240}>{opt.title}</Text>
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+      <Stack gap={4}>
+        {linkedTasks.map((linked) => (
+          <Paper key={linked.id} withBorder radius="sm" px="xs" py={6}>
+            <Group gap="xs" wrap="nowrap">
+              <Text
+                size="xs"
+                style={{ flex: 1, cursor: "pointer" }}
+                truncate
+                onClick={() => onOpenTask(linked.id)}
+              >
+                {linked.title}
+              </Text>
+              <ActionIcon
+                size="xs"
+                variant="subtle"
+                color="red"
+                onClick={() => handleUnlink(linked.id)}
+              >
+                <IconX size={10} />
+              </ActionIcon>
+            </Group>
+          </Paper>
+        ))}
+      </Stack>
+    </Box>
   );
 }
 

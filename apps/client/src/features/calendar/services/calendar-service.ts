@@ -69,3 +69,13 @@ export async function respondToCalendarEvent(
   const req = await api.post<ICalendarEvent>("/calendar/events/respond", data);
   return req.data;
 }
+
+export async function syncCalendarFromImap(): Promise<{
+  synced: number;
+  skipped: number;
+}> {
+  const req = await api.post<{ synced: number; skipped: number }>(
+    "/calendar/events/sync-imap",
+  );
+  return req.data;
+}

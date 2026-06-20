@@ -83,6 +83,32 @@ export class CalendarEventRepo {
       .executeTakeFirst();
   }
 
+  async findByExternalUid(
+    externalUid: string,
+    workspaceId: string,
+  ): Promise<CalendarEvent | undefined> {
+    return this.db
+      .selectFrom('calendarEvents')
+      .selectAll()
+      .where('externalUid', '=', externalUid)
+      .where('workspaceId', '=', workspaceId)
+      .executeTakeFirst();
+  }
+
+  async update(
+    eventId: string,
+    workspaceId: string,
+    data: Partial<UpdatableCalendarEvent>,
+  ): Promise<CalendarEvent> {
+    return this.db
+      .updateTable('calendarEvents')
+      .set({ ...data, updatedAt: new Date() })
+      .where('id', '=', eventId)
+      .where('workspaceId', '=', workspaceId)
+      .returningAll()
+      .executeTakeFirst();
+  }
+
   async findEventsInRange(
     userId: string,
     workspaceId: string,

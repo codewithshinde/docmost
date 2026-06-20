@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { addHours } from "date-fns";
 import { LoadingOverlay } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { useQueryClient } from "@tanstack/react-query";
+import { CALENDAR_EVENTS_KEY } from "@/features/calendar/queries/calendar-query";
 import { getAppName } from "@/lib/config.ts";
 import { CalendarToolbar } from "@/features/calendar/components/calendar-toolbar";
 import { MonthView } from "@/features/calendar/components/month-view";
@@ -14,6 +17,7 @@ import { EventFormModal } from "@/features/calendar/components/event-form-modal"
 import { EventDetailsDrawer } from "@/features/calendar/components/event-details-drawer";
 import { useCalendarEventsQuery } from "@/features/calendar/queries/calendar-query";
 import { useCalendarSocket } from "@/features/calendar/hooks/use-calendar-socket";
+import { syncCalendarFromImap } from "@/features/calendar/services/calendar-service";
 import { ICalendarEvent } from "@/features/calendar/types/calendar.types";
 import {
   CalendarViewType,
@@ -109,6 +113,35 @@ export default function CalendarPage() {
     setDefaultPrivate(false);
   };
 
+  const queryClient = useQueryClient();
+  const [syncingImap, setSyncingImap] = useState(false);
+
+  const handleSyncImap = async () => {
+    setSyncingImap(true);
+    try {
+      const result = await syncCalendarFromImap();
+      queryClient.invalidateQueries({ queryKey: CALENDAR_EVENTS_KEY });
+      notifications.show({
+        title: t("Email sync complete"),
+        message: t(
+          "{{synced}} event(s) synced from your email. {{skipped}} skipped.",
+          result,
+        ),
+        color: "green",
+      });
+    } catch (err: any) {
+      notifications.show({
+        title: t("Sync failed"),
+        message:
+          err?.response?.data?.message ??
+          t("Unable to sync. Check your email settings."),
+        color: "red",
+      });
+    } finally {
+      setSyncingImap(false);
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -126,6 +159,8 @@ export default function CalendarPage() {
         onToday={handleToday}
         onNewEvent={handleNewEvent}
         onBlockTime={handleBlockTime}
+        onSyncImap={handleSyncImap}
+        syncingImap={syncingImap}
       />
 
       <div style={{ position: "relative" }}>

@@ -771,6 +771,7 @@ export interface CalendarEvents {
   visibility: Generated<string>;
   status: Generated<string>;
   color: string | null;
+  externalUid: string | null;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;
 }
@@ -819,6 +820,8 @@ export interface TeamProjectTasks {
   externalLinks: Generated<Json>;
   dueAt: Timestamp | null;
   sortOrder: Generated<number>;
+  parentTaskId: string | null;
+  linkedTaskIds: Generated<Json>;
   createdById: string | null;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;

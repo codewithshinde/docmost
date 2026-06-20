@@ -296,4 +296,191 @@ export class MailAccountService {
 
     return { ok: true };
   }
+
+  async syncCalendarFromImap(
+    userId: string,
+  ): Promise<ParsedCalendarEvent[]> {
+    const client = await this.connect(userId);
+    const events: ParsedCalendarEvent[] = [];
+
+    try {
+      const lock = await client.getMailboxLock('INBOX');
+      try {
+        const total = client.mailbox ? client.mailbox.exists : 0;
+        if (total === 0) return events;
+
+        // Only scan the most recent 200 messages to keep it fast
+        const start = Math.max(1, total - 199);
+        const range = `${start}:${total}`;
+
+        for await (const message of client.fetch(range, { source: true })) {
+          if (!message.source) continue;
+          try {
+            const parsed = await simpleParser(message.source);
+
+            // Check body text/calendar
+            const bodyParts: string[] = [];
+            if (parsed.text && parsed.text.includes('BEGIN:VCALENDAR')) {
+              bodyParts.push(parsed.text);
+            }
+
+            // Check attachments for .ics files
+            for (const att of parsed.attachments ?? []) {
+              const isIcs =
+                att.contentType === 'text/calendar' ||
+                att.filename?.endsWith('.ics');
+              if (isIcs && att.content) {
+                bodyParts.push(att.content.toString('utf8'));
+              }
+            }
+
+            for (const icsText of bodyParts) {
+              const parsed = parseIcsEvents(icsText);
+              events.push(...parsed);
+            }
+          } catch {
+            // skip unparseable messages
+          }
+        }
+      } finally {
+        lock.release();
+      }
+    } finally {
+      await client.logout().catch(() => {});
+    }
+
+    // Deduplicate by uid
+    const seen = new Set<string>();
+    return events.filter((e) => {
+      if (!e.uid || seen.has(e.uid)) return false;
+      seen.add(e.uid);
+      return true;
+    });
+  }
+}
+
+export interface ParsedCalendarEvent {
+  uid: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  allDay: boolean;
+  organizerEmail: string | null;
+  attendeeEmails: string[];
+  meetingUrl: string | null;
+}
+
+function parseIcsEvents(icsText: string): ParsedCalendarEvent[] {
+  const events: ParsedCalendarEvent[] = [];
+  const lines = icsText
+    .replace(/\r\n[ \t]/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split('\n');
+
+  let inEvent = false;
+  let current: Record<string, string> = {};
+  const attendees: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line === 'BEGIN:VEVENT') {
+      inEvent = true;
+      current = {};
+      attendees.length = 0;
+      continue;
+    }
+    if (line === 'END:VEVENT') {
+      inEvent = false;
+      const uid = current['UID'] ?? '';
+      const title = current['SUMMARY'] ?? 'Untitled';
+      const description = current['DESCRIPTION'] ?? null;
+      const location = current['LOCATION'] ?? null;
+      const startStr = current['DTSTART'] ?? current['DTSTART;VALUE=DATE'];
+      const endStr = current['DTEND'] ?? current['DTEND;VALUE=DATE'];
+      const organizer = (current['ORGANIZER'] ?? '').replace(/^mailto:/i, '');
+      const urlField = current['URL'] ?? null;
+
+      const startsAt = parseIcsDate(startStr);
+      const endsAt = parseIcsDate(endStr);
+      if (!startsAt || !endsAt) continue;
+
+      const allDay = Boolean(current['DTSTART;VALUE=DATE']) || (startStr?.length === 8);
+
+      // Extract video meeting URL from description/location/url
+      const combinedText = [urlField, description, location].filter(Boolean).join(' ');
+      const meetingUrl = extractMeetingUrl(combinedText);
+
+      events.push({
+        uid,
+        title,
+        description: description ? unfoldText(description) : null,
+        location,
+        startsAt,
+        endsAt,
+        allDay,
+        organizerEmail: organizer || null,
+        attendeeEmails: [...attendees],
+        meetingUrl,
+      });
+      continue;
+    }
+
+    if (!inEvent) continue;
+
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).toUpperCase();
+    const value = line.slice(colonIdx + 1);
+
+    if (key.startsWith('ATTENDEE')) {
+      const email = value.replace(/^mailto:/i, '');
+      if (email) attendees.push(email);
+    } else {
+      // Normalize parameterized keys like DTSTART;TZID=...
+      const baseKey = key.split(';')[0];
+      current[baseKey] = value;
+      // Also store with params for VALUE=DATE
+      current[key] = value;
+    }
+  }
+
+  return events;
+}
+
+function parseIcsDate(str: string | undefined): Date | null {
+  if (!str) return null;
+  // Basic date: 20260620 or datetime: 20260620T100000Z
+  const cleaned = str.replace(/[TZ]/g, '').replace(/\.\d+$/, '');
+  if (cleaned.length === 8) {
+    const y = +cleaned.slice(0, 4);
+    const m = +cleaned.slice(4, 6) - 1;
+    const d = +cleaned.slice(6, 8);
+    if (isNaN(y + m + d)) return null;
+    return new Date(Date.UTC(y, m, d));
+  }
+  if (cleaned.length >= 14) {
+    const y = +cleaned.slice(0, 4);
+    const mo = +cleaned.slice(4, 6) - 1;
+    const d = +cleaned.slice(6, 8);
+    const h = +cleaned.slice(8, 10);
+    const mi = +cleaned.slice(10, 12);
+    const s = +cleaned.slice(12, 14);
+    if (isNaN(y + mo + d + h + mi + s)) return null;
+    return new Date(Date.UTC(y, mo, d, h, mi, s));
+  }
+  const date = new Date(str);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function unfoldText(text: string): string {
+  return text.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';');
+}
+
+function extractMeetingUrl(text: string): string | null {
+  const urlPattern = /https?:\/\/(zoom\.us|meet\.google\.com|teams\.microsoft\.com|webex\.com)[^\s"<>]*/i;
+  const match = text.match(urlPattern);
+  return match ? match[0] : null;
 }

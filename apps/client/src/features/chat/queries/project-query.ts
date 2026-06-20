@@ -161,6 +161,7 @@ export function useCreateProjectTaskMutation() {
       storyPoints?: number | null;
       externalLinks?: string[];
       dueAt?: string;
+      parentTaskId?: string | null;
     }
   >({
     mutationFn: ({ teamId: _teamId, ...data }) => createProjectTask(data),
@@ -198,6 +199,8 @@ export function useUpdateProjectTaskMutation() {
       storyPoints?: number | null;
       externalLinks?: string[];
       dueAt?: string;
+      parentTaskId?: string | null;
+      linkedTaskIds?: string[];
     }
   >({
     mutationFn: ({ projectId: _projectId, teamId: _teamId, ...data }) =>

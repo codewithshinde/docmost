@@ -107,10 +107,13 @@ export interface ITeamProjectTask {
   externalLinks: string[];
   dueAt: string | null;
   sortOrder: number;
+  parentTaskId: string | null;
+  linkedTaskIds: string[];
   createdById: string | null;
   createdAt: string;
   updatedAt: string;
   attachments?: ITaskAttachment[] | null;
+  subtasks?: ITeamProjectTask[];
 }
 
 export interface ITeamProjectTaskComment {

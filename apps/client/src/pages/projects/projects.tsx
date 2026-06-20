@@ -28,7 +28,6 @@ import {
   IconCircleFilled,
   IconFolderFilled,
   IconLayoutKanban,
-  IconPencil,
   IconPlus,
   IconSearch,
   IconSettings,
@@ -523,19 +522,6 @@ function ProjectSidebarItem({
                 }}
               >
                 <IconSettings size={10} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label={t("Delete")} withArrow>
-              <ActionIcon
-                size="xs"
-                variant="subtle"
-                color="red"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-              >
-                <IconTrash size={10} />
               </ActionIcon>
             </Tooltip>
           </Group>

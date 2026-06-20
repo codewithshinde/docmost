@@ -1,5 +1,5 @@
-import { ActionIcon, Button, Group, SegmentedControl, Text } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight, IconClock, IconPlus } from "@tabler/icons-react";
+import { ActionIcon, Button, Group, Loader, SegmentedControl, Text, Tooltip } from "@mantine/core";
+import { IconChevronLeft, IconChevronRight, IconClock, IconMail, IconPlus } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { format, type Locale } from "date-fns";
 import { useDateFnsLocale } from "@/lib/date-locale";
@@ -14,6 +14,8 @@ interface CalendarToolbarProps {
   onToday: () => void;
   onNewEvent: () => void;
   onBlockTime: () => void;
+  onSyncImap?: () => void;
+  syncingImap?: boolean;
 }
 
 export function CalendarToolbar({
@@ -25,6 +27,8 @@ export function CalendarToolbar({
   onToday,
   onNewEvent,
   onBlockTime,
+  onSyncImap,
+  syncingImap,
 }: CalendarToolbarProps) {
   const { t } = useTranslation();
   const locale = useDateFnsLocale();
@@ -66,6 +70,18 @@ export function CalendarToolbar({
         >
           {t("Block time")}
         </Button>
+        {onSyncImap && (
+          <Tooltip label={t("Sync calendar invites from your connected email account")} withArrow multiline w={240}>
+            <Button
+              variant="default"
+              leftSection={syncingImap ? <Loader size={14} /> : <IconMail size={16} />}
+              onClick={onSyncImap}
+              disabled={syncingImap}
+            >
+              {t("Sync email")}
+            </Button>
+          </Tooltip>
+        )}
         <Button leftSection={<IconPlus size={16} />} onClick={onNewEvent}>
           {t("New event")}
         </Button>

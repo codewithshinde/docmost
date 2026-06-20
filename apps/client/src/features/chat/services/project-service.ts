@@ -71,6 +71,7 @@ export async function createProjectTask(data: {
   storyPoints?: number | null;
   externalLinks?: string[];
   dueAt?: string;
+  parentTaskId?: string | null;
 }): Promise<ITeamProjectTask> {
   const req = await api.post<ITeamProjectTask>("/projects/tasks/create", data);
   return req.data;
@@ -89,6 +90,8 @@ export async function updateProjectTask(data: {
   storyPoints?: number | null;
   externalLinks?: string[];
   dueAt?: string;
+  parentTaskId?: string | null;
+  linkedTaskIds?: string[];
 }): Promise<ITeamProjectTask> {
   const req = await api.post<ITeamProjectTask>("/projects/tasks/update", data);
   return req.data;

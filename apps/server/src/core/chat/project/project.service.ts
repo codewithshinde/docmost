@@ -124,6 +124,7 @@ export class ProjectService {
       dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined,
       sortOrder: await this.projectRepo.nextSortOrder(project.id),
       createdById: user.id,
+      parentTaskId: dto.parentTaskId ?? null,
     });
   }
 
@@ -149,6 +150,10 @@ export class ProjectService {
         externalLinks: dto.externalLinks,
       }),
       ...(dto.dueAt !== undefined && { dueAt: new Date(dto.dueAt) }),
+      ...(dto.parentTaskId !== undefined && { parentTaskId: dto.parentTaskId }),
+      ...(dto.linkedTaskIds !== undefined && {
+        linkedTaskIds: dto.linkedTaskIds,
+      }),
       workspaceId: workspace.id,
       teamId: task.teamId,
       projectId: task.projectId,

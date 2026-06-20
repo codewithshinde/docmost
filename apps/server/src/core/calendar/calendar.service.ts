@@ -22,6 +22,7 @@ import {
   RespondCalendarEventDto,
   UpdateCalendarEventDto,
 } from './dto/calendar.dto';
+import { MailAccountService } from '../mail-account/mail-account.service';
 
 @Injectable()
 export class CalendarService {
@@ -32,6 +33,7 @@ export class CalendarService {
     private readonly chatWsService: ChatWsService,
     private readonly integrationSettingsService: IntegrationSettingsService,
     private readonly calendarNotificationService: CalendarNotificationService,
+    private readonly mailAccountService: MailAccountService,
     @InjectKysely() private readonly db: KyselyDB,
   ) {}
 
@@ -474,5 +476,94 @@ export class CalendarService {
       await this.integrationSettingsService.getCallRuntimeConfig(workspaceId);
     if (!runtime.jitsiDomain) return null;
     return `https://${runtime.jitsiDomain}/${workspaceId}-${eventId}`;
+  }
+
+  async syncEventsFromImap(
+    user: User,
+    workspace: Workspace,
+  ): Promise<{ synced: number; skipped: number }> {
+    let parsedEvents;
+    try {
+      parsedEvents = await this.mailAccountService.syncCalendarFromImap(user.id);
+    } catch (err: any) {
+      throw new BadRequestException(
+        err?.message ?? 'Unable to connect to email account. Check your IMAP settings.',
+      );
+    }
+
+    let synced = 0;
+    let skipped = 0;
+
+    for (const ev of parsedEvents) {
+      try {
+        if (ev.startsAt >= ev.endsAt) {
+          skipped++;
+          continue;
+        }
+
+        // Check if event already exists by uid (stored in description prefix or title match)
+        const existing = await this.calendarEventRepo.findByExternalUid(
+          ev.uid,
+          workspace.id,
+        );
+        if (existing) {
+          // Update existing
+          await this.calendarEventRepo.update(existing.id, workspace.id, {
+            title: ev.title,
+            description: ev.description,
+            location: ev.location,
+            startsAt: ev.startsAt,
+            endsAt: ev.endsAt,
+            allDay: ev.allDay,
+            externalUid: ev.uid,
+            meetingUrl: ev.meetingUrl,
+          });
+          synced++;
+          continue;
+        }
+
+        await executeTx(this.db, async (trx) => {
+          const event = await this.calendarEventRepo.insertEvent(
+            {
+              workspaceId: workspace.id,
+              organizerId: user.id,
+              title: ev.title,
+              description: ev.description,
+              location: ev.location,
+              startsAt: ev.startsAt,
+              endsAt: ev.endsAt,
+              allDay: ev.allDay,
+              visibility: 'private',
+              color: null,
+              externalUid: ev.uid,
+              meetingUrl: ev.meetingUrl,
+            },
+            trx,
+          );
+
+          await this.calendarAttendeeRepo.insertAttendee(
+            {
+              eventId: event.id,
+              userId: user.id,
+              role: 'attendee',
+              responseStatus: 'needsAction',
+            },
+            trx,
+          );
+        });
+
+        synced++;
+      } catch {
+        skipped++;
+      }
+    }
+
+    if (synced > 0) {
+      this.chatWsService.emitToUsers([user.id], ChatWsEvent.CALENDAR_EVENT_CREATED, {
+        workspaceId: workspace.id,
+      });
+    }
+
+    return { synced, skipped };
   }
 }

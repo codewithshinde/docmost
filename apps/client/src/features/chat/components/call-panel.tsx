@@ -75,6 +75,30 @@ export function CallPanel({ channelId }: CallPanelProps) {
     setActiveCallChannelId(null);
   };
 
+  const isSecureContext =
+    window.isSecureContext ||
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+
+  if (!isSecureContext) {
+    return (
+      <div className={classes.panel}>
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          color="orange"
+          variant="light"
+          title={t("HTTPS required for video calls")}
+          withCloseButton
+          onClose={() => setActiveCallChannelId(null)}
+        >
+          {t(
+            "Video and audio calls require a secure connection (HTTPS). Please access this app via HTTPS to use calls.",
+          )}
+        </Alert>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className={classes.panel}>

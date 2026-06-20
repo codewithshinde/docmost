@@ -5,5 +5,6 @@ import { MailAccountService } from './mail-account.service';
 @Module({
   controllers: [MailAccountController],
   providers: [MailAccountService],
+  exports: [MailAccountService],
 })
 export class MailAccountModule {}

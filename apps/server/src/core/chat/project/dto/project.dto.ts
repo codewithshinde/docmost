@@ -167,6 +167,10 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
   @IsOptional()
   @IsDateString()
   dueAt?: string;
+
+  @IsOptional()
+  @IsUUID()
+  parentTaskId?: string | null;
 }
 
 export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
@@ -220,6 +224,15 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
   @IsOptional()
   @IsDateString()
   dueAt?: string;
+
+  @IsOptional()
+  @IsUUID()
+  parentTaskId?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  linkedTaskIds?: string[];
 }
 
 export class CreateTeamProjectTaskCommentDto extends TeamProjectTaskIdDto {

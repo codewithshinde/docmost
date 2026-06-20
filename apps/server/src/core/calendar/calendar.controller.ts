@@ -83,4 +83,13 @@ export class CalendarController {
   ) {
     return this.calendarService.respondToEvent(dto, user, workspace);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('events/sync-imap')
+  async syncEventsFromImap(
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.calendarService.syncEventsFromImap(user, workspace);
+  }
 }
