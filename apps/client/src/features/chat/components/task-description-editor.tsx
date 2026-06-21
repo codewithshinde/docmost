@@ -70,6 +70,11 @@ export function TaskDescriptionEditor({
 
   useEffect(() => {
     if (!editor) return;
+    editor.setEditable(!readOnly);
+  }, [editor, readOnly]);
+
+  useEffect(() => {
+    if (!editor) return;
     const current = editor.getHTML();
     const incoming = value || "";
     if (incoming !== current && incoming !== (current === "<p></p>" ? "" : current)) {
@@ -79,7 +84,7 @@ export function TaskDescriptionEditor({
         editor.commands.setContent(incoming);
       }
     }
-  }, [value]);
+  }, [editor, value]);
 
   if (!editor) return null;
 

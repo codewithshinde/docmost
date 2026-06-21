@@ -124,7 +124,7 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(20000)
   description?: string;
 
   @IsOptional()
@@ -186,7 +186,7 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(20000)
   description?: string;
 
   @IsOptional()

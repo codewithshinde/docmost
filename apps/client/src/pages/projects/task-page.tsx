@@ -358,6 +358,7 @@ export default function TaskPage() {
           display: "flex",
           height: "calc(100% - 49px)",
           overflow: "hidden",
+          background: "var(--mantine-color-gray-0)",
         }}
       >
         {/* Left: Main content */}
@@ -365,7 +366,7 @@ export default function TaskPage() {
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "28px 36px",
+            padding: "24px 32px",
             minWidth: 0,
           }}
         >
@@ -403,7 +404,7 @@ export default function TaskPage() {
             borderLeft: "1px solid var(--mantine-color-default-border)",
             overflowY: "auto",
             padding: "24px 16px",
-            background: "var(--mantine-color-default-hover)",
+            background: "var(--mantine-color-body)",
           }}
         >
           <TaskMetaSidebar
@@ -533,7 +534,7 @@ function TaskMainContent({
   const ticketLabel = task.ticketNumber ? `#${task.ticketNumber}` : null;
 
   return (
-    <Stack gap="xl">
+    <Stack gap="md" maw={980}>
       <Modal
         opened={!!previewImage}
         onClose={() => setPreviewImage(null)}
@@ -552,120 +553,133 @@ function TaskMainContent({
         )}
       </Modal>
 
-      {/* Ticket number + type breadcrumb */}
-      <Group gap="xs" wrap="nowrap">
-        {ticketLabel && (
-          <Badge
-            size="lg"
-            variant="outline"
-            color="gray"
-            radius="sm"
-            style={{ fontFamily: "monospace", fontWeight: 700, letterSpacing: 1 }}
-          >
-            {ticketLabel}
-          </Badge>
-        )}
-        <Badge
-          size="sm"
-          variant="light"
-          color={typeCfg?.color ?? "teal"}
-          leftSection={typeCfg ? <typeCfg.icon size={10} /> : null}
-        >
-          {task.parentTaskId ? "Sub-task" : t(typeCfg?.label ?? task.issueType)}
-        </Badge>
-        <Badge size="sm" variant="dot" color={priCfg?.color ?? "gray"}>
-          {priCfg?.label ?? task.priority}
-        </Badge>
-        <Text size="xs" c="dimmed" style={{ marginLeft: "auto" }}>
-          {formatDateTime(task.createdAt)}
-        </Text>
-        {editingIssue ? (
-          <Group gap="xs">
-            <Button size="xs" variant="subtle" color="gray" onClick={handleCancelIssueEdit}>
-              {t("Cancel")}
-            </Button>
-            <Button size="xs" onClick={handleSaveIssue} disabled={!titleValue.trim()}>
-              {t("Save issue")}
-            </Button>
+      <Paper
+        withBorder
+        radius="sm"
+        p="lg"
+        style={{
+          borderTop: `3px solid var(--mantine-color-${typeCfg?.color ?? "blue"}-5)`,
+          boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
+        }}
+      >
+        <Stack gap="md">
+          <Group gap="xs" wrap="nowrap">
+            {ticketLabel && (
+              <Badge
+                size="lg"
+                variant="outline"
+                color="gray"
+                radius="sm"
+                style={{ fontFamily: "monospace", fontWeight: 700, letterSpacing: 1 }}
+              >
+                {ticketLabel}
+              </Badge>
+            )}
+            <Badge
+              size="sm"
+              variant="light"
+              color={typeCfg?.color ?? "teal"}
+              leftSection={typeCfg ? <typeCfg.icon size={10} /> : null}
+            >
+              {task.parentTaskId ? "Sub-task" : t(typeCfg?.label ?? task.issueType)}
+            </Badge>
+            <Badge size="sm" variant="dot" color={priCfg?.color ?? "gray"}>
+              {priCfg?.label ?? task.priority}
+            </Badge>
+            <Text size="xs" c="dimmed" style={{ marginLeft: "auto" }}>
+              {formatDateTime(task.createdAt)}
+            </Text>
+            {editingIssue ? (
+              <Group gap="xs">
+                <Button size="xs" variant="subtle" color="gray" onClick={handleCancelIssueEdit}>
+                  {t("Cancel")}
+                </Button>
+                <Button size="xs" onClick={handleSaveIssue} disabled={!titleValue.trim()}>
+                  {t("Save issue")}
+                </Button>
+              </Group>
+            ) : (
+              <Button size="xs" variant="light" leftSection={<IconPencil size={12} />} onClick={() => setEditingIssue(true)}>
+                {t("Edit issue")}
+              </Button>
+            )}
           </Group>
-        ) : (
-          <Button size="xs" variant="light" leftSection={<IconPencil size={12} />} onClick={() => setEditingIssue(true)}>
-            {t("Edit issue")}
-          </Button>
-        )}
-      </Group>
 
-      {/* Title */}
-      {editingIssue ? (
-        <TextInput
-          value={titleValue}
-          onChange={(e) => setTitleValue(e.currentTarget.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") { e.preventDefault(); handleSaveIssue(); }
-            if (e.key === "Escape") handleCancelIssueEdit();
-          }}
-          autoFocus
-          size="xl"
-          styles={{ input: { fontSize: 24, fontWeight: 700, border: "none", padding: 0, background: "transparent" } }}
-        />
-      ) : (
-        <Text
-          fw={700}
-          size="xl"
-          style={{ lineHeight: 1.3, fontSize: 24 }}
-        >
-          {task.title}
-        </Text>
-      )}
+          {editingIssue ? (
+            <TextInput
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.currentTarget.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); handleSaveIssue(); }
+                if (e.key === "Escape") handleCancelIssueEdit();
+              }}
+              autoFocus
+              size="xl"
+              styles={{ input: { fontSize: 26, fontWeight: 750, border: "none", padding: 0, background: "transparent" } }}
+            />
+          ) : (
+            <Text fw={750} size="xl" style={{ lineHeight: 1.25, fontSize: 26 }}>
+              {task.title}
+            </Text>
+          )}
 
-      {/* Description */}
-      <Box>
-        <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={8}>
-          {t("Description")}
-        </Text>
-        {editingIssue ? (
-          <TaskDescriptionEditor
-            value={descValue}
-            onChange={setDescValue}
-            placeholder={t("Add a rich description... Supports formatting, headings, code blocks, and more.")}
-          />
-        ) : (
-          <TaskDescriptionEditor
-            value={task.description ?? ""}
-            onChange={() => {}}
-            readOnly
-            placeholder={t("No description yet.")}
-          />
-        )}
-      </Box>
+          <Divider />
+
+          <Box>
+            <Text size="xs" c="dimmed" fw={700} tt="uppercase" mb={8}>
+              {t("Description")}
+            </Text>
+            {editingIssue ? (
+              <TaskDescriptionEditor
+                value={descValue}
+                onChange={setDescValue}
+                placeholder={t("Add a rich description... Supports formatting, headings, code blocks, and more.")}
+              />
+            ) : (
+              <TaskDescriptionEditor
+                value={task.description ?? ""}
+                onChange={() => {}}
+                readOnly
+                placeholder={t("No description yet.")}
+              />
+            )}
+          </Box>
+        </Stack>
+      </Paper>
 
       {/* Sub-tasks */}
-      <SubtasksSection
-        task={task}
-        allTasks={tasks}
-        projectId={project.id}
-        teamId={project.teamId}
-        projectStatuses={projectStatuses}
-        onOpenTask={onOpenTask}
-        onCreateSubtask={onCreateSubtask}
-      />
+      <Paper withBorder radius="sm" p="md">
+        <SubtasksSection
+          task={task}
+          allTasks={tasks}
+          projectId={project.id}
+          teamId={project.teamId}
+          projectStatuses={projectStatuses}
+          onOpenTask={onOpenTask}
+          onCreateSubtask={onCreateSubtask}
+        />
+      </Paper>
 
       {/* Linked issues */}
-      <LinkedTasksSection
-        task={task}
-        allTasks={tasks}
-        onUpdateTask={onUpdateTask}
-        onOpenTask={onOpenTask}
-      />
+      <Paper withBorder radius="sm" p="md">
+        <LinkedTasksSection
+          task={task}
+          allTasks={tasks}
+          onUpdateTask={onUpdateTask}
+          onOpenTask={onOpenTask}
+        />
+      </Paper>
 
       {/* Linked Pages */}
-      <LinkedPagesSection
-        task={task}
-        onUpdateTask={onUpdateTask}
-      />
+      <Paper withBorder radius="sm" p="md">
+        <LinkedPagesSection
+          task={task}
+          onUpdateTask={onUpdateTask}
+        />
+      </Paper>
 
       {/* Attachments */}
-      <Box>
+      <Paper withBorder radius="sm" p="md">
         <Group justify="space-between" mb={8}>
           <Group gap={6}>
             <IconPaperclip size={14} color="var(--mantine-color-dimmed)" />
@@ -739,12 +753,10 @@ function TaskMainContent({
             })}
           </Stack>
         )}
-      </Box>
-
-      <Divider />
+      </Paper>
 
       {/* Comments */}
-      <Box>
+      <Paper withBorder radius="sm" p="md">
         <Group gap={6} mb={10}>
           <Text size="xs" c="dimmed" fw={600} tt="uppercase">
             {t("Comments")} {comments.length > 0 && `(${comments.length})`}
@@ -791,12 +803,10 @@ function TaskMainContent({
             }
           />
         </Stack>
-      </Box>
-
-      <Divider />
+      </Paper>
 
       {/* History */}
-      <Box>
+      <Paper withBorder radius="sm" p="md">
         <Group gap={6} mb={8}>
           <IconHistory size={14} color="var(--mantine-color-dimmed)" />
           <Text size="xs" c="dimmed" fw={600} tt="uppercase">
@@ -812,7 +822,7 @@ function TaskMainContent({
             ))}
           </Stack>
         )}
-      </Box>
+      </Paper>
     </Stack>
   );
 }

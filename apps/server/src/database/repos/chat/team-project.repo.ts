@@ -137,6 +137,8 @@ export class TeamProjectRepo {
         'teamProjectTasks.sortOrder',
         'teamProjectTasks.parentTaskId',
         'teamProjectTasks.linkedTaskIds',
+        'teamProjectTasks.linkedPageIds',
+        'teamProjectTasks.ticketNumber',
         'teamProjectTasks.createdById',
         'teamProjectTasks.createdAt',
         'teamProjectTasks.updatedAt',
