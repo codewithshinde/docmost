@@ -5,6 +5,7 @@ import {
   ITeamProject,
   ITeamProjectTask,
   ITeamProjectTaskComment,
+  ITeamProjectTaskHistoryItem,
   ProjectIssueType,
   ProjectTaskPriority,
   ProjectTaskStatus,
@@ -140,4 +141,14 @@ export async function deleteTaskAttachment(
   attachmentId: string,
 ): Promise<void> {
   await api.post("/projects/tasks/attachments/delete", { taskId, attachmentId });
+}
+
+export async function getProjectTaskHistory(
+  taskId: string,
+): Promise<ITeamProjectTaskHistoryItem[]> {
+  const req = await api.post<ITeamProjectTaskHistoryItem[]>(
+    "/projects/tasks/history",
+    { taskId },
+  );
+  return req.data;
 }

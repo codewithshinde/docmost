@@ -18,7 +18,20 @@ export default function Home() {
           {t("Home")} - {getAppName()}
         </title>
       </Helmet>
-      <Container size={"900"} pt="md">
+      {/* Very faint tiled Likh logo watermark — does not interfere with content */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          backgroundImage: "url(/likh-logo.svg)",
+          backgroundRepeat: "repeat",
+          backgroundSize: "120px 120px",
+          opacity: 0.025,
+        }}
+      />
+      <Container size={"900"} pt="md" style={{ position: "relative", zIndex: 1 }}>
         <HomeAppTiles />
 
         <Space h="md" />

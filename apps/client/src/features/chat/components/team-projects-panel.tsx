@@ -297,22 +297,22 @@ export interface ProjectTasksViewProps {
   teamId: string;
   project: ITeamProject;
   members?: ITeamMember[];
+  onOpenTask?: (taskId: string) => void;
 }
 
 export function ProjectTasksView({
   teamId,
   project,
   members,
+  onOpenTask,
 }: ProjectTasksViewProps) {
   const { t } = useTranslation();
   const { data: tasks = [] } = useProjectTasksQuery(project.id);
   const updateProjectMutation = useUpdateProjectMutation();
-  const createTaskMutation = useCreateProjectTaskMutation();
   const updateTaskMutation = useUpdateProjectTaskMutation();
   const deleteTaskMutation = useDeleteProjectTaskMutation();
 
   const [view, setView] = useState<ProjectView>(project.view ?? "kanban");
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [filterPriority, setFilterPriority] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string | null>(null);
@@ -326,8 +326,6 @@ export function ProjectTasksView({
   );
   const projectSprints = useMemo(() => project.sprints ?? [], [project]);
   const projectTags = useMemo(() => project.projectTags ?? [], [project]);
-
-  const selectedTask = tasks.find((t) => t.id === selectedTaskId);
 
   const memberOptions = useMemo(
     () =>
@@ -353,7 +351,8 @@ export function ProjectTasksView({
   );
 
   const filteredTasks = useMemo(() => {
-    let result = tasks;
+    // Only show top-level tasks in the main board — sub-tasks live inside their parent's detail page
+    let result = tasks.filter((t) => !t.parentTaskId);
     if (filterPriority)
       result = result.filter((t) => t.priority === filterPriority);
     if (filterType) result = result.filter((t) => t.issueType === filterType);
@@ -572,7 +571,7 @@ export function ProjectTasksView({
             onUpdateStatus={(task, statusId) =>
               handleUpdateTask(task, { status: statusId })
             }
-            onOpenTask={setSelectedTaskId}
+            onOpenTask={(taskId) => onOpenTask?.(taskId)}
             onDeleteTask={handleDeleteTask}
             onDragStart={setDragTaskId}
             onDrop={handleDrop}
@@ -590,77 +589,12 @@ export function ProjectTasksView({
               memberOptions={memberOptions}
               projectStatuses={projectStatuses}
               onUpdateTask={handleUpdateTask}
-              onOpenTask={setSelectedTaskId}
+              onOpenTask={(taskId) => onOpenTask?.(taskId)}
               onDeleteTask={handleDeleteTask}
             />
           </Box>
         )}
       </Box>
-
-      {/* Task detail modal */}
-      <Modal
-        opened={!!selectedTask}
-        onClose={() => setSelectedTaskId(null)}
-        size="xl"
-        padding="lg"
-        title={
-          selectedTask ? (
-            <Group gap="xs">
-              <ThemeIcon
-                size={22}
-                variant="light"
-                color={issueTypeConfig[selectedTask.issueType]?.color ?? "teal"}
-                radius="sm"
-              >
-                {(() => {
-                  const Icon =
-                    issueTypeConfig[selectedTask.issueType]?.icon ?? IconCheckbox;
-                  return <Icon size={14} />;
-                })()}
-              </ThemeIcon>
-              <Text size="sm" fw={600}>
-                {issueTypeConfig[selectedTask.issueType]?.label}
-              </Text>
-              <Text size="sm" c="dimmed">· {project.name}</Text>
-            </Group>
-          ) : null
-        }
-        styles={{
-          body: { padding: "0 24px 24px" },
-        }}
-      >
-        {selectedTask && (
-          <TaskDetailPanel
-            task={selectedTask}
-            projectId={project.id}
-            teamId={teamId}
-            members={members}
-            memberOptions={memberOptions}
-            projectStatuses={projectStatuses}
-            projectSprints={projectSprints}
-            projectTags={projectTags}
-            allTasks={tasks}
-            onUpdateTask={(data) => handleUpdateTask(selectedTask, data)}
-            onDeleteTask={() => {
-              handleDeleteTask(selectedTask);
-              setSelectedTaskId(null);
-            }}
-            onOpenTask={(taskId) => setSelectedTaskId(taskId)}
-            onCreateSubtask={async ({ title, parentTaskId }) => {
-              await createTaskMutation.mutateAsync({
-                teamId,
-                projectId: project.id,
-                title,
-                parentTaskId,
-                issueType: "task",
-                priority: "medium",
-                status: projectStatuses[0]?.id ?? "todo",
-                tags: [],
-              });
-            }}
-          />
-        )}
-      </Modal>
 
       {/* Create task modal */}
       <CreateTaskModal
@@ -674,7 +608,7 @@ export function ProjectTasksView({
         projectTags={projectTags}
         onCreated={(taskId) => {
           setCreateModalOpen(false);
-          setSelectedTaskId(taskId);
+          onOpenTask?.(taskId);
         }}
       />
     </Box>

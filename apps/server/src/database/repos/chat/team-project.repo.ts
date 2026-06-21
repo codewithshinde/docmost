@@ -6,6 +6,7 @@ import { KyselyDB } from '@likh/db/types/kysely.types';
 import {
   InsertableTeamProject,
   InsertableTeamProjectTask,
+  InsertableTeamProjectTaskHistory,
   TeamProject,
   TeamProjectTask,
   InsertableTeamProjectTaskComment,
@@ -134,6 +135,8 @@ export class TeamProjectRepo {
         'teamProjectTasks.externalLinks',
         'teamProjectTasks.dueAt',
         'teamProjectTasks.sortOrder',
+        'teamProjectTasks.parentTaskId',
+        'teamProjectTasks.linkedTaskIds',
         'teamProjectTasks.createdById',
         'teamProjectTasks.createdAt',
         'teamProjectTasks.updatedAt',
@@ -271,6 +274,38 @@ export class TeamProjectRepo {
       .executeTakeFirst();
 
     return Number(row?.nextSortOrder ?? 1);
+  }
+
+  async insertTaskHistory(
+    history: InsertableTeamProjectTaskHistory,
+  ): Promise<void> {
+    await this.db
+      .insertInto('teamProjectTaskHistory')
+      .values(history)
+      .execute();
+  }
+
+  async getTaskHistory(taskId: string, workspaceId: string) {
+    return this.db
+      .selectFrom('teamProjectTaskHistory')
+      .select((eb) => [
+        'teamProjectTaskHistory.id',
+        'teamProjectTaskHistory.taskId',
+        'teamProjectTaskHistory.fieldChanged',
+        'teamProjectTaskHistory.oldValue',
+        'teamProjectTaskHistory.newValue',
+        'teamProjectTaskHistory.createdAt',
+        jsonObjectFrom(
+          eb
+            .selectFrom('users')
+            .select(['users.id', 'users.name', 'users.avatarUrl'])
+            .whereRef('users.id', '=', 'teamProjectTaskHistory.userId'),
+        ).as('user'),
+      ])
+      .where('teamProjectTaskHistory.taskId', '=', taskId)
+      .where('teamProjectTaskHistory.workspaceId', '=', workspaceId)
+      .orderBy('teamProjectTaskHistory.createdAt', 'desc')
+      .execute();
   }
 
   private withTaskCount(eb: ExpressionBuilder<DB, 'teamProjects'>) {

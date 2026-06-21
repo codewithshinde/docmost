@@ -849,6 +849,18 @@ export interface TeamProjectTaskAttachments {
   createdAt: Generated<Timestamp>;
 }
 
+export interface TeamProjectTaskHistory {
+  id: Generated<string>;
+  taskId: string;
+  projectId: string;
+  workspaceId: string;
+  userId: string;
+  fieldChanged: string;
+  oldValue: string | null;
+  newValue: string | null;
+  createdAt: Generated<Timestamp>;
+}
+
 export interface TeamGroups {
   id: Generated<string>;
   workspaceId: string;
@@ -923,6 +935,7 @@ export interface DB {
   teamProjects: TeamProjects;
   teamProjectTaskAttachments: TeamProjectTaskAttachments;
   teamProjectTaskComments: TeamProjectTaskComments;
+  teamProjectTaskHistory: TeamProjectTaskHistory;
   teamProjectTasks: TeamProjectTasks;
   templates: Templates;
   userMailAccounts: UserMailAccounts;

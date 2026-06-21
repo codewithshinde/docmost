@@ -149,4 +149,14 @@ export class ProjectController {
     await this.projectService.deleteTaskAttachment(dto, user, workspace);
     return { success: true };
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('tasks/history')
+  async getTaskHistory(
+    @Body() dto: TeamProjectTaskIdDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    return this.projectService.getTaskHistory(dto.taskId, user, workspace);
+  }
 }

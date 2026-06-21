@@ -43,6 +43,7 @@ import {
   TeamProjects,
   TeamProjectTaskAttachments,
   TeamProjectTaskComments,
+  TeamProjectTaskHistory,
   TeamProjectTasks,
   Channels,
   ChannelMembers,
@@ -290,6 +291,10 @@ export type InsertableTeamProjectTaskAttachment =
 export type TeamProjectTaskComment = Selectable<TeamProjectTaskComments>;
 export type InsertableTeamProjectTaskComment =
   Insertable<TeamProjectTaskComments>;
+
+export type TeamProjectTaskHistoryItem = Selectable<TeamProjectTaskHistory>;
+export type InsertableTeamProjectTaskHistory =
+  Insertable<TeamProjectTaskHistory>;
 
 // Channel
 export type Channel = Selectable<Channels>;

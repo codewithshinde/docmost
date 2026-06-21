@@ -136,7 +136,33 @@ export class ProjectService {
     const task = await this.getTaskForMember(dto.taskId, user, workspace);
     await this.assertAssignee(dto.assigneeId, task.teamId, workspace.id);
 
-    return this.projectRepo.updateTask(dto.taskId, workspace.id, {
+    // Track which fields changed for history
+    const trackedFields: Array<{ field: string; oldV: string | null; newV: string | null }> = [];
+    const stringify = (v: any) => (v == null ? null : String(v));
+    const check = (field: string, oldVal: any, newVal: any) => {
+      const o = stringify(oldVal);
+      const n = stringify(newVal);
+      if (newVal !== undefined && o !== n) trackedFields.push({ field, oldV: o, newV: n });
+    };
+    check('title', task.title, dto.title);
+    check('status', task.status, dto.status);
+    check('priority', task.priority, dto.priority);
+    check('issueType', task.issueType, dto.issueType);
+    check('assigneeId', task.assigneeId, dto.assigneeId);
+    check('sprint', task.sprint, dto.sprint);
+    check('storyPoints', task.storyPoints, dto.storyPoints);
+    check('dueAt', task.dueAt ? task.dueAt.toISOString().slice(0, 10) : null, dto.dueAt ? dto.dueAt.slice(0, 10) : undefined);
+    if (dto.tags !== undefined && JSON.stringify(task.tags) !== JSON.stringify(dto.tags)) {
+      trackedFields.push({ field: 'tags', oldV: JSON.stringify(task.tags), newV: JSON.stringify(dto.tags) });
+    }
+    if (dto.linkedTaskIds !== undefined && JSON.stringify(task.linkedTaskIds) !== JSON.stringify(dto.linkedTaskIds)) {
+      trackedFields.push({ field: 'linkedTaskIds', oldV: JSON.stringify(task.linkedTaskIds), newV: JSON.stringify(dto.linkedTaskIds) });
+    }
+    if (dto.description !== undefined && dto.description !== task.description) {
+      trackedFields.push({ field: 'description', oldV: task.description ? 'updated' : null, newV: 'updated' });
+    }
+
+    const updated = await this.projectRepo.updateTask(dto.taskId, workspace.id, {
       ...(dto.title !== undefined && { title: dto.title }),
       ...(dto.description !== undefined && { description: dto.description }),
       ...(dto.issueType !== undefined && { issueType: dto.issueType }),
@@ -158,6 +184,26 @@ export class ProjectService {
       teamId: task.teamId,
       projectId: task.projectId,
     });
+
+    // Insert history records asynchronously
+    for (const { field, oldV, newV } of trackedFields) {
+      this.projectRepo.insertTaskHistory({
+        taskId: task.id,
+        projectId: task.projectId,
+        workspaceId: workspace.id,
+        userId: user.id,
+        fieldChanged: field,
+        oldValue: oldV,
+        newValue: newV,
+      }).catch(() => {});
+    }
+
+    return updated;
+  }
+
+  async getTaskHistory(taskId: string, user: User, workspace: Workspace) {
+    await this.getTaskForMember(taskId, user, workspace);
+    return this.projectRepo.getTaskHistory(taskId, workspace.id);
   }
 
   async deleteTask(

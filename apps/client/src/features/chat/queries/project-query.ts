@@ -14,6 +14,7 @@ import {
   deleteTaskAttachment,
   getProjectTasks,
   getProjectTaskComments,
+  getProjectTaskHistory,
   getTeamProjects,
   getUserProjects,
   updateProject,
@@ -26,6 +27,7 @@ import {
   ITeamProject,
   ITeamProjectTask,
   ITeamProjectTaskComment,
+  ITeamProjectTaskHistoryItem,
   ProjectIssueType,
   ProjectTaskPriority,
   ProjectTaskStatus,
@@ -277,6 +279,16 @@ export function useUploadTaskAttachmentMutation() {
       });
     },
     onError: showError,
+  });
+}
+
+export function useProjectTaskHistoryQuery(
+  taskId?: string,
+): UseQueryResult<ITeamProjectTaskHistoryItem[], Error> {
+  return useQuery({
+    queryKey: [...PROJECTS_KEY, "task", taskId, "history"],
+    queryFn: () => getProjectTaskHistory(taskId!),
+    enabled: !!taskId,
   });
 }
 

@@ -100,6 +100,19 @@ export default function GlobalSidebar() {
 
   return (
     <div className={classes.navbar}>
+      {/* Brand logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, paddingBottom: 12, borderBottom: "1px solid var(--mantine-color-default-border)", marginBottom: 8 }}>
+        <img
+          src="/likh-logo.svg"
+          alt="Likh"
+          style={{ width: 28, height: 28, flexShrink: 0 }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
+        <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-0.5px", background: "linear-gradient(135deg, #228be6 0%, #7048e8 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          Likh
+        </span>
+      </div>
+
       <ScrollArea w="100%" style={{ flex: 1 }}>
         <div className={classes.section}>
           {mainNavItems.map((item) =>

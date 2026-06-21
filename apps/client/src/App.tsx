@@ -53,6 +53,7 @@ import CalendarPage from "@/pages/calendar/calendar.tsx";
 import TeamsPage from "@/pages/teams/teams";
 import TeamHubPage from "@/pages/teams/team-hub";
 import ProjectsPage from "@/pages/projects/projects";
+import TaskPage from "@/pages/projects/task-page";
 import AdminConsole from "@/pages/settings/admin-console";
 
 export default function App() {
@@ -104,6 +105,7 @@ export default function App() {
           <Route path={"/teams"} element={<TeamsPage />} />
           <Route path={"/teams/:teamId"} element={<TeamHubPage />} />
           <Route path={"/projects"} element={<ProjectsPage />} />
+          <Route path={"/projects/:projectId/tasks/:taskId"} element={<TaskPage />} />
           <Route path={"/mail"} element={<Inbox />} />
           <Route path={"/calendar"} element={<CalendarPage />} />
           <Route path={"/spaces"} element={<SpacesPage />} />

@@ -129,6 +129,16 @@ export interface ITeamProjectTaskComment {
   updatedAt: string;
 }
 
+export interface ITeamProjectTaskHistoryItem {
+  id: string;
+  taskId: string;
+  fieldChanged: string;
+  oldValue: string | null;
+  newValue: string | null;
+  user?: { id: string; name: string; avatarUrl?: string | null } | null;
+  createdAt: string;
+}
+
 export interface ITeamGroup {
   id: string;
   teamId: string;
