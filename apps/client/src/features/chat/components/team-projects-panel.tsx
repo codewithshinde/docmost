@@ -661,16 +661,16 @@ function KanbanBoard({
               key={status.id}
               style={{
                 flex: "1 1 0",
-                minWidth: 260,
+                minWidth: 270,
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
                 background: isOver
-                  ? "var(--mantine-color-blue-0)"
+                  ? `var(--mantine-color-${status.color}-0)`
                   : "var(--mantine-color-default-hover)",
-                borderRadius: 8,
+                borderRadius: 10,
                 border: isOver
-                  ? "2px dashed var(--mantine-color-blue-4)"
+                  ? `2px dashed var(--mantine-color-${status.color}-4)`
                   : "2px solid transparent",
                 transition: "background 0.15s, border 0.15s",
               }}
@@ -685,24 +685,35 @@ function KanbanBoard({
               }}
             >
               {/* Column header */}
-              <Group justify="space-between" px="sm" py="xs" style={{ flexShrink: 0 }}>
-                <Group gap={6}>
+              <Group
+                justify="space-between"
+                px="sm"
+                pt="sm"
+                pb="xs"
+                style={{
+                  flexShrink: 0,
+                  borderBottom: `2px solid var(--mantine-color-${status.color}-4)`,
+                }}
+              >
+                <Group gap={8}>
                   <Box
                     style={{
                       width: 10,
                       height: 10,
                       borderRadius: "50%",
                       background: `var(--mantine-color-${status.color}-5)`,
+                      flexShrink: 0,
                     }}
                   />
-                  <Text size="xs" fw={700} tt="uppercase" c="dimmed">
+                  <Text size="xs" fw={700} tt="uppercase" style={{ letterSpacing: 0.8 }}>
                     {status.label}
                   </Text>
                   <Badge
                     size="xs"
-                    variant="light"
+                    variant="filled"
                     color={status.color}
                     radius="xl"
+                    style={{ minWidth: 22 }}
                   >
                     {colTasks.length}
                   </Badge>
@@ -768,68 +779,82 @@ function KanbanCard({
   const typeCfg = issueTypeConfig[task.issueType];
   const TypeIcon = typeCfg?.icon ?? IconCheckbox;
   const pastDue = isPastDue(task.dueAt);
+  const [hovered, setHovered] = useState(false);
+
+  // Priority indicator colors
+  const priBorderColor = priCfg?.color === "red"
+    ? "var(--mantine-color-red-5)"
+    : priCfg?.color === "orange"
+      ? "var(--mantine-color-orange-5)"
+      : priCfg?.color === "yellow"
+        ? "var(--mantine-color-yellow-5)"
+        : "var(--mantine-color-gray-4)";
 
   return (
     <Paper
       withBorder
-      radius="sm"
+      radius="md"
       p="sm"
       draggable
       onDragStart={onDragStart}
       onClick={onOpen}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         cursor: "pointer",
-        borderLeft: `3px solid var(--mantine-color-${priCfg?.color ?? "gray"}-5)`,
+        borderLeft: `3px solid ${priBorderColor}`,
         userSelect: "none",
-        transition: "box-shadow 0.1s",
+        transition: "box-shadow 0.15s, transform 0.1s",
+        boxShadow: hovered ? "0 2px 8px rgba(0,0,0,0.08)" : undefined,
+        transform: hovered ? "translateY(-1px)" : undefined,
       }}
     >
-      <Group justify="space-between" wrap="nowrap" mb={6}>
+      {/* Top row: ticket + type icon + actions */}
+      <Group justify="space-between" wrap="nowrap" mb={8}>
         <Group gap={6} wrap="nowrap">
-          <ThemeIcon
-            size={18}
-            color={typeCfg?.color ?? "teal"}
-            variant="light"
-            radius="sm"
-          >
-            <TypeIcon size={11} />
-          </ThemeIcon>
-          <Badge
-            size="xs"
-            variant="light"
-            color={priCfg?.color ?? "gray"}
-            radius="sm"
-          >
-            {t(priCfg?.label ?? task.priority)}
-          </Badge>
+          <Tooltip label={t(typeCfg?.label ?? task.issueType)} withArrow openDelay={500}>
+            <ThemeIcon
+              size={20}
+              color={typeCfg?.color ?? "teal"}
+              variant="light"
+              radius="sm"
+            >
+              <TypeIcon size={12} />
+            </ThemeIcon>
+          </Tooltip>
+          {task.ticketNumber && (
+            <Text size="xs" c="dimmed" fw={600} style={{ fontFamily: "monospace", letterSpacing: 0.5 }}>
+              #{task.ticketNumber}
+            </Text>
+          )}
         </Group>
         <div onClick={(e) => e.stopPropagation()}>
           <Menu position="bottom-end" withinPortal>
             <Menu.Target>
-              <ActionIcon variant="subtle" color="gray" size="xs">
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="xs"
+                style={{ opacity: hovered ? 1 : 0.4, transition: "opacity 0.15s" }}
+              >
                 <IconDots size={12} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
+              <Menu.Label>{t("Move to")}</Menu.Label>
               {projectStatuses
                 .filter((s) => s.id !== task.status)
                 .map((s) => (
-                  <Menu.Item key={s.id} onClick={() => onStatusChange(s.id)}>
-                    <Group gap={6}>
-                      <Box
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          background: `var(--mantine-color-${s.color}-5)`,
-                        }}
-                      />
-                      {t("Move to {{status}}", { status: s.label })}
-                    </Group>
+                  <Menu.Item key={s.id} onClick={() => onStatusChange(s.id)}
+                    leftSection={
+                      <Box style={{ width: 8, height: 8, borderRadius: "50%", background: `var(--mantine-color-${s.color}-5)` }} />
+                    }
+                  >
+                    {s.label}
                   </Menu.Item>
                 ))}
               <Menu.Divider />
-              <Menu.Item color="red" onClick={onDelete}>
+              <Menu.Item color="red" leftSection={<IconTrash size={12} />} onClick={onDelete}>
                 {t("Delete")}
               </Menu.Item>
             </Menu.Dropdown>
@@ -837,62 +862,76 @@ function KanbanCard({
         </div>
       </Group>
 
-      <Text size="sm" fw={500} mb={6} lineClamp={2} style={{ lineHeight: 1.4 }}>
+      {/* Title */}
+      <Text size="sm" fw={500} mb={8} lineClamp={2} style={{ lineHeight: 1.5 }}>
         {task.title}
       </Text>
 
+      {/* Tags */}
       {(task.tags ?? []).length > 0 && (
-        <Group gap={4} mb={6} wrap="wrap">
-          {task.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} size="xs" variant="outline" radius="sm">
+        <Group gap={4} mb={8} wrap="wrap">
+          {task.tags.slice(0, 2).map((tag) => (
+            <Badge key={tag} size="xs" variant="outline" color="gray" radius="xl">
               {tag}
             </Badge>
           ))}
+          {task.tags.length > 2 && (
+            <Badge size="xs" variant="outline" color="gray" radius="xl">
+              +{task.tags.length - 2}
+            </Badge>
+          )}
         </Group>
       )}
 
-      <Group justify="space-between" mt={6} wrap="nowrap">
-        <Group gap={4} wrap="nowrap">
-          {task.sprint && (
-            <Badge size="xs" variant="dot" color="blue" radius="sm">
-              {task.sprint}
-            </Badge>
-          )}
+      {/* Bottom row: priority + due date + assignee */}
+      <Group justify="space-between" wrap="nowrap">
+        <Group gap={6} wrap="nowrap">
+          {/* Priority pill */}
+          <Badge
+            size="xs"
+            variant="light"
+            color={priCfg?.color ?? "gray"}
+            radius="xl"
+            style={{ fontSize: 10 }}
+          >
+            {t(priCfg?.label ?? task.priority)}
+          </Badge>
+
+          {/* Due date */}
           {task.dueAt && (
-            <Group gap={2} wrap="nowrap">
+            <Group gap={3} wrap="nowrap">
               <IconCalendar
-                size={10}
-                color={
-                  pastDue
-                    ? "var(--mantine-color-red-5)"
-                    : "var(--mantine-color-dimmed)"
-                }
+                size={11}
+                color={pastDue ? "var(--mantine-color-red-5)" : "var(--mantine-color-dimmed)"}
               />
-              <Text
-                size="xs"
-                c={pastDue ? "red" : "dimmed"}
-                fw={pastDue ? 600 : 400}
-              >
+              <Text size="xs" c={pastDue ? "red" : "dimmed"} fw={pastDue ? 600 : 400}>
                 {formatDate(task.dueAt)}
               </Text>
             </Group>
           )}
-        </Group>
-        <Group gap={4} wrap="nowrap">
-          <Group gap={2} wrap="nowrap">
-            <IconClock size={10} color="var(--mantine-color-dimmed)" />
-            <Text size="xs" c="dimmed" style={{ fontSize: 10 }}>
-              {formatDate(task.createdAt)}
-            </Text>
-          </Group>
-          {task.assignee && (
-            <CustomAvatar
-              size={20}
-              name={task.assignee.name}
-              avatarUrl={task.assignee.avatarUrl}
-            />
+
+          {/* Sprint */}
+          {task.sprint && (
+            <Badge size="xs" variant="dot" color="indigo" radius="xl" style={{ fontSize: 10 }}>
+              {task.sprint}
+            </Badge>
           )}
         </Group>
+
+        {/* Assignee avatar */}
+        {task.assignee ? (
+          <Tooltip label={task.assignee.name} withArrow openDelay={300}>
+            <span>
+              <CustomAvatar size={22} name={task.assignee.name} avatarUrl={task.assignee.avatarUrl} />
+            </span>
+          </Tooltip>
+        ) : (
+          <Tooltip label={t("Unassigned")} withArrow openDelay={300}>
+            <ThemeIcon size={22} variant="light" color="gray" radius="xl">
+              <IconUser size={12} />
+            </ThemeIcon>
+          </Tooltip>
+        )}
       </Group>
     </Paper>
   );
@@ -925,32 +964,31 @@ function TaskTable({
   }));
 
   return (
-    <Table verticalSpacing={6} striped highlightOnHover>
-      <Table.Thead
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 1,
-          background: "var(--mantine-color-body)",
-        }}
-      >
+    <Table
+      verticalSpacing={8}
+      highlightOnHover
+      styles={{
+        thead: { position: "sticky", top: 0, zIndex: 2, background: "var(--mantine-color-body)" },
+        th: { fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, color: "var(--mantine-color-dimmed)" },
+      }}
+    >
+      <Table.Thead>
         <Table.Tr>
+          <Table.Th w={80}>{t("ID")}</Table.Th>
           <Table.Th>{t("Issue")}</Table.Th>
-          <Table.Th w={100}>{t("Type")}</Table.Th>
-          <Table.Th w={140}>{t("Status")}</Table.Th>
+          <Table.Th w={90}>{t("Type")}</Table.Th>
+          <Table.Th w={150}>{t("Status")}</Table.Th>
           <Table.Th w={150}>{t("Assignee")}</Table.Th>
-          <Table.Th w={120}>{t("Sprint")}</Table.Th>
-          <Table.Th w={100}>{t("Due")}</Table.Th>
-          <Table.Th w={110}>{t("Priority")}</Table.Th>
-          <Table.Th w={110}>{t("Created")}</Table.Th>
+          <Table.Th w={110}>{t("Due")}</Table.Th>
+          <Table.Th w={120}>{t("Priority")}</Table.Th>
           <Table.Th w={60} />
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
         {tasks.length === 0 && (
           <Table.Tr>
-            <Table.Td colSpan={9}>
-              <Text c="dimmed" size="sm" ta="center" py="lg">
+            <Table.Td colSpan={8}>
+              <Text c="dimmed" size="sm" ta="center" py="xl">
                 {t("No issues yet. Click + Create issue to get started.")}
               </Text>
             </Table.Td>
@@ -963,144 +1001,128 @@ function TaskTable({
           const past = isPastDue(task.dueAt);
           const statusCfg = getStatusCfg(task.status, projectStatuses);
           return (
-            <Table.Tr key={task.id} style={{ cursor: "pointer" }}>
+            <Table.Tr
+              key={task.id}
+              style={{ cursor: "pointer" }}
+            >
+              {/* Ticket ID */}
               <Table.Td onClick={() => onOpenTask(task.id)}>
-                <Group gap={6} wrap="nowrap">
+                {task.ticketNumber ? (
+                  <Text size="xs" c="dimmed" fw={600} style={{ fontFamily: "monospace" }}>
+                    #{task.ticketNumber}
+                  </Text>
+                ) : (
+                  <Text size="xs" c="dimmed">—</Text>
+                )}
+              </Table.Td>
+
+              {/* Title */}
+              <Table.Td onClick={() => onOpenTask(task.id)}>
+                <Group gap={8} wrap="nowrap">
                   <Box
                     style={{
                       width: 3,
-                      height: 32,
+                      height: 36,
                       borderRadius: 2,
                       background: `var(--mantine-color-${priCfg?.color ?? "gray"}-5)`,
                       flexShrink: 0,
                     }}
                   />
-                  <div>
-                    <Text size="sm" fw={500}>
-                      {task.title}
-                    </Text>
+                  <div style={{ minWidth: 0 }}>
+                    <Text size="sm" fw={500} truncate>{task.title}</Text>
                     {(task.tags ?? []).length > 0 && (
                       <Group gap={4} mt={2}>
-                        {task.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} size="xs" variant="outline">
-                            {tag}
-                          </Badge>
+                        {task.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} size="xs" variant="outline" color="gray" radius="xl">{tag}</Badge>
                         ))}
+                        {task.tags.length > 2 && (
+                          <Text size="xs" c="dimmed">+{task.tags.length - 2}</Text>
+                        )}
                       </Group>
                     )}
                   </div>
                 </Group>
               </Table.Td>
+
+              {/* Type */}
               <Table.Td>
                 <Group gap={4} wrap="nowrap">
-                  <ThemeIcon
-                    size={16}
-                    color={typeCfg?.color ?? "teal"}
-                    variant="light"
-                    radius="sm"
-                  >
-                    <TypeIcon size={10} />
+                  <ThemeIcon size={18} color={typeCfg?.color ?? "teal"} variant="light" radius="sm">
+                    <TypeIcon size={11} />
                   </ThemeIcon>
-                  <Text size="xs">{t(typeCfg?.label ?? task.issueType)}</Text>
                 </Group>
               </Table.Td>
+
+              {/* Status */}
               <Table.Td>
                 <Select
                   size="xs"
                   value={task.status}
                   data={statusOptions}
-                  onChange={(v) =>
-                    onUpdateTask(task, {
-                      status: (v as ProjectTaskStatus) ?? "todo",
-                    })
-                  }
+                  onChange={(v) => onUpdateTask(task, { status: (v as ProjectTaskStatus) ?? "todo" })}
                   leftSection={
-                    <Box
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: `var(--mantine-color-${statusCfg.color}-5)`,
-                      }}
-                    />
+                    <Box style={{ width: 8, height: 8, borderRadius: "50%", background: `var(--mantine-color-${statusCfg.color}-5)` }} />
                   }
+                  styles={{ input: { fontWeight: 500 } }}
                 />
               </Table.Td>
+
+              {/* Assignee */}
               <Table.Td>
-                <Select
-                  size="xs"
-                  value={task.assigneeId}
-                  data={memberOptions}
-                  onChange={(v) => onUpdateTask(task, { assigneeId: v })}
-                  clearable
-                  searchable
-                />
+                {task.assignee ? (
+                  <Group gap={6} wrap="nowrap">
+                    <CustomAvatar size={22} name={task.assignee.name} avatarUrl={task.assignee.avatarUrl} />
+                    <Text size="xs" truncate style={{ maxWidth: 90 }}>{task.assignee.name}</Text>
+                  </Group>
+                ) : (
+                  <Select
+                    size="xs"
+                    value={task.assigneeId}
+                    data={memberOptions}
+                    onChange={(v) => onUpdateTask(task, { assigneeId: v })}
+                    clearable
+                    searchable
+                    placeholder={t("Assign")}
+                  />
+                )}
               </Table.Td>
+
+              {/* Due date */}
               <Table.Td>
-                <TextInput
-                  size="xs"
-                  value={task.sprint ?? ""}
-                  onChange={(e) =>
-                    onUpdateTask(task, {
-                      sprint: e.currentTarget.value || null,
-                    })
-                  }
-                  placeholder="-"
-                />
+                {task.dueAt ? (
+                  <Group gap={4} wrap="nowrap">
+                    <IconCalendar size={12} color={past ? "var(--mantine-color-red-5)" : "var(--mantine-color-dimmed)"} />
+                    <Text size="xs" c={past ? "red" : "dimmed"} fw={past ? 600 : 400}>
+                      {formatDate(task.dueAt)}
+                    </Text>
+                  </Group>
+                ) : (
+                  <Text size="xs" c="dimmed">—</Text>
+                )}
               </Table.Td>
+
+              {/* Priority */}
               <Table.Td>
-                <Text
+                <Badge
                   size="xs"
-                  c={
-                    past
-                      ? "red"
-                      : task.dueAt
-                        ? undefined
-                        : "dimmed"
-                  }
-                  fw={past ? 600 : 400}
+                  variant="light"
+                  color={priCfg?.color ?? "gray"}
+                  radius="xl"
                 >
-                  {formatDate(task.dueAt) ?? "-"}
-                </Text>
+                  {t(priCfg?.label ?? task.priority)}
+                </Badge>
               </Table.Td>
+
+              {/* Actions */}
               <Table.Td>
-                <Select
-                  size="xs"
-                  value={task.priority}
-                  data={priorityOptions.map((o) => ({
-                    value: o.value,
-                    label: t(priorityConfig[o.value].label),
-                  }))}
-                  onChange={(v) =>
-                    onUpdateTask(task, {
-                      priority: (v as ProjectTaskPriority) ?? "medium",
-                    })
-                  }
-                />
-              </Table.Td>
-              <Table.Td>
-                <Text size="xs" c="dimmed">
-                  {formatDate(task.createdAt)}
-                </Text>
-              </Table.Td>
-              <Table.Td>
-                <Group gap={4} wrap="nowrap">
+                <Group gap={2} wrap="nowrap">
                   <Tooltip label={t("Open")} withArrow>
-                    <ActionIcon
-                      size="sm"
-                      variant="subtle"
-                      onClick={() => onOpenTask(task.id)}
-                    >
+                    <ActionIcon size="sm" variant="subtle" onClick={() => onOpenTask(task.id)}>
                       <IconChevronRight size={14} />
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip label={t("Delete")} withArrow>
-                    <ActionIcon
-                      size="sm"
-                      variant="subtle"
-                      color="red"
-                      onClick={() => onDeleteTask(task)}
-                    >
+                    <ActionIcon size="sm" variant="subtle" color="red" onClick={() => onDeleteTask(task)}>
                       <IconTrash size={14} />
                     </ActionIcon>
                   </Tooltip>

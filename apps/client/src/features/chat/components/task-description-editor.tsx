@@ -1,14 +1,31 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import Placeholder from "@tiptap/extension-placeholder";
 import { useEffect, useRef } from "react";
-import { ActionIcon, Box, Group, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Divider, Group, Tooltip } from "@mantine/core";
 import {
+  IconAlignCenter,
+  IconAlignLeft,
+  IconAlignRight,
+  IconBlockquote,
   IconBold,
-  IconItalic,
-  IconList,
-  IconListNumbers,
+  IconCode,
+  IconH1,
   IconH2,
   IconH3,
+  IconHighlight,
+  IconItalic,
+  IconStrikethrough,
+  IconLink,
+  IconList,
+  IconListNumbers,
+  IconMinus,
+  IconSourceCode,
+  IconUnderline,
 } from "@tabler/icons-react";
 
 interface TaskDescriptionEditorProps {
@@ -23,149 +40,205 @@ export function TaskDescriptionEditor({
   value,
   onChange,
   onBlur,
-  placeholder = "Add a description...",
+  placeholder = "Add a description... Use the toolbar for rich formatting.",
   readOnly = false,
 }: TaskDescriptionEditorProps) {
   const initialContent = useRef(value);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3] },
+        codeBlock: { languageClassPrefix: "language-" },
+      }),
+      Underline,
+      Highlight.configure({ multicolor: false }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Placeholder.configure({ placeholder }),
+      Link.configure({ openOnClick: false, autolink: true }),
+    ],
     content: initialContent.current || "",
     editable: !readOnly,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange(html === "<p></p>" ? "" : html);
     },
-    onBlur: () => {
-      onBlur?.();
-    },
+    onBlur: () => onBlur?.(),
   });
 
-  // Sync value when task changes
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      if (value === "" || value === "<p></p>") {
+    if (!editor) return;
+    const current = editor.getHTML();
+    const incoming = value || "";
+    if (incoming !== current && incoming !== (current === "<p></p>" ? "" : current)) {
+      if (!incoming) {
         editor.commands.clearContent();
       } else {
-        editor.commands.setContent(value);
+        editor.commands.setContent(incoming);
       }
     }
   }, [value]);
 
   if (!editor) return null;
 
-  const isEmpty =
-    editor.isEmpty || editor.getHTML() === "<p></p>";
+  const ToolBtn = ({
+    label,
+    active,
+    onClick,
+    children,
+  }: {
+    label: string;
+    active?: boolean;
+    onClick: () => void;
+    children: React.ReactNode;
+  }) => (
+    <Tooltip label={label} withArrow openDelay={400}>
+      <ActionIcon
+        size="xs"
+        variant={active ? "filled" : "subtle"}
+        color={active ? "blue" : "gray"}
+        onClick={onClick}
+      >
+        {children}
+      </ActionIcon>
+    </Tooltip>
+  );
+
+  const setLink = () => {
+    const prev = editor.getAttributes("link").href as string | undefined;
+    const url = window.prompt("URL", prev ?? "https://");
+    if (url === null) return;
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    }
+  };
 
   return (
     <Box
       style={{
         border: "1px solid var(--mantine-color-default-border)",
-        borderRadius: 6,
+        borderRadius: 8,
         background: "var(--mantine-color-body)",
         overflow: "hidden",
       }}
     >
       {!readOnly && (
-        <Group
-          gap={2}
+        <Box
           px="xs"
-          py={4}
+          py={6}
           style={{
             borderBottom: "1px solid var(--mantine-color-default-border)",
             background: "var(--mantine-color-default-hover)",
           }}
         >
-          <Tooltip label="Bold" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("bold") ? "filled" : "subtle"}
-              color={editor.isActive("bold") ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleBold().run()}
-            >
+          <Group gap={2} wrap="wrap">
+            {/* Formatting */}
+            <ToolBtn label="Bold (⌘B)" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
               <IconBold size={12} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Italic" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("italic") ? "filled" : "subtle"}
-              color={editor.isActive("italic") ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-            >
+            </ToolBtn>
+            <ToolBtn label="Italic (⌘I)" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}>
               <IconItalic size={12} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Heading 2" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("heading", { level: 2 }) ? "filled" : "subtle"}
-              color={editor.isActive("heading", { level: 2 }) ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            >
+            </ToolBtn>
+            <ToolBtn label="Underline (⌘U)" active={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}>
+              <IconUnderline size={12} />
+            </ToolBtn>
+            <ToolBtn label="Strikethrough" active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()}>
+              <IconStrikethrough size={12} />
+            </ToolBtn>
+            <ToolBtn label="Highlight" active={editor.isActive("highlight")} onClick={() => editor.chain().focus().toggleHighlight().run()}>
+              <IconHighlight size={12} />
+            </ToolBtn>
+            <ToolBtn label="Inline code" active={editor.isActive("code")} onClick={() => editor.chain().focus().toggleCode().run()}>
+              <IconCode size={12} />
+            </ToolBtn>
+            <ToolBtn label="Link" active={editor.isActive("link")} onClick={setLink}>
+              <IconLink size={12} />
+            </ToolBtn>
+
+            <Divider orientation="vertical" my={2} />
+
+            {/* Headings */}
+            <ToolBtn label="Heading 1" active={editor.isActive("heading", { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
+              <IconH1 size={12} />
+            </ToolBtn>
+            <ToolBtn label="Heading 2" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
               <IconH2 size={12} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Heading 3" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("heading", { level: 3 }) ? "filled" : "subtle"}
-              color={editor.isActive("heading", { level: 3 }) ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            >
+            </ToolBtn>
+            <ToolBtn label="Heading 3" active={editor.isActive("heading", { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
               <IconH3 size={12} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Bullet list" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("bulletList") ? "filled" : "subtle"}
-              color={editor.isActive("bulletList") ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-            >
+            </ToolBtn>
+
+            <Divider orientation="vertical" my={2} />
+
+            {/* Lists */}
+            <ToolBtn label="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
               <IconList size={12} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label="Numbered list" withArrow>
-            <ActionIcon
-              size="xs"
-              variant={editor.isActive("orderedList") ? "filled" : "subtle"}
-              color={editor.isActive("orderedList") ? "blue" : "gray"}
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            >
+            </ToolBtn>
+            <ToolBtn label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
               <IconListNumbers size={12} />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
+            </ToolBtn>
+
+            <Divider orientation="vertical" my={2} />
+
+            {/* Blocks */}
+            <ToolBtn label="Blockquote" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
+              <IconBlockquote size={12} />
+            </ToolBtn>
+            <ToolBtn label="Code block" active={editor.isActive("codeBlock")} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
+              <IconSourceCode size={12} />
+            </ToolBtn>
+            <ToolBtn label="Divider" active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+              <IconMinus size={12} />
+            </ToolBtn>
+
+            <Divider orientation="vertical" my={2} />
+
+            {/* Alignment */}
+            <ToolBtn label="Align left" active={editor.isActive({ textAlign: "left" })} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
+              <IconAlignLeft size={12} />
+            </ToolBtn>
+            <ToolBtn label="Align center" active={editor.isActive({ textAlign: "center" })} onClick={() => editor.chain().focus().setTextAlign("center").run()}>
+              <IconAlignCenter size={12} />
+            </ToolBtn>
+            <ToolBtn label="Align right" active={editor.isActive({ textAlign: "right" })} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
+              <IconAlignRight size={12} />
+            </ToolBtn>
+          </Group>
+        </Box>
       )}
+
       <Box
-        style={{ position: "relative", minHeight: readOnly ? undefined : 120 }}
-        px="xs"
-        py="xs"
+        style={{ minHeight: readOnly ? undefined : 140, position: "relative" }}
+        px="sm"
+        py="sm"
+        className="task-rich-editor"
       >
-        {isEmpty && !editor.isFocused && (
-          <Box
-            style={{
-              position: "absolute",
-              top: 8,
-              left: 12,
-              pointerEvents: "none",
-              color: "var(--mantine-color-dimmed)",
-              fontSize: 14,
-            }}
-          >
-            {placeholder}
-          </Box>
-        )}
         <EditorContent
           editor={editor}
-          style={{
-            outline: "none",
-            fontSize: 14,
-            lineHeight: 1.6,
-          }}
+          style={{ outline: "none", fontSize: 14, lineHeight: 1.7 }}
         />
       </Box>
+
+      <style>{`
+        .task-rich-editor .tiptap { outline: none; }
+        .task-rich-editor .tiptap p { margin: 0 0 8px; }
+        .task-rich-editor .tiptap p:last-child { margin-bottom: 0; }
+        .task-rich-editor .tiptap h1 { font-size: 22px; font-weight: 700; margin: 12px 0 6px; }
+        .task-rich-editor .tiptap h2 { font-size: 18px; font-weight: 700; margin: 10px 0 4px; }
+        .task-rich-editor .tiptap h3 { font-size: 15px; font-weight: 700; margin: 8px 0 4px; }
+        .task-rich-editor .tiptap ul, .task-rich-editor .tiptap ol { padding-left: 20px; margin: 6px 0; }
+        .task-rich-editor .tiptap li { margin: 2px 0; }
+        .task-rich-editor .tiptap blockquote { border-left: 3px solid var(--mantine-color-blue-4); padding-left: 12px; margin: 8px 0; color: var(--mantine-color-dimmed); }
+        .task-rich-editor .tiptap code { background: var(--mantine-color-gray-1); padding: 2px 5px; border-radius: 3px; font-size: 12px; font-family: monospace; }
+        .task-rich-editor .tiptap pre { background: var(--mantine-color-dark-8); color: var(--mantine-color-gray-1); padding: 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+        .task-rich-editor .tiptap pre code { background: none; padding: 0; font-size: 13px; }
+        .task-rich-editor .tiptap hr { border: none; border-top: 2px solid var(--mantine-color-default-border); margin: 12px 0; }
+        .task-rich-editor .tiptap a { color: var(--mantine-color-blue-6); text-decoration: underline; }
+        .task-rich-editor .tiptap mark { background: var(--mantine-color-yellow-2); border-radius: 2px; padding: 0 2px; }
+        .task-rich-editor .tiptap .is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: var(--mantine-color-dimmed); pointer-events: none; height: 0; }
+      `}</style>
     </Box>
   );
 }

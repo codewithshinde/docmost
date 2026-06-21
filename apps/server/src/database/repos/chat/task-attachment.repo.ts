@@ -70,6 +70,14 @@ export class TaskAttachmentRepo {
     }, {});
   }
 
+  async findByAttachmentId(attachmentId: string) {
+    return this.db
+      .selectFrom('teamProjectTaskAttachments')
+      .selectAll()
+      .where('attachmentId', '=', attachmentId)
+      .executeTakeFirst();
+  }
+
   async deleteTaskAttachment(
     taskId: string,
     attachmentId: string,

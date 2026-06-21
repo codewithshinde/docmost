@@ -276,6 +276,16 @@ export class TeamProjectRepo {
     return Number(row?.nextSortOrder ?? 1);
   }
 
+  async nextTicketNumber(projectId: string): Promise<number> {
+    const row = await this.db
+      .selectFrom('teamProjectTasks')
+      .select(sql<number>`coalesce(max(ticket_number), 0) + 1`.as('nextTicket'))
+      .where('projectId', '=', projectId)
+      .executeTakeFirst();
+
+    return Number(row?.nextTicket ?? 1);
+  }
+
   async insertTaskHistory(
     history: InsertableTeamProjectTaskHistory,
   ): Promise<void> {

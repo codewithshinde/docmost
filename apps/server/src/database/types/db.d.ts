@@ -823,6 +823,8 @@ export interface TeamProjectTasks {
   sortOrder: Generated<number>;
   parentTaskId: string | null;
   linkedTaskIds: Generated<Json>;
+  ticketNumber: number | null;
+  linkedPageIds: Generated<Json>;
   createdById: string | null;
   createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;

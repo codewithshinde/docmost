@@ -171,6 +171,11 @@ export class CreateTeamProjectTaskDto extends TeamProjectIdDto {
   @IsOptional()
   @IsUUID()
   parentTaskId?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  linkedPageIds?: string[];
 }
 
 export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
@@ -233,6 +238,11 @@ export class UpdateTeamProjectTaskDto extends TeamProjectTaskIdDto {
   @IsArray()
   @IsUUID(undefined, { each: true })
   linkedTaskIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  linkedPageIds?: string[];
 }
 
 export class CreateTeamProjectTaskCommentDto extends TeamProjectTaskIdDto {

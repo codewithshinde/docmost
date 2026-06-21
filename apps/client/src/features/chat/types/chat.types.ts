@@ -109,6 +109,8 @@ export interface ITeamProjectTask {
   sortOrder: number;
   parentTaskId: string | null;
   linkedTaskIds: string[];
+  ticketNumber: number | null;
+  linkedPageIds: string[];
   createdById: string | null;
   createdAt: string;
   updatedAt: string;

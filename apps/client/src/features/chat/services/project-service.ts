@@ -93,6 +93,7 @@ export async function updateProjectTask(data: {
   dueAt?: string;
   parentTaskId?: string | null;
   linkedTaskIds?: string[];
+  linkedPageIds?: string[];
 }): Promise<ITeamProjectTask> {
   const req = await api.post<ITeamProjectTask>("/projects/tasks/update", data);
   return req.data;

@@ -346,38 +346,48 @@ export class AttachmentController {
     }
 
     if (attachment.type === AttachmentType.Chat) {
-      const messageAttachment = await this.messageAttachmentRepo.findByAttachmentId(
-        attachment.id,
-      );
-      if (!messageAttachment) {
-        throw new NotFoundException();
-      }
-
-      let channelMember = await this.channelMemberRepo.getChannelMember(
-        messageAttachment.channelId,
-        user.id,
-      );
-      if (!channelMember) {
-        const channel = await this.channelRepo.findById(
-          messageAttachment.channelId,
-          workspace.id,
+      // Check task attachments first — they use the Chat type but have no message record
+      const taskAttachment = await this.taskAttachmentRepo.findByAttachmentId(attachment.id);
+      if (taskAttachment) {
+        const task = await this.teamProjectRepo.findTaskById(taskAttachment.taskId, workspace.id);
+        if (!task) throw new NotFoundException();
+        const teamMember = await this.teamMemberRepo.getTeamMember(task.teamId, user.id);
+        if (!teamMember) throw new NotFoundException();
+        // access granted — fall through to sendFileResponse
+      } else {
+        const messageAttachment = await this.messageAttachmentRepo.findByAttachmentId(
+          attachment.id,
         );
-        if (channel?.type === 'public' && channel.teamId) {
-          const teamMember = await this.teamMemberRepo.getTeamMember(
-            channel.teamId,
-            user.id,
-          );
-          if (teamMember) {
-            await this.channelMemberRepo.ensureChannelMember({
-              channelId: messageAttachment.channelId,
-              userId: user.id,
-              role: 'member',
-            });
-            channelMember = { channelId: messageAttachment.channelId, userId: user.id } as any;
-          }
-        }
-        if (!channelMember) {
+        if (!messageAttachment) {
           throw new NotFoundException();
+        }
+
+        let channelMember = await this.channelMemberRepo.getChannelMember(
+          messageAttachment.channelId,
+          user.id,
+        );
+        if (!channelMember) {
+          const channel = await this.channelRepo.findById(
+            messageAttachment.channelId,
+            workspace.id,
+          );
+          if (channel?.type === 'public' && channel.teamId) {
+            const teamMember = await this.teamMemberRepo.getTeamMember(
+              channel.teamId,
+              user.id,
+            );
+            if (teamMember) {
+              await this.channelMemberRepo.ensureChannelMember({
+                channelId: messageAttachment.channelId,
+                userId: user.id,
+                role: 'member',
+              });
+              channelMember = { channelId: messageAttachment.channelId, userId: user.id } as any;
+            }
+          }
+          if (!channelMember) {
+            throw new NotFoundException();
+          }
         }
       }
     } else if (attachment.aiChatId) {

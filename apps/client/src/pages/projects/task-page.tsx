@@ -18,6 +18,7 @@ import {
   TextInput,
   ThemeIcon,
   Tooltip,
+  CopyButton,
 } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -31,10 +32,15 @@ import {
   IconChevronRight,
   IconCircle,
   IconClock,
+  IconExternalLink,
   IconFile,
+  IconFileText,
   IconHistory,
+  IconLink,
   IconPaperclip,
   IconPlus,
+  IconSearch,
+  IconShare,
   IconTag,
   IconTrash,
   IconUser,
@@ -75,8 +81,10 @@ import {
 import { useTeamMembersQuery } from "@/features/chat/queries/team-query";
 import { useUserProjectsQuery } from "@/features/chat/queries/project-query";
 import { TaskDescriptionEditor } from "@/features/chat/components/task-description-editor";
+import { searchPage } from "@/features/search/services/search-service";
+import { IPageSearch } from "@/features/search/types/search.types";
 
-// ─── Constants (shared with panel) ───────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const priorityConfig: Record<ProjectTaskPriority, { label: string; color: string }> = {
   low: { label: "Low", color: "gray" },
@@ -142,6 +150,7 @@ const FIELD_LABELS: Record<string, string> = {
   dueAt: "Due Date",
   tags: "Tags",
   linkedTaskIds: "Linked Issues",
+  linkedPageIds: "Linked Pages",
   description: "Description",
 };
 
@@ -207,7 +216,6 @@ export default function TaskPage() {
     });
   };
 
-  // Parent task breadcrumb
   const parentTask = task?.parentTaskId ? tasks.find((t) => t.id === task.parentTaskId) : null;
 
   if (!task || !project) {
@@ -229,68 +237,103 @@ export default function TaskPage() {
 
   const TypeIcon = issueTypeConfig[task.issueType]?.icon ?? IconCheckbox;
   const typeCfg = issueTypeConfig[task.issueType];
+  const priCfg = priorityConfig[task.priority];
+  const statusCfg = getStatusCfg(task.status, projectStatuses);
+  const ticketLabel = task.ticketNumber ? `#${task.ticketNumber}` : null;
+  const shareUrl = window.location.href;
 
   return (
     <>
       <Helmet>
         <title>
-          {task.title} - {getAppName()}
+          {ticketLabel ? `${ticketLabel} ${task.title}` : task.title} - {getAppName()}
         </title>
       </Helmet>
 
-      {/* Top bar with breadcrumbs */}
+      {/* Top bar */}
       <Box
-        px="lg"
-        py="sm"
+        px="md"
+        py="xs"
         style={{
           borderBottom: "1px solid var(--mantine-color-default-border)",
           background: "var(--mantine-color-body)",
           flexShrink: 0,
         }}
       >
-        <Group gap="xs" wrap="nowrap">
-          <ActionIcon variant="subtle" size="sm" component={Link} to="/projects">
-            <IconChevronLeft size={16} />
-          </ActionIcon>
-          <Breadcrumbs separator="/" style={{ fontSize: 13 }}>
-            <Anchor component={Link} to="/projects" size="sm" c="dimmed">
-              {t("Projects")}
-            </Anchor>
-            <Anchor
-              component={Link}
-              to="/projects"
-              size="sm"
-              c="dimmed"
-              onClick={() => navigate("/projects")}
-            >
-              {project.name}
-            </Anchor>
-            {parentTask && (
-              <Anchor
-                component={Link}
-                to={`/projects/${projectId}/tasks/${parentTask.id}`}
-                size="sm"
-                c="dimmed"
-              >
-                {parentTask.title}
+        <Group justify="space-between" wrap="nowrap">
+          <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+            <ActionIcon variant="subtle" size="sm" component={Link} to="/projects">
+              <IconChevronLeft size={16} />
+            </ActionIcon>
+            <Breadcrumbs separator="/" style={{ fontSize: 13, minWidth: 0 }}>
+              <Anchor component={Link} to="/projects" size="sm" c="dimmed">
+                {t("Projects")}
               </Anchor>
-            )}
-            <Text size="sm" fw={500} lineClamp={1} style={{ maxWidth: 300 }}>
-              {task.title}
-            </Text>
-          </Breadcrumbs>
-          <Box style={{ marginLeft: "auto" }}>
-            <Group gap="xs">
-              <Badge
-                variant="light"
-                size="sm"
-                color={typeCfg?.color ?? "teal"}
-                leftSection={<TypeIcon size={10} />}
-              >
-                {task.parentTaskId ? "Sub-task" : t(typeCfg?.label ?? task.issueType)}
-              </Badge>
-            </Group>
-          </Box>
+              <Anchor component={Link} to="/projects" size="sm" c="dimmed">
+                {project.name}
+              </Anchor>
+              {parentTask && (
+                <Anchor
+                  component={Link}
+                  to={`/projects/${projectId}/tasks/${parentTask.id}`}
+                  size="sm"
+                  c="dimmed"
+                >
+                  {parentTask.ticketNumber ? `#${parentTask.ticketNumber}` : parentTask.title}
+                </Anchor>
+              )}
+              <Text size="sm" fw={500} lineClamp={1} style={{ maxWidth: 260 }}>
+                {ticketLabel && <Text span c="dimmed" mr={4}>{ticketLabel}</Text>}
+                {task.title}
+              </Text>
+            </Breadcrumbs>
+          </Group>
+
+          <Group gap="xs" wrap="nowrap">
+            {/* Status badge */}
+            <Badge
+              variant="light"
+              size="sm"
+              color={statusCfg.color}
+            >
+              {statusCfg.label}
+            </Badge>
+
+            {/* Priority badge */}
+            <Badge
+              variant="dot"
+              size="sm"
+              color={priCfg?.color ?? "gray"}
+            >
+              {priCfg?.label ?? task.priority}
+            </Badge>
+
+            {/* Issue type */}
+            <Badge
+              variant="light"
+              size="sm"
+              color={typeCfg?.color ?? "teal"}
+              leftSection={<TypeIcon size={10} />}
+            >
+              {task.parentTaskId ? "Sub-task" : t(typeCfg?.label ?? task.issueType)}
+            </Badge>
+
+            {/* Share link */}
+            <CopyButton value={shareUrl} timeout={2000}>
+              {({ copied, copy }) => (
+                <Tooltip label={copied ? t("Link copied!") : t("Copy link")} withArrow>
+                  <ActionIcon
+                    variant={copied ? "filled" : "subtle"}
+                    color={copied ? "green" : "gray"}
+                    size="sm"
+                    onClick={copy}
+                  >
+                    {copied ? <IconCheck size={14} /> : <IconShare size={14} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+          </Group>
         </Group>
       </Box>
 
@@ -298,7 +341,7 @@ export default function TaskPage() {
       <Box
         style={{
           display: "flex",
-          height: "calc(100% - 53px)",
+          height: "calc(100% - 49px)",
           overflow: "hidden",
         }}
       >
@@ -307,7 +350,7 @@ export default function TaskPage() {
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "24px 32px",
+            padding: "28px 36px",
             minWidth: 0,
           }}
         >
@@ -340,7 +383,7 @@ export default function TaskPage() {
         {/* Right: Meta sidebar */}
         <Box
           style={{
-            width: 300,
+            width: 280,
             flexShrink: 0,
             borderLeft: "1px solid var(--mantine-color-default-border)",
             overflowY: "auto",
@@ -350,10 +393,12 @@ export default function TaskPage() {
         >
           <TaskMetaSidebar
             task={task}
+            projectId={projectId}
             projectStatuses={projectStatuses}
             projectSprints={projectSprints}
             projectTags={projectTags}
             memberOptions={memberOptions}
+            shareUrl={shareUrl}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
           />
@@ -446,47 +491,76 @@ function TaskMainContent({
   };
 
   const attachments = (task as any).attachments as ITaskAttachment[] | undefined;
-
-  // Title editing
-  const titleEl = editingTitle ? (
-    <TextInput
-      value={titleValue}
-      onChange={(e) => setTitleValue(e.currentTarget.value)}
-      onBlur={handleSaveTitle}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") { e.preventDefault(); handleSaveTitle(); }
-        if (e.key === "Escape") { setTitleValue(task.title); setEditingTitle(false); }
-      }}
-      autoFocus
-      size="xl"
-      styles={{ input: { fontSize: 24, fontWeight: 700, border: "none", padding: 0, background: "transparent" } }}
-    />
-  ) : (
-    <Text
-      fw={700}
-      size="xl"
-      onClick={() => setEditingTitle(true)}
-      style={{ cursor: "text", lineHeight: 1.3, fontSize: 24 }}
-    >
-      {task.title}
-    </Text>
-  );
+  const typeCfg = issueTypeConfig[task.issueType];
+  const priCfg = priorityConfig[task.priority];
+  const ticketLabel = task.ticketNumber ? `#${task.ticketNumber}` : null;
 
   return (
     <Stack gap="xl">
+      {/* Ticket number + type breadcrumb */}
+      <Group gap="xs" wrap="nowrap">
+        {ticketLabel && (
+          <Badge
+            size="lg"
+            variant="outline"
+            color="gray"
+            radius="sm"
+            style={{ fontFamily: "monospace", fontWeight: 700, letterSpacing: 1 }}
+          >
+            {ticketLabel}
+          </Badge>
+        )}
+        <Badge
+          size="sm"
+          variant="light"
+          color={typeCfg?.color ?? "teal"}
+          leftSection={typeCfg ? <typeCfg.icon size={10} /> : null}
+        >
+          {task.parentTaskId ? "Sub-task" : t(typeCfg?.label ?? task.issueType)}
+        </Badge>
+        <Badge size="sm" variant="dot" color={priCfg?.color ?? "gray"}>
+          {priCfg?.label ?? task.priority}
+        </Badge>
+        <Text size="xs" c="dimmed" style={{ marginLeft: "auto" }}>
+          {formatDateTime(task.createdAt)}
+        </Text>
+      </Group>
+
       {/* Title */}
-      {titleEl}
+      {editingTitle ? (
+        <TextInput
+          value={titleValue}
+          onChange={(e) => setTitleValue(e.currentTarget.value)}
+          onBlur={handleSaveTitle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); handleSaveTitle(); }
+            if (e.key === "Escape") { setTitleValue(task.title); setEditingTitle(false); }
+          }}
+          autoFocus
+          size="xl"
+          styles={{ input: { fontSize: 24, fontWeight: 700, border: "none", padding: 0, background: "transparent" } }}
+        />
+      ) : (
+        <Text
+          fw={700}
+          size="xl"
+          onClick={() => setEditingTitle(true)}
+          style={{ cursor: "text", lineHeight: 1.3, fontSize: 24 }}
+        >
+          {task.title}
+        </Text>
+      )}
 
       {/* Description */}
       <Box>
-        <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={6}>
+        <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={8}>
           {t("Description")}
         </Text>
         <TaskDescriptionEditor
           value={descValue}
           onChange={setDescValue}
           onBlur={handleDescBlur}
-          placeholder={t("Add a description...")}
+          placeholder={t("Add a rich description... Supports formatting, headings, code blocks, and more.")}
         />
       </Box>
 
@@ -509,11 +583,17 @@ function TaskMainContent({
         onOpenTask={onOpenTask}
       />
 
+      {/* Linked Pages */}
+      <LinkedPagesSection
+        task={task}
+        onUpdateTask={onUpdateTask}
+      />
+
       {/* Attachments */}
       <Box>
-        <Group justify="space-between" mb={6}>
-          <Group gap={4}>
-            <IconPaperclip size={14} />
+        <Group justify="space-between" mb={8}>
+          <Group gap={6}>
+            <IconPaperclip size={14} color="var(--mantine-color-dimmed)" />
             <Text size="xs" c="dimmed" fw={600} tt="uppercase">
               {t("Attachments")}
               {attachments && attachments.length > 0 && (
@@ -538,27 +618,45 @@ function TaskMainContent({
               const url = getFileUrl(`/files/${att.id}/${att.fileName}`);
               const isImage = att.mimeType?.startsWith("image/");
               return (
-                <Paper key={att.id} withBorder radius="sm" p="xs">
+                <Paper key={att.id} withBorder radius="sm" p="sm">
                   <Group justify="space-between" wrap="nowrap">
                     {isImage ? (
-                      <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-                        <img src={url} alt={att.fileName} style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4, flexShrink: 0 }} />
-                        <Anchor href={url} target="_blank" size="xs" truncate style={{ flex: 1 }}>{att.fileName}</Anchor>
+                      <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                        <Box
+                          style={{
+                            width: 60,
+                            height: 60,
+                            flexShrink: 0,
+                            borderRadius: 6,
+                            overflow: "hidden",
+                            border: "1px solid var(--mantine-color-default-border)",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => window.open(url, "_blank")}
+                        >
+                          <img src={url} alt={att.fileName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </Box>
+                        <Box style={{ minWidth: 0 }}>
+                          <Anchor href={url} target="_blank" size="xs" truncate fw={500}>
+                            {att.fileName}
+                          </Anchor>
+                          <Text size="xs" c="dimmed">{formatBytes(att.fileSize)}</Text>
+                        </Box>
                       </Group>
                     ) : (
-                      <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-                        <ThemeIcon size={32} variant="light" color="blue" radius="sm"><IconFile size={18} /></ThemeIcon>
+                      <Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+                        <ThemeIcon size={40} variant="light" color="blue" radius="sm"><IconFile size={22} /></ThemeIcon>
                         <div style={{ minWidth: 0 }}>
-                          <Anchor href={url} target="_blank" size="xs" truncate>{att.fileName}</Anchor>
+                          <Anchor href={url} target="_blank" size="xs" truncate fw={500}>{att.fileName}</Anchor>
                           <Text size="xs" c="dimmed">{formatBytes(att.fileSize)}</Text>
                         </div>
                       </Group>
                     )}
                     <ActionIcon
-                      size="xs" variant="subtle" color="red"
+                      size="sm" variant="subtle" color="red"
                       onClick={() => deleteAttachmentMutation.mutate({ taskId: task.id, projectId: project.id, attachmentId: att.id })}
                     >
-                      <IconX size={12} />
+                      <IconX size={14} />
                     </ActionIcon>
                   </Group>
                 </Paper>
@@ -572,13 +670,15 @@ function TaskMainContent({
 
       {/* Comments */}
       <Box>
-        <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={8}>
-          {t("Comments")} {comments.length > 0 && `(${comments.length})`}
-        </Text>
-        <Stack gap="xs">
+        <Group gap={6} mb={10}>
+          <Text size="xs" c="dimmed" fw={600} tt="uppercase">
+            {t("Comments")} {comments.length > 0 && `(${comments.length})`}
+          </Text>
+        </Group>
+        <Stack gap="sm">
           {comments.map((item) => <CommentItem key={item.id} comment={item} />)}
           <TextInput
-            placeholder={t("Add a comment...")}
+            placeholder={t("Add a comment... (Enter to submit)")}
             value={comment}
             onChange={(e) => setComment(e.currentTarget.value)}
             size="sm"
@@ -629,18 +729,22 @@ function TaskMainContent({
 
 function TaskMetaSidebar({
   task,
+  projectId,
   projectStatuses,
   projectSprints,
   projectTags,
   memberOptions,
+  shareUrl,
   onUpdateTask,
   onDeleteTask,
 }: {
   task: ITeamProjectTask;
+  projectId?: string;
   projectStatuses: IProjectStatus[];
   projectSprints: ISprint[];
   projectTags: string[];
   memberOptions: { value: string; label: string }[];
+  shareUrl: string;
   onUpdateTask: (data: Partial<ITeamProjectTask>) => void;
   onDeleteTask: () => void;
 }) {
@@ -648,6 +752,7 @@ function TaskMetaSidebar({
   const [tagSearch, setTagSearch] = useState("");
 
   const statusCfg = getStatusCfg(task.status, projectStatuses);
+  const priCfg = priorityConfig[task.priority];
   const statusOptions = projectStatuses.map((s) => ({ value: s.id, label: s.label }));
   const sprintOptions = [
     ...new Set([...projectSprints.map((s) => s.name), ...(task.sprint ? [task.sprint] : [])]),
@@ -666,6 +771,33 @@ function TaskMetaSidebar({
 
   return (
     <Stack gap="xs">
+      {/* Ticket ID */}
+      {task.ticketNumber && (
+        <Box mb="sm">
+          <Text size="xs" c="dimmed" fw={500} mb={4}>Ticket ID</Text>
+          <Group gap="xs">
+            <Badge
+              variant="outline"
+              color="gray"
+              radius="sm"
+              style={{ fontFamily: "monospace", fontWeight: 700 }}
+            >
+              #{task.ticketNumber}
+            </Badge>
+            <CopyButton value={shareUrl} timeout={2000}>
+              {({ copied, copy }) => (
+                <Tooltip label={copied ? "Copied!" : "Copy shareable link"} withArrow>
+                  <ActionIcon size="xs" variant={copied ? "filled" : "subtle"} color={copied ? "green" : "gray"} onClick={copy}>
+                    {copied ? <IconCheck size={10} /> : <IconLink size={10} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+          </Group>
+        </Box>
+      )}
+
+      <Divider my={4} />
       <Text size="xs" fw={700} tt="uppercase" c="dimmed" mb={4}>{t("Details")}</Text>
 
       <MetaRow icon={IconCircle} label={t("Status")}>
@@ -689,6 +821,9 @@ function TaskMetaSidebar({
             label: t(priorityConfig[o.value as ProjectTaskPriority].label),
           }))}
           onChange={(v) => onUpdateTask({ priority: (v as ProjectTaskPriority) ?? "medium" })}
+          leftSection={
+            <Box style={{ width: 8, height: 8, borderRadius: "50%", background: `var(--mantine-color-${priCfg?.color ?? "gray"}-5)` }} />
+          }
         />
       </MetaRow>
 
@@ -819,6 +954,10 @@ function SubtasksSection({
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [adding, setAdding] = useState(false);
   const subtasks = allTasks.filter((t) => t.parentTaskId === task.id);
+  const done = subtasks.filter((s) => {
+    const sc = projectStatuses.find((ps) => ps.id === s.status);
+    return sc?.isDone;
+  }).length;
 
   const handleAdd = () => {
     const title = newSubtaskTitle.trim();
@@ -830,12 +969,14 @@ function SubtasksSection({
 
   return (
     <Box>
-      <Group justify="space-between" mb={6}>
-        <Group gap={4}>
-          <IconCheckbox size={14} />
+      <Group justify="space-between" mb={8}>
+        <Group gap={6}>
+          <IconCheckbox size={14} color="var(--mantine-color-dimmed)" />
           <Text size="xs" c="dimmed" fw={600} tt="uppercase">
             {t("Sub-tasks")}
-            {subtasks.length > 0 && <Badge size="xs" variant="light" ml={4}>{subtasks.length}</Badge>}
+            {subtasks.length > 0 && (
+              <Text span ml={6} size="xs" c="dimmed">({done}/{subtasks.length})</Text>
+            )}
           </Text>
         </Group>
         <Button size="compact-xs" variant="subtle" leftSection={<IconPlus size={12} />} onClick={() => setAdding(true)}>
@@ -851,12 +992,20 @@ function SubtasksSection({
             <Paper
               key={sub.id} withBorder radius="sm" px="sm" py={8}
               onClick={() => onOpenTask(sub.id)}
-              style={{ cursor: "pointer", borderLeft: `3px solid var(--mantine-color-${subTypeCfg.color}-4)` }}
+              style={{
+                cursor: "pointer",
+                borderLeft: `3px solid var(--mantine-color-${subTypeCfg.color}-4)`,
+              }}
             >
               <Group gap="xs" wrap="nowrap">
                 <ThemeIcon size={16} color={subTypeCfg.color} variant="light" radius="sm">
                   <SubIcon size={10} />
                 </ThemeIcon>
+                {sub.ticketNumber && (
+                  <Text size="xs" c="dimmed" fw={600} style={{ fontFamily: "monospace", flexShrink: 0 }}>
+                    #{sub.ticketNumber}
+                  </Text>
+                )}
                 <Text size="sm" style={{ flex: 1 }} truncate>{sub.title}</Text>
                 <Badge size="xs" variant="dot" color={statusCfg.color}>{statusCfg.label}</Badge>
               </Group>
@@ -920,56 +1069,52 @@ function LinkedTasksSection({
 
   return (
     <Box>
-      <Group justify="space-between" mb={6}>
-        <Group gap={4}>
-          <IconFile size={14} />
+      <Group justify="space-between" mb={8}>
+        <Group gap={6}>
+          <IconLink size={14} color="var(--mantine-color-dimmed)" />
           <Text size="xs" c="dimmed" fw={600} tt="uppercase">
             {t("Linked issues")}
             {linkedTasks.length > 0 && <Badge size="xs" variant="light" ml={4}>{linkedTasks.length}</Badge>}
           </Text>
         </Group>
         <Box style={{ position: "relative" }}>
-          <Button
-            size="compact-xs"
-            variant="subtle"
-            leftSection={<IconPlus size={12} />}
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <Button size="compact-xs" variant="subtle" leftSection={<IconPlus size={12} />} onClick={() => setMenuOpen(!menuOpen)}>
             {t("Link")}
           </Button>
           {menuOpen && (
             <Paper
-              withBorder
-              shadow="md"
-              radius="sm"
-              p="xs"
-              style={{ position: "absolute", right: 0, top: "100%", zIndex: 200, width: 260 }}
+              withBorder shadow="md" radius="sm" p="xs"
+              style={{ position: "absolute", right: 0, top: "100%", zIndex: 200, width: 280 }}
             >
               <TextInput
                 size="xs"
                 placeholder={t("Search issues...")}
+                leftSection={<IconSearch size={12} />}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.currentTarget.value)}
                 autoFocus
                 mb="xs"
               />
               {filtered.length === 0 ? (
-                <Text size="xs" c="dimmed">{t("No issues found")}</Text>
+                <Text size="xs" c="dimmed" py="xs">{t("No issues found")}</Text>
               ) : (
                 <Stack gap={2}>
-                  {filtered.map((opt) => (
-                    <Box
-                      key={opt.id}
-                      px="xs" py={4}
-                      onClick={() => handleLink(opt.id)}
-                      style={{
-                        cursor: "pointer", borderRadius: 4,
-                        "&:hover": { background: "var(--mantine-color-default-hover)" },
-                      }}
-                    >
-                      <Text size="xs" truncate>{opt.title}</Text>
-                    </Box>
-                  ))}
+                  {filtered.map((opt) => {
+                    const tc = issueTypeConfig[opt.issueType] ?? issueTypeConfig.task;
+                    const TI = tc.icon;
+                    return (
+                      <Box
+                        key={opt.id}
+                        px="xs" py={6}
+                        onClick={() => handleLink(opt.id)}
+                        style={{ cursor: "pointer", borderRadius: 4, display: "flex", alignItems: "center", gap: 8 }}
+                      >
+                        <ThemeIcon size={16} color={tc.color} variant="light" radius="sm"><TI size={10} /></ThemeIcon>
+                        {opt.ticketNumber && <Text size="xs" c="dimmed" fw={600} style={{ flexShrink: 0, fontFamily: "monospace" }}>#{opt.ticketNumber}</Text>}
+                        <Text size="xs" truncate style={{ flex: 1 }}>{opt.title}</Text>
+                      </Box>
+                    );
+                  })}
                 </Stack>
               )}
               <Button size="xs" variant="subtle" mt="xs" onClick={() => setMenuOpen(false)} fullWidth>{t("Close")}</Button>
@@ -977,9 +1122,6 @@ function LinkedTasksSection({
           )}
         </Box>
       </Group>
-      {linkedIds.length > 0 && linkedTasks.length === 0 && (
-        <Text size="xs" c="dimmed" fs="italic">{t("Linked tasks may be in a different project or were deleted.")}</Text>
-      )}
       <Stack gap={4}>
         {linkedTasks.map((linked) => {
           const typeCfg = issueTypeConfig[linked.issueType] ?? issueTypeConfig.task;
@@ -990,6 +1132,11 @@ function LinkedTasksSection({
                 <ThemeIcon size={16} color={typeCfg.color} variant="light" radius="sm">
                   <LinkedIcon size={10} />
                 </ThemeIcon>
+                {linked.ticketNumber && (
+                  <Text size="xs" c="dimmed" fw={600} style={{ flexShrink: 0, fontFamily: "monospace" }}>
+                    #{linked.ticketNumber}
+                  </Text>
+                )}
                 <Text size="xs" style={{ flex: 1, cursor: "pointer" }} truncate onClick={() => onOpenTask(linked.id)}>
                   {linked.title}
                 </Text>
@@ -1005,17 +1152,172 @@ function LinkedTasksSection({
   );
 }
 
+// ─── Linked Pages section ─────────────────────────────────────────────────────
+
+function LinkedPagesSection({
+  task,
+  onUpdateTask,
+}: {
+  task: ITeamProjectTask;
+  onUpdateTask: (data: Partial<ITeamProjectTask>) => void;
+}) {
+  const { t } = useTranslation();
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState<IPageSearch[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const linkedPageIds: string[] = Array.isArray(task.linkedPageIds) ? task.linkedPageIds : [];
+
+  // We keep a local cache of fetched page info
+  const [pageCache, setPageCache] = useState<Record<string, IPageSearch>>({});
+
+  const handleSearch = async (query: string) => {
+    setSearchValue(query);
+    if (!query.trim()) { setSearchResults([]); return; }
+    setSearching(true);
+    try {
+      const results = await searchPage({ query });
+      setSearchResults(results.filter((p) => !linkedPageIds.includes(p.id)));
+      // Cache results for display
+      const newCache: Record<string, IPageSearch> = { ...pageCache };
+      for (const r of results) newCache[r.id] = r;
+      setPageCache(newCache);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleLink = (page: IPageSearch) => {
+    const newCache = { ...pageCache, [page.id]: page };
+    setPageCache(newCache);
+    onUpdateTask({ linkedPageIds: [...linkedPageIds, page.id] });
+    setSearchValue("");
+    setSearchResults([]);
+    setMenuOpen(false);
+  };
+
+  const handleUnlink = (pageId: string) => {
+    onUpdateTask({ linkedPageIds: linkedPageIds.filter((id) => id !== pageId) });
+  };
+
+  const linkedPages = linkedPageIds
+    .map((id) => pageCache[id])
+    .filter(Boolean) as IPageSearch[];
+
+  return (
+    <Box>
+      <Group justify="space-between" mb={8}>
+        <Group gap={6}>
+          <IconFileText size={14} color="var(--mantine-color-dimmed)" />
+          <Text size="xs" c="dimmed" fw={600} tt="uppercase">
+            {t("Linked pages")}
+            {linkedPageIds.length > 0 && <Badge size="xs" variant="light" ml={4}>{linkedPageIds.length}</Badge>}
+          </Text>
+        </Group>
+        <Box style={{ position: "relative" }}>
+          <Button size="compact-xs" variant="subtle" leftSection={<IconPlus size={12} />} onClick={() => setMenuOpen(!menuOpen)}>
+            {t("Link page")}
+          </Button>
+          {menuOpen && (
+            <Paper
+              withBorder shadow="md" radius="sm" p="xs"
+              style={{ position: "absolute", right: 0, top: "100%", zIndex: 200, width: 300 }}
+            >
+              <TextInput
+                size="xs"
+                placeholder={t("Search space pages...")}
+                leftSection={searching ? <Loader size={12} /> : <IconSearch size={12} />}
+                value={searchValue}
+                onChange={(e) => handleSearch(e.currentTarget.value)}
+                autoFocus
+                mb="xs"
+              />
+              {searchResults.length === 0 && searchValue && !searching && (
+                <Text size="xs" c="dimmed" py="xs">{t("No pages found")}</Text>
+              )}
+              {searchResults.length === 0 && !searchValue && (
+                <Text size="xs" c="dimmed" py="xs">{t("Type to search pages in all spaces...")}</Text>
+              )}
+              {searchResults.length > 0 && (
+                <Stack gap={2}>
+                  {searchResults.slice(0, 8).map((page) => (
+                    <Box
+                      key={page.id}
+                      px="xs" py={6}
+                      onClick={() => handleLink(page)}
+                      style={{ cursor: "pointer", borderRadius: 4, display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <IconFileText size={14} color="var(--mantine-color-blue-5)" />
+                      <Box style={{ flex: 1, minWidth: 0 }}>
+                        <Text size="xs" truncate fw={500}>{page.title || t("Untitled")}</Text>
+                        {page.space?.name && <Text size="xs" c="dimmed">{page.space.name}</Text>}
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              )}
+              <Button size="xs" variant="subtle" mt="xs" onClick={() => setMenuOpen(false)} fullWidth>{t("Close")}</Button>
+            </Paper>
+          )}
+        </Box>
+      </Group>
+      <Stack gap={4}>
+        {linkedPageIds.length > 0 && linkedPages.length < linkedPageIds.length && (
+          <Text size="xs" c="dimmed" fs="italic">
+            {t("Search for a page above to load its title.")}
+          </Text>
+        )}
+        {linkedPages.map((page) => (
+          <Paper key={page.id} withBorder radius="sm" px="sm" py={8}>
+            <Group gap="xs" wrap="nowrap">
+              <IconFileText size={14} color="var(--mantine-color-blue-5)" />
+              <Box style={{ flex: 1, minWidth: 0 }}>
+                <Anchor
+                  href={`/s/${page.space?.slug ?? ""}/${page.slugId}`}
+                  target="_blank"
+                  size="xs"
+                  fw={500}
+                  truncate
+                >
+                  {page.title || t("Untitled")}
+                </Anchor>
+                {page.space?.name && <Text size="xs" c="dimmed">{page.space.name}</Text>}
+              </Box>
+              <ActionIcon size="xs" variant="subtle" href={`/s/${page.space?.slug ?? ""}/${page.slugId}`} component="a" target="_blank">
+                <IconExternalLink size={10} />
+              </ActionIcon>
+              <ActionIcon size="xs" variant="subtle" color="red" onClick={() => handleUnlink(page.id)}>
+                <IconX size={10} />
+              </ActionIcon>
+            </Group>
+          </Paper>
+        ))}
+        {linkedPageIds.length > 0 && linkedPages.length === 0 && (
+          <Text size="xs" c="dimmed" fs="italic">
+            {t("Search above to load the linked pages.")}
+          </Text>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
 // ─── Comment item ─────────────────────────────────────────────────────────────
 
 function CommentItem({ comment }: { comment: ITeamProjectTaskComment }) {
   return (
-    <Paper withBorder radius="sm" p="xs">
-      <Group gap="xs" mb={4} wrap="nowrap">
-        <CustomAvatar size={24} name={comment.user?.name ?? "?"} avatarUrl={comment.user?.avatarUrl} />
-        <Text size="xs" fw={500}>{comment.user?.name ?? "Unknown"}</Text>
-        <Text size="xs" c="dimmed">{formatDateTime(comment.createdAt)}</Text>
+    <Paper withBorder radius="sm" p="sm">
+      <Group gap="xs" mb={6} wrap="nowrap">
+        <CustomAvatar size={28} name={comment.user?.name ?? "?"} avatarUrl={comment.user?.avatarUrl} />
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Text size="xs" fw={600}>{comment.user?.name ?? "Unknown"}</Text>
+          <Text size="xs" c="dimmed">{formatDateTime(comment.createdAt)}</Text>
+        </Box>
       </Group>
-      <Text size="sm" style={{ whiteSpace: "pre-wrap", paddingLeft: 32 }}>{comment.content}</Text>
+      <Box pl={36}>
+        <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>{comment.content}</Text>
+      </Box>
     </Paper>
   );
 }
@@ -1043,7 +1345,7 @@ function HistoryItem({ item }: { item: ITeamProjectTaskHistoryItem }) {
           )}
           {!item.oldValue && item.newValue && (
             <>
-              <Text size="xs" c="dimmed">to</Text>
+              <Text size="xs" c="dimmed">set to</Text>
               <Badge size="xs" variant="filled" color="blue">{item.newValue}</Badge>
             </>
           )}

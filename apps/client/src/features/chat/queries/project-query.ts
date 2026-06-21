@@ -203,6 +203,7 @@ export function useUpdateProjectTaskMutation() {
       dueAt?: string;
       parentTaskId?: string | null;
       linkedTaskIds?: string[];
+      linkedPageIds?: string[];
     }
   >({
     mutationFn: ({ projectId: _projectId, teamId: _teamId, ...data }) =>
