@@ -99,7 +99,7 @@ export function CreateTeamModal({
           />
           <SegmentedControl
             value={type}
-            onChange={setType}
+            onChange={(value) => setType(value as string)}
             data={[
               { value: "open", label: t("Open") },
               { value: "invite_only", label: t("Invite only") },

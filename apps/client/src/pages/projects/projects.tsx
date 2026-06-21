@@ -241,7 +241,7 @@ export default function ProjectsPage() {
                   clearable
                   data={teamOptions}
                   value={teamFilter}
-                  onChange={setTeamFilter}
+                  onChange={(v) => setTeamFilter(v as string | null)}
                 />
               )}
             </>
@@ -599,7 +599,7 @@ function CreateProjectModal({
             label={t("Team")}
             data={teamOptions}
             value={teamId}
-            onChange={setTeamId}
+            onChange={(v) => setTeamId(v as string | null)}
             placeholder={t("Select team")}
             required
             searchable

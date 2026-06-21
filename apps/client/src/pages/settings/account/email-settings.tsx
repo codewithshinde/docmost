@@ -177,7 +177,7 @@ export default function EmailSettings() {
                 <NumberInput
                   label={t("IMAP port")}
                   value={imapPort}
-                  onChange={setImapPort}
+                  onChange={(v) => setImapPort(v as number | string)}
                   min={1}
                   max={65535}
                 />
@@ -198,7 +198,7 @@ export default function EmailSettings() {
                 <NumberInput
                   label={t("SMTP port")}
                   value={smtpPort}
-                  onChange={setSmtpPort}
+                  onChange={(v) => setSmtpPort(v as number | string)}
                   min={1}
                   max={65535}
                 />

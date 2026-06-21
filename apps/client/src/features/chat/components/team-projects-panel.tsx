@@ -480,7 +480,7 @@ export function ProjectTasksView({
                       label: t(o.label),
                     }))}
                     value={filterPriority}
-                    onChange={setFilterPriority}
+                    onChange={(v) => setFilterPriority(v as string | null)}
                   />
                   <Select
                     size="xs"
@@ -492,7 +492,7 @@ export function ProjectTasksView({
                       label: t(o.label),
                     }))}
                     value={filterType}
-                    onChange={setFilterType}
+                    onChange={(v) => setFilterType(v as string | null)}
                   />
                   {sprintOptions.length > 0 && (
                     <Select
@@ -502,7 +502,7 @@ export function ProjectTasksView({
                       clearable
                       data={sprintOptions}
                       value={filterSprint}
-                      onChange={setFilterSprint}
+                      onChange={(v) => setFilterSprint(v as string | null)}
                     />
                   )}
                   {members && members.length > 0 && (
@@ -513,7 +513,7 @@ export function ProjectTasksView({
                       clearable
                       data={memberOptions}
                       value={filterAssignee}
-                      onChange={setFilterAssignee}
+                      onChange={(v) => setFilterAssignee(v as string | null)}
                     />
                   )}
                   {hasFilters && (
@@ -1913,7 +1913,7 @@ function CreateTaskModal({
             label={t("Assignee")}
             value={assigneeId}
             data={memberOptions}
-            onChange={setAssigneeId}
+            onChange={(v) => setAssigneeId(v as string | null)}
             clearable
             searchable
             placeholder={t("Unassigned")}
@@ -1931,7 +1931,7 @@ function CreateTaskModal({
               label={t("Sprint")}
               value={sprint}
               data={sprintOptions}
-              onChange={setSprint}
+              onChange={(v) => setSprint(v as string | null)}
               clearable
               placeholder={t("None")}
             />
@@ -1948,7 +1948,7 @@ function CreateTaskModal({
             size="sm"
             label={t("Story points")}
             value={storyPoints}
-            onChange={setStoryPoints}
+            onChange={(v) => setStoryPoints(v as string | number)}
             min={0}
             placeholder="0"
           />

@@ -204,7 +204,7 @@ export default function TeamHubPage() {
                 label: group.name,
               }))}
               value={groupId}
-              onChange={setGroupId}
+              onChange={(v) => setGroupId(v as string | null)}
               searchable
               style={{ flex: 1 }}
             />

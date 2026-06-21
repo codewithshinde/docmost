@@ -219,7 +219,7 @@ export function TeamSettingsModal({
             />
             <SegmentedControl
               value={type}
-              onChange={setType}
+              onChange={(value) => setType(value as string)}
               disabled={!isOwner}
               data={[
                 { value: "open", label: t("Open") },
