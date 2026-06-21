@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { ExpressionBuilder, sql } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import {
   InsertableTeamProject,
   InsertableTeamProjectTask,
@@ -11,8 +11,8 @@ import {
   InsertableTeamProjectTaskComment,
   UpdatableTeamProject,
   UpdatableTeamProjectTask,
-} from '@docmost/db/types/entity.types';
-import { DB } from '@docmost/db/types/db';
+} from '@likh/db/types/entity.types';
+import { DB } from '@likh/db/types/db';
 
 @Injectable()
 export class TeamProjectRepo {

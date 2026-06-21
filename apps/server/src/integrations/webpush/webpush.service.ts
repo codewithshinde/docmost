@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as webpush from 'web-push';
 import { EnvironmentService } from '../environment/environment.service';
-import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
+import { PushSubscriptionRepo } from '@likh/db/repos/notification/push-subscription.repo';
 
 @Injectable()
 export class WebPushService implements OnModuleInit {

@@ -19,7 +19,7 @@ import { Popover, Button, ScrollArea, Tooltip } from "@mantine/core";
 import type { Editor } from "@tiptap/react";
 import { useEditorState } from "@tiptap/react";
 import { useTranslation } from "react-i18next";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 import classes from "./bubble-menu.module.css";
 
 interface NodeSelectorProps {

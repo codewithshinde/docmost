@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { AuditRepo } from '@docmost/db/repos/audit/audit.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { AuditRepo } from '@likh/db/repos/audit/audit.repo';
 import { DEFAULT_AUDIT_RETENTION_DAYS } from '../audit.service';
 
 @Injectable()

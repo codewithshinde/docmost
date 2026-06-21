@@ -122,14 +122,14 @@ export function encodeFilePath(filePath: string): string {
     .join('/');
 }
 
-export async function readDocmostMetadata(
+export async function readLikhMetadata(
   extractDir: string,
 ): Promise<ExportMetadata | null> {
-  const metadataPath = path.join(extractDir, 'docmost-metadata.json');
+  const metadataPath = path.join(extractDir, 'likh-metadata.json');
   try {
     const content = await fs.readFile(metadataPath, 'utf-8');
     const metadata = JSON.parse(content) as ExportMetadata;
-    if (metadata.source === 'docmost' && metadata.pages) {
+    if ((metadata.source === 'likh' || metadata.source === 'docmost') && metadata.pages) {
       return metadata;
     }
     return null;

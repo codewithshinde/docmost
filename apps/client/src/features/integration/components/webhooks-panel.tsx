@@ -57,7 +57,7 @@ export function WebhooksPanel() {
       </Group>
       <Text size="sm" c="dimmed" mb="md">
         {t(
-          "Send signed HTTP callbacks when Docmost events happen. Payloads include x-docmost-signature HMAC headers.",
+          "Send signed HTTP callbacks when Likh events happen. Payloads include x-likh-signature HMAC headers.",
         )}
       </Text>
 
@@ -70,7 +70,7 @@ export function WebhooksPanel() {
           />
           <TextInput
             label={t("Endpoint URL")}
-            placeholder="https://example.com/webhooks/docmost"
+            placeholder="https://example.com/webhooks/likh"
             value={url}
             onChange={(e) => setUrl(e.currentTarget.value)}
           />

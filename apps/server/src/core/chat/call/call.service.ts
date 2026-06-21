@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { AccessToken, RoomServiceClient, VideoGrant } from 'livekit-server-sdk';
 import * as jwt from 'jsonwebtoken';
-import { CallRepo } from '@docmost/db/repos/chat/call.repo';
-import { CallParticipantRepo } from '@docmost/db/repos/chat/call-participant.repo';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { CallRepo } from '@likh/db/repos/chat/call.repo';
+import { CallParticipantRepo } from '@likh/db/repos/chat/call-participant.repo';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import { ChannelService } from '../channel/channel.service';
 import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';

@@ -6,7 +6,7 @@ import {
   convertTableNodeToArrayOfRows,
   isEditorReady,
   transpose,
-} from "@docmost/editor-ext";
+} from "@likh/editor-ext";
 import {
   getCellSortText,
   isCellEmpty,

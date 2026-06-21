@@ -66,7 +66,7 @@ export default function McpSettings() {
               components={{
                 anchor: (
                   <Anchor
-                    href="https://docmost.com/docs/user-guide/mcp"
+                    href="https://likh.app/docs/user-guide/mcp"
                     target="_blank"
                     size="sm"
                   />

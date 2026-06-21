@@ -5,12 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
-import { CalendarEventRepo } from '@docmost/db/repos/calendar/calendar-event.repo';
-import { CalendarAttendeeRepo } from '@docmost/db/repos/calendar/calendar-attendee.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
+import { CalendarEventRepo } from '@likh/db/repos/calendar/calendar-event.repo';
+import { CalendarAttendeeRepo } from '@likh/db/repos/calendar/calendar-attendee.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import { ChatWsService } from '../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../ws/chat-ws.constants';
 import { IntegrationSettingsService } from '../../integrations/integration/integration-settings.service';

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import type { Editor } from "@tiptap/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { TableMap } from "@tiptap/pm/tables";
-import { isEditorReady, moveColumn, moveRow } from "@docmost/editor-ext";
+import { isEditorReady, moveColumn, moveRow } from "@likh/editor-ext";
 
 export type MoveDirection = "left" | "right" | "up" | "down";
 

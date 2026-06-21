@@ -1,9 +1,9 @@
 import {
   InsertableUserSession,
   UserSession,
-} from '@docmost/db/types/entity.types';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+} from '@likh/db/types/entity.types';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { dbOrTx } from '@likh/db/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { sql } from 'kysely';

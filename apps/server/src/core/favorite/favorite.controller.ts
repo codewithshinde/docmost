@@ -13,17 +13,17 @@ import { FavoriteService } from './services/favorite.service';
 import { AddFavoriteDto, RemoveFavoriteDto } from './dto/favorite.dto';
 import { FavoriteIdsDto } from './dto/favorite-ids.dto';
 import { ListFavoritesDto } from './dto/list-favorites.dto';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
-import { Page, User, Workspace } from '@docmost/db/types/entity.types';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { Page, User, Workspace } from '@likh/db/types/entity.types';
+import { PageRepo } from '@likh/db/repos/page/page.repo';
+import { SpaceRepo } from '@likh/db/repos/space/space.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
 import { PageAccessService } from '../page/page-access/page-access.service';
-import { TemplateRepo } from '@docmost/db/repos/template/template.repo';
-import { FavoriteType } from '@docmost/db/repos/favorite/favorite.repo';
+import { TemplateRepo } from '@likh/db/repos/template/template.repo';
+import { FavoriteType } from '@likh/db/repos/favorite/favorite.repo';
 
 @UseGuards(JwtAuthGuard)
 @Controller('favorites')

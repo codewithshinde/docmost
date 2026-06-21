@@ -1,18 +1,17 @@
 <div align="center">
-    <h1><b>Docmost</b></h1>
+    <h1><b>Likh</b></h1>
     <p>
         Open-source collaborative wiki and documentation software.
         <br />
-        <a href="https://docmost.com"><strong>Website</strong></a> | 
-        <a href="https://docmost.com/docs"><strong>Documentation</strong></a> |
-        <a href="https://twitter.com/DocmostHQ"><strong>Twitter / X</strong></a>
+        <a href="https://likh.app"><strong>Website</strong></a> | 
+        <a href="https://likh.app/docs"><strong>Documentation</strong></a>
     </p>
 </div>
 <br />
 
 ## Getting started
 
-To get started with Docmost, please refer to our [documentation](https://docmost.com/docs) or try our [cloud version](https://docmost.com/pricing) .
+To get started with Likh, please refer to our [documentation](https://likh.app/docs) or try our [cloud version](https://likh.app/pricing) .
 
 ## Features
 
@@ -31,22 +30,22 @@ To get started with Docmost, please refer to our [documentation](https://docmost
 ### Screenshots
 
 <p align="center">
-<img alt="home" src="https://docmost.com/screenshots/home.png" width="70%">
-<img alt="editor" src="https://docmost.com/screenshots/editor.png" width="70%">
+<img alt="home" src="https://likh.app/screenshots/home.png" width="70%">
+<img alt="editor" src="https://likh.app/screenshots/editor.png" width="70%">
 </p>
 
 ### License
-Docmost core is licensed under the open-source AGPL 3.0 license.  
+Likh core is licensed under the open-source AGPL 3.0 license.  
 Enterprise features are available under an enterprise license (Enterprise Edition).  
 
-All files in the following directories are licensed under the Docmost Enterprise license defined in `packages/ee/License`.
+All files in the following directories are licensed under the Likh Enterprise license defined in `packages/ee/License`.
   - apps/server/src/ee
   - apps/client/src/ee
   - packages/ee
 
 ### Contributing
 
-See the [development documentation](https://docmost.com/docs/self-hosting/development)
+See the [development documentation](https://likh.app/docs/self-hosting/development)
 
 ## Thanks
 Special thanks to;
@@ -59,4 +58,3 @@ Special thanks to;
 <img width="48" alt="Algolia-mark-square-white" src="https://github.com/user-attachments/assets/6ccad04a-9589-4965-b6a1-d5cb1f4f9e94" />
 
 [Algolia](https://www.algolia.com/) for providing full-text search to the docs.
-

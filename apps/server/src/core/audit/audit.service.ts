@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { AuditRepo } from '@docmost/db/repos/audit/audit.repo';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { AuditRepo } from '@likh/db/repos/audit/audit.repo';
+import { WorkspaceRepo } from '@likh/db/repos/workspace/workspace.repo';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import {
   WorkspaceCaslAction,

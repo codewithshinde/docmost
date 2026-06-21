@@ -10,7 +10,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 
 export class ChannelIdDto {
   @IsUUID()

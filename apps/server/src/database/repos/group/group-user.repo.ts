@@ -4,14 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx, executeTx } from '@docmost/db/utils';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { dbOrTx, executeTx } from '@likh/db/utils';
 import { sql } from 'kysely';
-import { GroupUser, InsertableGroupUser } from '@docmost/db/types/entity.types';
+import { GroupUser, InsertableGroupUser } from '@likh/db/types/entity.types';
 import { PaginationOptions } from '../../pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { executeWithCursorPagination } from '@likh/db/pagination/cursor-pagination';
+import { GroupRepo } from '@likh/db/repos/group/group.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
 
 @Injectable()
 export class GroupUserRepo {

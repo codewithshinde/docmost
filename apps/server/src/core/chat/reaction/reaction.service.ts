@@ -3,10 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
-import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
-import { MessageReactionRepo } from '@docmost/db/repos/chat/message-reaction.repo';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { MessageRepo } from '@likh/db/repos/chat/message.repo';
+import { ChannelMemberRepo } from '@likh/db/repos/chat/channel-member.repo';
+import { MessageReactionRepo } from '@likh/db/repos/chat/message-reaction.repo';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';
 import { AddReactionDto, RemoveReactionDto } from './dto/reaction.dto';

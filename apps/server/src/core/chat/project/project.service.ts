@@ -3,15 +3,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
-import { TeamProjectRepo } from '@docmost/db/repos/chat/team-project.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { TeamMemberRepo } from '@likh/db/repos/chat/team-member.repo';
+import { TeamProjectRepo } from '@likh/db/repos/chat/team-project.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
 import {
   TeamProject,
   TeamProjectTask,
   User,
   Workspace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import {
   CreateTeamProjectDto,
   CreateTeamProjectTaskCommentDto,
@@ -20,7 +20,7 @@ import {
   UpdateTeamProjectDto,
   UpdateTeamProjectTaskDto,
 } from './dto/project.dto';
-import { TaskAttachmentRepo } from '@docmost/db/repos/chat/task-attachment.repo';
+import { TaskAttachmentRepo } from '@likh/db/repos/chat/task-attachment.repo';
 
 @Injectable()
 export class ProjectService {

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import { NotificationService } from '../notification.service';
 import { NotificationType } from '../notification.constants';
 import { EnvironmentService } from '../../../integrations/environment/environment.service';
-import { MeetingInviteEmail } from '@docmost/transactional/emails/meeting-invite-email';
+import { MeetingInviteEmail } from '@likh/transactional/emails/meeting-invite-email';
 
 export interface CalendarEventNotificationContext {
   eventId: string;

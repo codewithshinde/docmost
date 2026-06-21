@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import {
   FavoriteRepo,
   FavoriteType,
-} from '@docmost/db/repos/favorite/favorite.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { InsertableFavorite } from '@docmost/db/types/entity.types';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+} from '@likh/db/repos/favorite/favorite.repo';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { InsertableFavorite } from '@likh/db/types/entity.types';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
 
 @Injectable()
 export class FavoriteService {

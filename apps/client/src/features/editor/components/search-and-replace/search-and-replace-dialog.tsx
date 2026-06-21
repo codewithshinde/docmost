@@ -17,7 +17,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useEditor } from "@tiptap/react";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { searchAndReplaceStateAtom } from "@/features/editor/components/search-and-replace/atoms/search-and-replace-state-atom.ts";
 import { useAtom } from "jotai";

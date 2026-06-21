@@ -10,7 +10,7 @@ export type ExportPageMetadata = {
 
 export type ExportMetadata = {
   exportedAt: string;
-  source: 'docmost';
+  source: 'likh' | 'docmost';
   version: string;
   pages: Record<string, ExportPageMetadata>;
 };

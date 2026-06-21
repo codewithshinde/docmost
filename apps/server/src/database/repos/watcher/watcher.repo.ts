@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
 import { KyselyDB, KyselyTransaction } from '../../types/kysely.types';
-import { InsertableWatcher, Watcher } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+import { InsertableWatcher, Watcher } from '@likh/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { executeWithCursorPagination } from '@likh/db/pagination/cursor-pagination';
 import { ExpressionBuilder } from 'kysely';
-import { DB } from '@docmost/db/types/db';
+import { DB } from '@likh/db/types/db';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import { dbOrTx } from '@docmost/db/utils';
+import { dbOrTx } from '@likh/db/utils';
 
 export const WatcherType = {
   PAGE: 'page',

@@ -5,15 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { MessageRepo } from '@docmost/db/repos/chat/message.repo';
-import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
-import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
-import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
-import { MessageMentionRepo } from '@docmost/db/repos/chat/message-mention.repo';
-import { MessageAttachmentRepo } from '@docmost/db/repos/chat/message-attachment.repo';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
-import { Message, User, Workspace } from '@docmost/db/types/entity.types';
+import { MessageRepo } from '@likh/db/repos/chat/message.repo';
+import { ChannelRepo } from '@likh/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@likh/db/repos/chat/channel-member.repo';
+import { TeamMemberRepo } from '@likh/db/repos/chat/team-member.repo';
+import { MessageMentionRepo } from '@likh/db/repos/chat/message-mention.repo';
+import { MessageAttachmentRepo } from '@likh/db/repos/chat/message-attachment.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
+import { Message, User, Workspace } from '@likh/db/types/entity.types';
 import { ChatWsService } from '../../../ws/chat-ws.service';
 import { ChatWsEvent } from '../../../ws/chat-ws.constants';
 import { ChatNotificationService } from '../../notification/services/chat.notification';

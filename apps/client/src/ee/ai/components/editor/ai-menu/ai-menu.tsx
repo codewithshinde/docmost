@@ -21,7 +21,7 @@ import { ResultPreview } from "./result-preview.tsx";
 import classes from "./ai-menu.module.css";
 import { marked } from "marked";
 import { DOMSerializer } from "@tiptap/pm/model";
-import { copyToClipboard, htmlToMarkdown, isEditorReady } from "@docmost/editor-ext";
+import { copyToClipboard, htmlToMarkdown, isEditorReady } from "@likh/editor-ext";
 import { useLocation } from "react-router-dom";
 
 interface EditorAiMenuProps {

@@ -11,7 +11,7 @@ import {
 } from "@/features/comment/atoms/comment-atom";
 import { useTranslation } from "react-i18next";
 import { getRelativeSelection, ySyncPluginKey } from "@tiptap/y-tiptap";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 
 type ReadonlyBubbleMenuProps = {
   editor: Editor;

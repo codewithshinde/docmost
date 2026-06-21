@@ -24,7 +24,7 @@ export function AuthLayout({
       <WorkspaceBranding branding={branding} />
       <Group justify="center" gap={8} className={classes.logo}>
         <img
-          src={logo || branding?.faviconUrl || "/icons/favicon-32x32.png"}
+          src={logo || branding?.faviconUrl || "/icons/likh-logo.svg"}
           alt={appName}
           width={22}
           height={22}

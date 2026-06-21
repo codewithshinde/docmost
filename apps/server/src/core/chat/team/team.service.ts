@@ -5,21 +5,21 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { TeamRepo } from '@docmost/db/repos/chat/team.repo';
-import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
-import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
-import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { TeamRepo } from '@likh/db/repos/chat/team.repo';
+import { TeamMemberRepo } from '@likh/db/repos/chat/team-member.repo';
+import { ChannelRepo } from '@likh/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@likh/db/repos/chat/channel-member.repo';
+import { GroupRepo } from '@likh/db/repos/group/group.repo';
+import { GroupUserRepo } from '@likh/db/repos/group/group-user.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
 import {
   Team,
   TeamMember,
   User,
   Workspace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { slugify } from '../../../common/helpers/slug.utils';
 import { nanoIdGen } from '../../../common/helpers/nanoid.utils';
 import { ChatWsService } from '../../../ws/chat-ws.service';

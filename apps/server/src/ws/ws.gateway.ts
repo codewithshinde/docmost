@@ -11,9 +11,9 @@ import { Server, Socket } from 'socket.io';
 import { TokenService } from '../core/auth/services/token.service';
 import { JwtPayload, JwtType } from '../core/auth/dto/jwt-payload';
 import { OnModuleDestroy } from '@nestjs/common';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
-import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
+import { TeamMemberRepo } from '@likh/db/repos/chat/team-member.repo';
+import { ChannelRepo } from '@likh/db/repos/chat/channel.repo';
 import { WsService } from './ws.service';
 import {
   CHAT_EVENT,

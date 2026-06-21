@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { TableMap } from "@tiptap/pm/tables";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 
 type Scope =
   | { kind: "col"; index: number }

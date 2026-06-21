@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Label } from '@docmost/db/types/entity.types';
-import { LabelRepo, LabelType } from '@docmost/db/repos/label/label.repo';
+import { Label } from '@likh/db/types/entity.types';
+import { LabelRepo, LabelType } from '@likh/db/repos/label/label.repo';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
 import { normalizeLabelName } from './utils';
 
 @Injectable()

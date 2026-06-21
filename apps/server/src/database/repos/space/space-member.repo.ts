@@ -2,19 +2,19 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { dbOrTx } from '@likh/db/utils';
 import { sql } from 'kysely';
 import {
   InsertableSpaceMember,
   SpaceMember,
   UpdatableSpaceMember,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { PaginationOptions } from '../../pagination/pagination-options';
 import { MemberInfo, UserSpaceRole } from './types';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
+import { executeWithCursorPagination } from '@likh/db/pagination/cursor-pagination';
+import { GroupRepo } from '@likh/db/repos/group/group.repo';
+import { SpaceRepo } from '@likh/db/repos/space/space.repo';
 import { withCache } from '../../../common/helpers/with-cache';
 import {
   CacheKey,

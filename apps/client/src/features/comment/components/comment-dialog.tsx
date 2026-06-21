@@ -15,7 +15,7 @@ import { currentUserAtom } from "@/features/user/atoms/current-user-atom";
 import { useCreateCommentMutation } from "@/features/comment/queries/comment-query";
 import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
 import { useEditor } from "@tiptap/react";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 import { CustomAvatar } from "@/components/ui/custom-avatar.tsx";
 import { useTranslation } from "react-i18next";
 

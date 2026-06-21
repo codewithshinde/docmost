@@ -1,11 +1,11 @@
 ---
 name: project-overview
-description: Likh (Docmost fork) tech stack, monorepo structure, key patterns
+description: Likh tech stack, monorepo structure, key patterns (fully rebranded from Docmost)
 metadata:
   type: project
 ---
 
-**Likh** is a fork of Docmost rebranded as "Likh" - a team collaboration platform.
+**Likh** is a fully rebranded fork of Docmost - a team collaboration platform. All "Docmost" references have been replaced with "Likh".
 
 Stack: NestJS (Fastify) + Kysely ORM (PostgreSQL) backend, React + Vite + Mantine UI v8 + TanStack React Query v5 frontend.
 

@@ -11,7 +11,7 @@ import * as nodemailer from 'nodemailer';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import WorkspaceAbilityFactory from '../../core/casl/abilities/workspace-ability.factory';
 import {
   WorkspaceCaslAction,

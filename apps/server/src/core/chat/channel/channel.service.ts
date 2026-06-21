@@ -5,18 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { ChannelRepo } from '@docmost/db/repos/chat/channel.repo';
-import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
-import { TeamMemberRepo } from '@docmost/db/repos/chat/team-member.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { ChannelRepo } from '@likh/db/repos/chat/channel.repo';
+import { ChannelMemberRepo } from '@likh/db/repos/chat/channel-member.repo';
+import { TeamMemberRepo } from '@likh/db/repos/chat/team-member.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
 import {
   Channel,
   ChannelMember,
   User,
   Workspace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { slugify } from '../../../common/helpers/slug.utils';
 import { nanoIdGen } from '../../../common/helpers/nanoid.utils';
 import { ChatWsService } from '../../../ws/chat-ws.service';

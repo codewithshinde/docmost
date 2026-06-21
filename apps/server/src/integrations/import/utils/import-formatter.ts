@@ -1,8 +1,8 @@
-import { getEmbedUrlAndProvider } from '@docmost/editor-ext';
+import { getEmbedUrlAndProvider } from '@likh/editor-ext';
 import { Logger } from '@nestjs/common';
 import * as path from 'path';
 import { v7 } from 'uuid';
-import { InsertableBacklink } from '@docmost/db/types/entity.types';
+import { InsertableBacklink } from '@likh/db/types/entity.types';
 import { Cheerio, CheerioAPI, load } from 'cheerio';
 import slugify from '@sindresorhus/slugify';
 import { normalizeTableColumnWidths } from './table-utils';

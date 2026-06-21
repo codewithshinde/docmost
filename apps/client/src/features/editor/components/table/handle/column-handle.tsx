@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useTableHandleDrag } from "./hooks/use-table-handle-drag";
 import { useColumnRowMenuLifecycle } from "./hooks/use-column-row-menu-lifecycle";
 import { ColumnHandleMenu } from "./menus/column-handle-menu";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 import classes from "./handle.module.css";
 
 interface ColumnHandleProps {
