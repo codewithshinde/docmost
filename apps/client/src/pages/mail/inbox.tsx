@@ -6,6 +6,7 @@ import { Button, Center, Loader, Text } from "@mantine/core";
 import { IconMail, IconSettings } from "@tabler/icons-react";
 import { getAppName } from "@/lib/config.ts";
 import { useMailAccountQuery } from "@/features/mail-account/queries/mail-account-query";
+import { MailSidebar } from "@/features/mail-account/components/mail-sidebar";
 import { MailMessageList } from "@/features/mail-account/components/mail-message-list";
 import { MailMessageReader } from "@/features/mail-account/components/mail-message-reader";
 import {
@@ -14,10 +15,13 @@ import {
 } from "@/features/mail-account/components/compose-mail-modal";
 import classes from "@/features/mail-account/styles/inbox.module.css";
 
+type FolderKey = "inbox" | "sent" | "archive" | "trash";
+
 export default function Inbox() {
   const { t } = useTranslation();
   const { data: account, isLoading } = useMailAccountQuery();
   const [selectedUid, setSelectedUid] = useState<number | null>(null);
+  const [folder, setFolder] = useState<FolderKey>("inbox");
   const [composeOpened, setComposeOpened] = useState(false);
   const [composeInitialValues, setComposeInitialValues] = useState<
     ComposeMailInitialValues | undefined
@@ -45,9 +49,7 @@ export default function Inbox() {
           <IconMail size={40} stroke={1.5} />
           <Text fw={600}>{t("No email account connected")}</Text>
           <Text size="sm">
-            {t(
-              "Connect your mailbox to read your email inside this app.",
-            )}
+            {t("Connect your mailbox to read your email inside this app.")}
           </Text>
           <Button
             component={Link}
@@ -59,10 +61,14 @@ export default function Inbox() {
         </div>
       ) : (
         <>
+          <MailSidebar
+            folder={folder}
+            onFolderChange={setFolder}
+            onCompose={() => openCompose()}
+          />
           <MailMessageList
             selectedUid={selectedUid}
             onSelect={setSelectedUid}
-            onCompose={() => openCompose()}
           />
           <MailMessageReader uid={selectedUid} onCompose={openCompose} />
           <ComposeMailModal

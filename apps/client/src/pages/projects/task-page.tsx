@@ -9,6 +9,7 @@ import {
   Divider,
   Group,
   Loader,
+  Modal,
   MultiSelect,
   NumberInput,
   Paper,
@@ -18,7 +19,6 @@ import {
   TextInput,
   ThemeIcon,
   Tooltip,
-  CopyButton,
 } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -38,6 +38,7 @@ import {
   IconHistory,
   IconLink,
   IconPaperclip,
+  IconPencil,
   IconPlus,
   IconSearch,
   IconShare,
@@ -217,6 +218,25 @@ export default function TaskPage() {
   };
 
   const parentTask = task?.parentTaskId ? tasks.find((t) => t.id === task.parentTaskId) : null;
+  const shareUrl = window.location.href;
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const copyShareUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = shareUrl;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+    setCopiedLink(true);
+    window.setTimeout(() => setCopiedLink(false), 1800);
+  };
 
   if (!task || !project) {
     return (
@@ -240,7 +260,6 @@ export default function TaskPage() {
   const priCfg = priorityConfig[task.priority];
   const statusCfg = getStatusCfg(task.status, projectStatuses);
   const ticketLabel = task.ticketNumber ? `#${task.ticketNumber}` : null;
-  const shareUrl = window.location.href;
 
   return (
     <>
@@ -319,20 +338,16 @@ export default function TaskPage() {
             </Badge>
 
             {/* Share link */}
-            <CopyButton value={shareUrl} timeout={2000}>
-              {({ copied, copy }) => (
-                <Tooltip label={copied ? t("Link copied!") : t("Copy link")} withArrow>
-                  <ActionIcon
-                    variant={copied ? "filled" : "subtle"}
-                    color={copied ? "green" : "gray"}
-                    size="sm"
-                    onClick={copy}
-                  >
-                    {copied ? <IconCheck size={14} /> : <IconShare size={14} />}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
+            <Tooltip label={copiedLink ? t("Link copied!") : t("Copy link")} withArrow>
+              <ActionIcon
+                variant={copiedLink ? "filled" : "subtle"}
+                color={copiedLink ? "green" : "gray"}
+                size="sm"
+                onClick={copyShareUrl}
+              >
+                {copiedLink ? <IconCheck size={14} /> : <IconShare size={14} />}
+              </ActionIcon>
+            </Tooltip>
           </Group>
         </Group>
       </Box>
@@ -399,6 +414,8 @@ export default function TaskPage() {
             projectTags={projectTags}
             memberOptions={memberOptions}
             shareUrl={shareUrl}
+            onCopyShareUrl={copyShareUrl}
+            copiedLink={copiedLink}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
           />
@@ -436,10 +453,11 @@ function TaskMainContent({
   onCreateSubtask: (data: { title: string; parentTaskId: string }) => void;
 }) {
   const { t } = useTranslation();
-  const [editingTitle, setEditingTitle] = useState(false);
+  const [editingIssue, setEditingIssue] = useState(false);
   const [titleValue, setTitleValue] = useState(task.title);
   const [descValue, setDescValue] = useState(task.description ?? "");
   const descSaved = useRef(task.description ?? "");
+  const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: comments = [] } = useProjectTaskCommentsQuery(task.id);
@@ -455,17 +473,22 @@ function TaskMainContent({
     descSaved.current = task.description ?? "";
   }, [task.id, task.title, task.description]);
 
-  const handleSaveTitle = () => {
-    const trimmed = titleValue.trim();
-    if (trimmed && trimmed !== task.title) onUpdateTask({ title: trimmed });
-    setEditingTitle(false);
-  };
-
-  const handleDescBlur = () => {
+  const handleSaveIssue = () => {
+    const nextTitle = titleValue.trim();
+    const data: Partial<ITeamProjectTask> = {};
+    if (nextTitle && nextTitle !== task.title) data.title = nextTitle;
     if (descValue !== descSaved.current) {
-      onUpdateTask({ description: descValue || null });
+      data.description = descValue || null;
       descSaved.current = descValue;
     }
+    if (Object.keys(data).length > 0) onUpdateTask(data);
+    setEditingIssue(false);
+  };
+
+  const handleCancelIssueEdit = () => {
+    setTitleValue(task.title);
+    setDescValue(task.description ?? "");
+    setEditingIssue(false);
   };
 
   const handleAddComment = async () => {
@@ -476,6 +499,20 @@ function TaskMainContent({
       content: comment.trim(),
     });
     setComment("");
+  };
+
+  const mentionOptions = memberOptions.filter((member) =>
+    comment.includes("@")
+      ? member.label.toLowerCase().includes(comment.split("@").pop()?.toLowerCase() ?? "")
+      : false,
+  ).slice(0, 5);
+
+  const insertMention = (label: string) => {
+    const beforeAt = comment.lastIndexOf("@");
+    const nextComment = beforeAt >= 0
+      ? `${comment.slice(0, beforeAt)}@${label} `
+      : `${comment}@${label} `;
+    setComment(nextComment);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -497,6 +534,24 @@ function TaskMainContent({
 
   return (
     <Stack gap="xl">
+      <Modal
+        opened={!!previewImage}
+        onClose={() => setPreviewImage(null)}
+        title={<Text fw={700} size="sm">{previewImage?.name}</Text>}
+        size="xl"
+        centered
+      >
+        {previewImage && (
+          <Box style={{ display: "flex", justifyContent: "center" }}>
+            <img
+              src={previewImage.url}
+              alt={previewImage.name}
+              style={{ maxWidth: "100%", maxHeight: "72vh", objectFit: "contain", borderRadius: 6 }}
+            />
+          </Box>
+        )}
+      </Modal>
+
       {/* Ticket number + type breadcrumb */}
       <Group gap="xs" wrap="nowrap">
         {ticketLabel && (
@@ -524,17 +579,30 @@ function TaskMainContent({
         <Text size="xs" c="dimmed" style={{ marginLeft: "auto" }}>
           {formatDateTime(task.createdAt)}
         </Text>
+        {editingIssue ? (
+          <Group gap="xs">
+            <Button size="xs" variant="subtle" color="gray" onClick={handleCancelIssueEdit}>
+              {t("Cancel")}
+            </Button>
+            <Button size="xs" onClick={handleSaveIssue} disabled={!titleValue.trim()}>
+              {t("Save issue")}
+            </Button>
+          </Group>
+        ) : (
+          <Button size="xs" variant="light" leftSection={<IconPencil size={12} />} onClick={() => setEditingIssue(true)}>
+            {t("Edit issue")}
+          </Button>
+        )}
       </Group>
 
       {/* Title */}
-      {editingTitle ? (
+      {editingIssue ? (
         <TextInput
           value={titleValue}
           onChange={(e) => setTitleValue(e.currentTarget.value)}
-          onBlur={handleSaveTitle}
           onKeyDown={(e) => {
-            if (e.key === "Enter") { e.preventDefault(); handleSaveTitle(); }
-            if (e.key === "Escape") { setTitleValue(task.title); setEditingTitle(false); }
+            if (e.key === "Enter") { e.preventDefault(); handleSaveIssue(); }
+            if (e.key === "Escape") handleCancelIssueEdit();
           }}
           autoFocus
           size="xl"
@@ -544,8 +612,7 @@ function TaskMainContent({
         <Text
           fw={700}
           size="xl"
-          onClick={() => setEditingTitle(true)}
-          style={{ cursor: "text", lineHeight: 1.3, fontSize: 24 }}
+          style={{ lineHeight: 1.3, fontSize: 24 }}
         >
           {task.title}
         </Text>
@@ -556,12 +623,20 @@ function TaskMainContent({
         <Text size="xs" c="dimmed" fw={600} tt="uppercase" mb={8}>
           {t("Description")}
         </Text>
-        <TaskDescriptionEditor
-          value={descValue}
-          onChange={setDescValue}
-          onBlur={handleDescBlur}
-          placeholder={t("Add a rich description... Supports formatting, headings, code blocks, and more.")}
-        />
+        {editingIssue ? (
+          <TaskDescriptionEditor
+            value={descValue}
+            onChange={setDescValue}
+            placeholder={t("Add a rich description... Supports formatting, headings, code blocks, and more.")}
+          />
+        ) : (
+          <TaskDescriptionEditor
+            value={task.description ?? ""}
+            onChange={() => {}}
+            readOnly
+            placeholder={t("No description yet.")}
+          />
+        )}
       </Box>
 
       {/* Sub-tasks */}
@@ -632,12 +707,12 @@ function TaskMainContent({
                             border: "1px solid var(--mantine-color-default-border)",
                             cursor: "pointer",
                           }}
-                          onClick={() => window.open(url, "_blank")}
+                          onClick={() => setPreviewImage({ url, name: att.fileName })}
                         >
                           <img src={url} alt={att.fileName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </Box>
                         <Box style={{ minWidth: 0 }}>
-                          <Anchor href={url} target="_blank" size="xs" truncate fw={500}>
+                          <Anchor component="button" type="button" onClick={() => setPreviewImage({ url, name: att.fileName })} size="xs" truncate fw={500}>
                             {att.fileName}
                           </Anchor>
                           <Text size="xs" c="dimmed">{formatBytes(att.fileSize)}</Text>
@@ -677,6 +752,23 @@ function TaskMainContent({
         </Group>
         <Stack gap="sm">
           {comments.map((item) => <CommentItem key={item.id} comment={item} />)}
+          {mentionOptions.length > 0 && (
+            <Paper withBorder radius="sm" p={4}>
+              <Group gap={4}>
+                {mentionOptions.map((member) => (
+                  <Button
+                    key={member.value}
+                    size="compact-xs"
+                    variant="subtle"
+                    leftSection={<IconUser size={11} />}
+                    onClick={() => insertMention(member.label)}
+                  >
+                    {member.label}
+                  </Button>
+                ))}
+              </Group>
+            </Paper>
+          )}
           <TextInput
             placeholder={t("Add a comment... (Enter to submit)")}
             value={comment}
@@ -735,6 +827,8 @@ function TaskMetaSidebar({
   projectTags,
   memberOptions,
   shareUrl,
+  onCopyShareUrl,
+  copiedLink,
   onUpdateTask,
   onDeleteTask,
 }: {
@@ -745,6 +839,8 @@ function TaskMetaSidebar({
   projectTags: string[];
   memberOptions: { value: string; label: string }[];
   shareUrl: string;
+  onCopyShareUrl: () => void;
+  copiedLink: boolean;
   onUpdateTask: (data: Partial<ITeamProjectTask>) => void;
   onDeleteTask: () => void;
 }) {
@@ -784,15 +880,11 @@ function TaskMetaSidebar({
             >
               #{task.ticketNumber}
             </Badge>
-            <CopyButton value={shareUrl} timeout={2000}>
-              {({ copied, copy }) => (
-                <Tooltip label={copied ? "Copied!" : "Copy shareable link"} withArrow>
-                  <ActionIcon size="xs" variant={copied ? "filled" : "subtle"} color={copied ? "green" : "gray"} onClick={copy}>
-                    {copied ? <IconCheck size={10} /> : <IconLink size={10} />}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
+            <Tooltip label={copiedLink ? "Copied!" : "Copy shareable link"} withArrow>
+              <ActionIcon size="xs" variant={copiedLink ? "filled" : "subtle"} color={copiedLink ? "green" : "gray"} onClick={onCopyShareUrl}>
+                {copiedLink ? <IconCheck size={10} /> : <IconLink size={10} />}
+              </ActionIcon>
+            </Tooltip>
           </Group>
         </Box>
       )}
@@ -1194,16 +1286,13 @@ function LinkedPagesSection({
     onUpdateTask({ linkedPageIds: [...linkedPageIds, page.id] });
     setSearchValue("");
     setSearchResults([]);
-    setMenuOpen(false);
   };
 
   const handleUnlink = (pageId: string) => {
     onUpdateTask({ linkedPageIds: linkedPageIds.filter((id) => id !== pageId) });
   };
 
-  const linkedPages = linkedPageIds
-    .map((id) => pageCache[id])
-    .filter(Boolean) as IPageSearch[];
+  const linkedPages = linkedPageIds.map((id) => pageCache[id] ?? { id, title: "Linked page", slugId: "", space: {} as IPageSearch["space"] });
 
   return (
     <Box>
@@ -1263,41 +1352,37 @@ function LinkedPagesSection({
         </Box>
       </Group>
       <Stack gap={4}>
-        {linkedPageIds.length > 0 && linkedPages.length < linkedPageIds.length && (
-          <Text size="xs" c="dimmed" fs="italic">
-            {t("Search for a page above to load its title.")}
-          </Text>
-        )}
         {linkedPages.map((page) => (
           <Paper key={page.id} withBorder radius="sm" px="sm" py={8}>
             <Group gap="xs" wrap="nowrap">
               <IconFileText size={14} color="var(--mantine-color-blue-5)" />
               <Box style={{ flex: 1, minWidth: 0 }}>
-                <Anchor
-                  href={`/s/${page.space?.slug ?? ""}/${page.slugId}`}
-                  target="_blank"
-                  size="xs"
-                  fw={500}
-                  truncate
-                >
-                  {page.title || t("Untitled")}
-                </Anchor>
+                {page.slugId ? (
+                  <Anchor
+                    href={`/s/${page.space?.slug ?? ""}/${page.slugId}`}
+                    target="_blank"
+                    size="xs"
+                    fw={500}
+                    truncate
+                  >
+                    {page.title || t("Untitled")}
+                  </Anchor>
+                ) : (
+                  <Text size="xs" fw={500} truncate>{page.title || t("Linked page")}</Text>
+                )}
                 {page.space?.name && <Text size="xs" c="dimmed">{page.space.name}</Text>}
               </Box>
-              <ActionIcon size="xs" variant="subtle" href={`/s/${page.space?.slug ?? ""}/${page.slugId}`} component="a" target="_blank">
-                <IconExternalLink size={10} />
-              </ActionIcon>
+              {page.slugId && (
+                <ActionIcon size="xs" variant="subtle" href={`/s/${page.space?.slug ?? ""}/${page.slugId}`} component="a" target="_blank">
+                  <IconExternalLink size={10} />
+                </ActionIcon>
+              )}
               <ActionIcon size="xs" variant="subtle" color="red" onClick={() => handleUnlink(page.id)}>
                 <IconX size={10} />
               </ActionIcon>
             </Group>
           </Paper>
         ))}
-        {linkedPageIds.length > 0 && linkedPages.length === 0 && (
-          <Text size="xs" c="dimmed" fs="italic">
-            {t("Search above to load the linked pages.")}
-          </Text>
-        )}
       </Stack>
     </Box>
   );

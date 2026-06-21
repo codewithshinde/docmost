@@ -19,6 +19,7 @@ import {
   Select,
   SimpleGrid,
   Stack,
+  Switch,
   Table,
   Text,
   TextInput,
@@ -87,6 +88,7 @@ import {
   useUploadTaskAttachmentMutation,
   useDeleteTaskAttachmentMutation,
 } from "../queries/project-query";
+import { TaskDescriptionEditor } from "./task-description-editor";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -318,6 +320,7 @@ export function ProjectTasksView({
   const [filterType, setFilterType] = useState<string | null>(null);
   const [filterSprint, setFilterSprint] = useState<string | null>(null);
   const [filterAssignee, setFilterAssignee] = useState<string | null>(null);
+  const [showSubtasks, setShowSubtasks] = useState(false);
   const [dragTaskId, setDragTaskId] = useState<string | null>(null);
 
   const projectStatuses = useMemo(
@@ -351,8 +354,7 @@ export function ProjectTasksView({
   );
 
   const filteredTasks = useMemo(() => {
-    // Only show top-level tasks in the main board — sub-tasks live inside their parent's detail page
-    let result = tasks.filter((t) => !t.parentTaskId);
+    let result = showSubtasks ? tasks : tasks.filter((t) => !t.parentTaskId);
     if (filterPriority)
       result = result.filter((t) => t.priority === filterPriority);
     if (filterType) result = result.filter((t) => t.issueType === filterType);
@@ -361,7 +363,7 @@ export function ProjectTasksView({
     if (filterAssignee)
       result = result.filter((t) => t.assigneeId === filterAssignee);
     return result;
-  }, [tasks, filterPriority, filterType, filterSprint, filterAssignee]);
+  }, [tasks, showSubtasks, filterPriority, filterType, filterSprint, filterAssignee]);
 
   const handleChangeView = (newView: ProjectView) => {
     setView(newView);
@@ -411,7 +413,8 @@ export function ProjectTasksView({
     filterPriority ||
     filterType ||
     filterSprint ||
-    filterAssignee
+    filterAssignee ||
+    showSubtasks
   );
 
   return (
@@ -459,7 +462,7 @@ export function ProjectTasksView({
                   rightSection={
                     hasFilters ? (
                       <Badge size="xs" circle variant="filled" color="blue">
-                        {[filterPriority, filterType, filterSprint, filterAssignee].filter(Boolean).length}
+                        {[filterPriority, filterType, filterSprint, filterAssignee, showSubtasks ? "subtasks" : null].filter(Boolean).length}
                       </Badge>
                     ) : null
                   }
@@ -515,6 +518,12 @@ export function ProjectTasksView({
                       onChange={(v) => setFilterAssignee(v as string | null)}
                     />
                   )}
+                  <Switch
+                    size="xs"
+                    label={t("Show sub-tasks")}
+                    checked={showSubtasks}
+                    onChange={(event) => setShowSubtasks(event.currentTarget.checked)}
+                  />
                   {hasFilters && (
                     <Button
                       size="xs"
@@ -525,6 +534,7 @@ export function ProjectTasksView({
                         setFilterType(null);
                         setFilterSprint(null);
                         setFilterAssignee(null);
+                        setShowSubtasks(false);
                       }}
                     >
                       {t("Clear filters")}
@@ -537,6 +547,9 @@ export function ProjectTasksView({
             <Text size="xs" c="dimmed">
               {filteredTasks.length}{" "}
               {t("issue", { count: filteredTasks.length })}
+              {!showSubtasks && tasks.some((task) => task.parentTaskId) && (
+                <Text span c="dimmed"> · {tasks.filter((task) => task.parentTaskId).length} {t("sub-tasks hidden")}</Text>
+              )}
             </Text>
           </Group>
 
@@ -827,6 +840,11 @@ function KanbanCard({
               #{task.ticketNumber}
             </Text>
           )}
+          {task.parentTaskId && (
+            <Badge size="xs" variant="outline" color="gray" radius="sm">
+              {t("Sub-task")}
+            </Badge>
+          )}
         </Group>
         <div onClick={(e) => e.stopPropagation()}>
           <Menu position="bottom-end" withinPortal>
@@ -1030,6 +1048,9 @@ function TaskTable({
                   />
                   <div style={{ minWidth: 0 }}>
                     <Text size="sm" fw={500} truncate>{task.title}</Text>
+                    {task.parentTaskId && (
+                      <Text size="xs" c="dimmed">{t("Sub-task")}</Text>
+                    )}
                     {(task.tags ?? []).length > 0 && (
                       <Group gap={4} mt={2}>
                         {task.tags.slice(0, 2).map((tag) => (
@@ -1924,15 +1945,15 @@ function CreateTaskModal({
           placeholder={t("Add tags")}
         />
 
-        <Textarea
-          size="sm"
-          label={t("Description")}
-          value={description}
-          onChange={(e) => setDescription(e.currentTarget.value)}
-          minRows={3}
-          autosize
-          placeholder={t("Optional description...")}
-        />
+        <Box>
+          <Text size="sm" fw={500} mb={4}>{t("Description")}</Text>
+          <TaskDescriptionEditor
+            value={description}
+            onChange={setDescription}
+            minHeight={180}
+            placeholder={t("Add acceptance criteria, context, links, and implementation notes...")}
+          />
+        </Box>
 
         <Group justify="flex-end">
           <Button variant="subtle" onClick={onClose}>

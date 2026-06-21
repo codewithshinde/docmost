@@ -25,6 +25,8 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import {
+  IconArrowDown,
+  IconArrowUp,
   IconChevronLeft,
   IconChevronRight,
   IconCircleFilled,
@@ -549,9 +551,6 @@ function ProjectSidebarItem({
         </ThemeIcon>
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Text size="xs" fw={600} truncate>{project.name}</Text>
-          {project.teamName && (
-            <Text size="xs" c="dimmed" truncate style={{ fontSize: 10 }}>{project.teamName}</Text>
-          )}
         </Box>
         {(hovered || active) && (
           <Group gap={2} wrap="nowrap" onClick={(e) => e.stopPropagation()}>
@@ -700,6 +699,16 @@ function ProjectSettingsModal({
     setNewStatusLabel(""); setNewStatusColor("blue"); setNewStatusIsDone(false);
   };
 
+  const moveStatus = (index: number, direction: -1 | 1) => {
+    setStatuses((prev) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+  };
+
   const TABS = [
     { key: "general", label: t("General") },
     { key: "statuses", label: t("Statuses") },
@@ -744,9 +753,21 @@ function ProjectSettingsModal({
         <Stack gap="sm">
           <Text size="xs" c="dimmed">{t("Customize the columns shown in the Kanban board.")}</Text>
           <Stack gap="xs">
-            {statuses.map((status) => (
+            {statuses.map((status, index) => (
               <Paper key={status.id} withBorder radius="sm" p="xs">
                 <Group gap="xs" wrap="nowrap">
+                  <Group gap={2} wrap="nowrap">
+                    <Tooltip label={t("Move up")} withArrow>
+                      <ActionIcon size="xs" variant="subtle" onClick={() => moveStatus(index, -1)} disabled={index === 0}>
+                        <IconArrowUp size={12} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label={t("Move down")} withArrow>
+                      <ActionIcon size="xs" variant="subtle" onClick={() => moveStatus(index, 1)} disabled={index === statuses.length - 1}>
+                        <IconArrowDown size={12} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
                   <Select size="xs" w={100} data={STATUS_COLORS.map((c) => ({ value: c, label: c }))} value={status.color}
                     onChange={(v) => setStatuses((prev) => prev.map((s) => s.id === status.id ? { ...s, color: v ?? "gray" } : s))}
                     leftSection={<ColorSwatch color={`var(--mantine-color-${status.color}-5)`} size={12} />}

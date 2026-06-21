@@ -34,6 +34,7 @@ interface TaskDescriptionEditorProps {
   onBlur?: () => void;
   placeholder?: string;
   readOnly?: boolean;
+  minHeight?: number;
 }
 
 export function TaskDescriptionEditor({
@@ -42,6 +43,7 @@ export function TaskDescriptionEditor({
   onBlur,
   placeholder = "Add a description... Use the toolbar for rich formatting.",
   readOnly = false,
+  minHeight = 220,
 }: TaskDescriptionEditorProps) {
   const initialContent = useRef(value);
 
@@ -94,7 +96,7 @@ export function TaskDescriptionEditor({
   }) => (
     <Tooltip label={label} withArrow openDelay={400}>
       <ActionIcon
-        size="xs"
+        size="sm"
         variant={active ? "filled" : "subtle"}
         color={active ? "blue" : "gray"}
         onClick={onClick}
@@ -119,15 +121,15 @@ export function TaskDescriptionEditor({
     <Box
       style={{
         border: "1px solid var(--mantine-color-default-border)",
-        borderRadius: 8,
+        borderRadius: 6,
         background: "var(--mantine-color-body)",
         overflow: "hidden",
       }}
     >
       {!readOnly && (
         <Box
-          px="xs"
-          py={6}
+          px="sm"
+          py={8}
           style={{
             borderBottom: "1px solid var(--mantine-color-default-border)",
             background: "var(--mantine-color-default-hover)",
@@ -136,93 +138,93 @@ export function TaskDescriptionEditor({
           <Group gap={2} wrap="wrap">
             {/* Formatting */}
             <ToolBtn label="Bold (⌘B)" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
-              <IconBold size={12} />
+              <IconBold size={16} />
             </ToolBtn>
             <ToolBtn label="Italic (⌘I)" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}>
-              <IconItalic size={12} />
+              <IconItalic size={16} />
             </ToolBtn>
             <ToolBtn label="Underline (⌘U)" active={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}>
-              <IconUnderline size={12} />
+              <IconUnderline size={16} />
             </ToolBtn>
             <ToolBtn label="Strikethrough" active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()}>
-              <IconStrikethrough size={12} />
+              <IconStrikethrough size={16} />
             </ToolBtn>
             <ToolBtn label="Highlight" active={editor.isActive("highlight")} onClick={() => editor.chain().focus().toggleHighlight().run()}>
-              <IconHighlight size={12} />
+              <IconHighlight size={16} />
             </ToolBtn>
             <ToolBtn label="Inline code" active={editor.isActive("code")} onClick={() => editor.chain().focus().toggleCode().run()}>
-              <IconCode size={12} />
+              <IconCode size={16} />
             </ToolBtn>
             <ToolBtn label="Link" active={editor.isActive("link")} onClick={setLink}>
-              <IconLink size={12} />
+              <IconLink size={16} />
             </ToolBtn>
 
             <Divider orientation="vertical" my={2} />
 
             {/* Headings */}
             <ToolBtn label="Heading 1" active={editor.isActive("heading", { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
-              <IconH1 size={12} />
+              <IconH1 size={16} />
             </ToolBtn>
             <ToolBtn label="Heading 2" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-              <IconH2 size={12} />
+              <IconH2 size={16} />
             </ToolBtn>
             <ToolBtn label="Heading 3" active={editor.isActive("heading", { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
-              <IconH3 size={12} />
+              <IconH3 size={16} />
             </ToolBtn>
 
             <Divider orientation="vertical" my={2} />
 
             {/* Lists */}
             <ToolBtn label="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
-              <IconList size={12} />
+              <IconList size={16} />
             </ToolBtn>
             <ToolBtn label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-              <IconListNumbers size={12} />
+              <IconListNumbers size={16} />
             </ToolBtn>
 
             <Divider orientation="vertical" my={2} />
 
             {/* Blocks */}
             <ToolBtn label="Blockquote" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-              <IconBlockquote size={12} />
+              <IconBlockquote size={16} />
             </ToolBtn>
             <ToolBtn label="Code block" active={editor.isActive("codeBlock")} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
-              <IconSourceCode size={12} />
+              <IconSourceCode size={16} />
             </ToolBtn>
             <ToolBtn label="Divider" active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-              <IconMinus size={12} />
+              <IconMinus size={16} />
             </ToolBtn>
 
             <Divider orientation="vertical" my={2} />
 
             {/* Alignment */}
             <ToolBtn label="Align left" active={editor.isActive({ textAlign: "left" })} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
-              <IconAlignLeft size={12} />
+              <IconAlignLeft size={16} />
             </ToolBtn>
             <ToolBtn label="Align center" active={editor.isActive({ textAlign: "center" })} onClick={() => editor.chain().focus().setTextAlign("center").run()}>
-              <IconAlignCenter size={12} />
+              <IconAlignCenter size={16} />
             </ToolBtn>
             <ToolBtn label="Align right" active={editor.isActive({ textAlign: "right" })} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
-              <IconAlignRight size={12} />
+              <IconAlignRight size={16} />
             </ToolBtn>
           </Group>
         </Box>
       )}
 
       <Box
-        style={{ minHeight: readOnly ? undefined : 140, position: "relative" }}
-        px="sm"
-        py="sm"
+        style={{ minHeight: readOnly ? 72 : minHeight, position: "relative" }}
+        px={readOnly ? "sm" : "md"}
+        py={readOnly ? "sm" : "md"}
         className="task-rich-editor"
       >
         <EditorContent
           editor={editor}
-          style={{ outline: "none", fontSize: 14, lineHeight: 1.7 }}
+          style={{ outline: "none", fontSize: 15, lineHeight: 1.75 }}
         />
       </Box>
 
       <style>{`
-        .task-rich-editor .tiptap { outline: none; }
+        .task-rich-editor .tiptap { outline: none; padding: 0; }
         .task-rich-editor .tiptap p { margin: 0 0 8px; }
         .task-rich-editor .tiptap p:last-child { margin-bottom: 0; }
         .task-rich-editor .tiptap h1 { font-size: 22px; font-weight: 700; margin: 12px 0 6px; }

@@ -33,6 +33,20 @@ export interface MailMessageSummary {
   seen: boolean;
 }
 
+export interface MailCalendarInvite {
+  uid: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  allDay: boolean;
+  organizerEmail: string | null;
+  attendeeEmails: string[];
+  meetingUrl: string | null;
+  method: string;
+}
+
 export interface MailMessageDetail {
   uid: number;
   messageId: string | null;
@@ -42,6 +56,7 @@ export interface MailMessageDetail {
   date: Date | null;
   html: string | null;
   text: string | null;
+  calendarInvite: MailCalendarInvite | null;
 }
 
 @Injectable()
@@ -201,6 +216,21 @@ export class MailAccountService {
           ? parsed.to.map((addr) => addr.text).join(', ')
           : parsed.to?.text ?? '';
 
+        let calendarInvite: MailCalendarInvite | null = null;
+        const icsTexts: string[] = [];
+        if (parsed.text && parsed.text.includes('BEGIN:VCALENDAR')) {
+          icsTexts.push(parsed.text);
+        }
+        for (const att of parsed.attachments ?? []) {
+          const isIcs = att.contentType === 'text/calendar' || att.filename?.endsWith('.ics');
+          if (isIcs && att.content) {
+            icsTexts.push(att.content.toString('utf8'));
+          }
+        }
+        if (icsTexts.length > 0) {
+          calendarInvite = parseCalendarInviteFromIcs(icsTexts[0]);
+        }
+
         return {
           uid: dto.uid,
           messageId: parsed.messageId ?? null,
@@ -210,6 +240,7 @@ export class MailAccountService {
           date: parsed.date ?? null,
           html: parsed.html || null,
           text: parsed.text || null,
+          calendarInvite,
         };
       } finally {
         lock.release();
@@ -292,6 +323,16 @@ export class MailAccountService {
       text: dto.text,
       inReplyTo: dto.inReplyTo,
       references: dto.references,
+      attachments: dto.icsAttachment
+        ? [
+            {
+              filename: 'invite.ics',
+              content: dto.icsAttachment,
+              contentType: 'text/calendar; method=REQUEST; charset=UTF-8',
+              contentDisposition: 'attachment',
+            },
+          ]
+        : [],
     });
 
     return { ok: true };
@@ -370,6 +411,29 @@ export interface ParsedCalendarEvent {
   organizerEmail: string | null;
   attendeeEmails: string[];
   meetingUrl: string | null;
+}
+
+function parseCalendarInviteFromIcs(icsText: string): MailCalendarInvite | null {
+  const methodMatch = icsText.match(/^METHOD:(.+)$/m);
+  const method = methodMatch ? methodMatch[1].trim().toUpperCase() : 'REQUEST';
+
+  const events = parseIcsEvents(icsText);
+  if (events.length === 0) return null;
+
+  const e = events[0];
+  return {
+    uid: e.uid,
+    title: e.title,
+    description: e.description,
+    location: e.location,
+    startsAt: e.startsAt,
+    endsAt: e.endsAt,
+    allDay: e.allDay,
+    organizerEmail: e.organizerEmail,
+    attendeeEmails: e.attendeeEmails,
+    meetingUrl: e.meetingUrl,
+    method,
+  };
 }
 
 function parseIcsEvents(icsText: string): ParsedCalendarEvent[] {

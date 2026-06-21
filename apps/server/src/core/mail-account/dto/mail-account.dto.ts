@@ -103,4 +103,8 @@ export class SendMailMessageDto {
   @IsArray()
   @IsString({ each: true })
   references?: string[];
+
+  @IsOptional()
+  @IsString()
+  icsAttachment?: string;
 }

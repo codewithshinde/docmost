@@ -1,18 +1,25 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import classes from "../styles/mail-editor.module.css";
 import {
   ActionIcon,
   Box,
   Button,
+  Checkbox,
   Divider,
   Group,
   Modal,
+  Paper,
   Stack,
+  Switch,
+  Text,
   TextInput,
+  Textarea,
   Tooltip,
 } from "@mantine/core";
+import { DateTimePicker, DatePickerInput } from "@mantine/dates";
 import {
   IconBold,
+  IconCalendarPlus,
   IconItalic,
   IconLink,
   IconLinkOff,
@@ -26,8 +33,9 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
-import { useState } from "react";
+import { addHours, format, parse } from "date-fns";
 import { useSendMailMessageMutation } from "../queries/mail-account-query";
+import { generateIcs } from "../utils/mail-ics.utils";
 
 export interface ComposeMailInitialValues {
   to?: string;
@@ -42,6 +50,14 @@ interface ComposeMailModalProps {
   opened: boolean;
   onClose: () => void;
   initialValues?: ComposeMailInitialValues;
+}
+
+function parseDateValue(value: string): Date {
+  return parse(value, "yyyy-MM-dd", new Date());
+}
+
+function parseDateTimeValue(value: string): Date {
+  return parse(value, "yyyy-MM-dd HH:mm:ss", new Date());
 }
 
 function parseRecipients(value: string): string[] {
@@ -184,6 +200,15 @@ export function ComposeMailModal({
   const [subject, setSubject] = useState("");
   const sendMutation = useSendMailMessageMutation();
 
+  // Calendar invite state
+  const [attachInvite, setAttachInvite] = useState(false);
+  const [icsTitle, setIcsTitle] = useState("");
+  const [icsAllDay, setIcsAllDay] = useState(false);
+  const [icsStart, setIcsStart] = useState<Date | null>(null);
+  const [icsEnd, setIcsEnd] = useState<Date | null>(null);
+  const [icsLocation, setIcsLocation] = useState("");
+  const [icsDescription, setIcsDescription] = useState("");
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ dropcursor: false, gapcursor: false }),
@@ -204,6 +229,14 @@ export function ComposeMailModal({
     setSubject(initialValues?.subject ?? "");
     const html = initialValues?.body ? textToHtml(initialValues.body) : "";
     editor.commands.setContent(html || "");
+    // Reset invite fields on open
+    setAttachInvite(false);
+    setIcsTitle("");
+    setIcsAllDay(false);
+    setIcsStart(null);
+    setIcsEnd(null);
+    setIcsLocation("");
+    setIcsDescription("");
   }, [opened, initialValues, editor]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -214,6 +247,21 @@ export function ComposeMailModal({
     const html = editor.getHTML();
     const text = editor.getText();
 
+    let icsAttachment: string | undefined;
+    if (attachInvite && icsTitle && icsStart && icsEnd) {
+      icsAttachment = generateIcs({
+        uid: `${Date.now()}-${Math.random().toString(36).slice(2)}@likh`,
+        title: icsTitle,
+        startsAt: icsStart,
+        endsAt: icsEnd,
+        allDay: icsAllDay,
+        location: icsLocation || undefined,
+        description: icsDescription || undefined,
+        attendeeEmails: toAddresses,
+        method: "REQUEST",
+      });
+    }
+
     await sendMutation.mutateAsync({
       to: toAddresses,
       cc: cc ? parseRecipients(cc) : undefined,
@@ -223,11 +271,14 @@ export function ComposeMailModal({
       text,
       inReplyTo: initialValues?.inReplyTo,
       references: initialValues?.references,
+      icsAttachment,
     });
 
     editor.commands.clearContent();
     onClose();
   };
+
+  const inviteValid = !attachInvite || (!!icsTitle && !!icsStart && !!icsEnd);
 
   return (
     <Modal
@@ -298,15 +349,126 @@ export function ComposeMailModal({
               <Box
                 p="sm"
                 className={classes.mailEditor}
-                style={{
-                  minHeight: 200,
-                  maxHeight: 400,
-                  overflowY: "auto",
-                }}
+                style={{ minHeight: 160, maxHeight: 320, overflowY: "auto" }}
               >
                 <EditorContent editor={editor} />
               </Box>
             </Box>
+          </Box>
+
+          {/* Calendar invite attachment */}
+          <Box>
+            <Group gap="xs">
+              <Switch
+                size="sm"
+                label={
+                  <Group gap={4}>
+                    <IconCalendarPlus size={14} />
+                    <Text size="sm">{t("Attach calendar invite")}</Text>
+                  </Group>
+                }
+                checked={attachInvite}
+                onChange={(e) => setAttachInvite(e.currentTarget.checked)}
+              />
+            </Group>
+
+            {attachInvite && (
+              <Paper
+                withBorder
+                p="sm"
+                mt="xs"
+                radius="sm"
+                style={{ background: "var(--mantine-color-default-hover)" }}
+              >
+                <Stack gap="sm">
+                  <TextInput
+                    label={t("Event title")}
+                    placeholder={t("Team standup")}
+                    value={icsTitle}
+                    onChange={(e) => setIcsTitle(e.currentTarget.value)}
+                    withAsterisk
+                    size="sm"
+                  />
+
+                  <Checkbox
+                    label={t("All day")}
+                    size="sm"
+                    checked={icsAllDay}
+                    onChange={(e) => {
+                      setIcsAllDay(e.currentTarget.checked);
+                      setIcsStart(null);
+                      setIcsEnd(null);
+                    }}
+                  />
+
+                  {icsAllDay ? (
+                    <Group grow>
+                      <DatePickerInput
+                        label={t("Start date")}
+                        placeholder={t("Pick date")}
+                        value={icsStart ? format(icsStart, "yyyy-MM-dd") : undefined}
+                        onChange={(value) => value && setIcsStart(parseDateValue(value))}
+                        size="sm"
+                        withAsterisk
+                      />
+                      <DatePickerInput
+                        label={t("End date")}
+                        placeholder={t("Pick date")}
+                        value={icsEnd ? format(icsEnd, "yyyy-MM-dd") : undefined}
+                        onChange={(value) => value && setIcsEnd(parseDateValue(value))}
+                        minDate={icsStart ? format(icsStart, "yyyy-MM-dd") : undefined}
+                        size="sm"
+                        withAsterisk
+                      />
+                    </Group>
+                  ) : (
+                    <Group grow>
+                      <DateTimePicker
+                        label={t("Start")}
+                        placeholder={t("Pick date & time")}
+                        value={icsStart ? format(icsStart, "yyyy-MM-dd HH:mm:ss") : undefined}
+                        onChange={(value) => {
+                          if (!value) return;
+                          const d = parseDateTimeValue(value);
+                          setIcsStart(d);
+                          if (!icsEnd) setIcsEnd(addHours(d, 1));
+                        }}
+                        size="sm"
+                        withAsterisk
+                      />
+                      <DateTimePicker
+                        label={t("End")}
+                        placeholder={t("Pick date & time")}
+                        value={icsEnd ? format(icsEnd, "yyyy-MM-dd HH:mm:ss") : undefined}
+                        onChange={(value) => value && setIcsEnd(parseDateTimeValue(value))}
+                        minDate={icsStart ? format(icsStart, "yyyy-MM-dd HH:mm:ss") : undefined}
+                        size="sm"
+                        withAsterisk
+                      />
+                    </Group>
+                  )}
+
+                  <TextInput
+                    label={t("Location")}
+                    placeholder={t("Conference room / Zoom link")}
+                    value={icsLocation}
+                    onChange={(e) => setIcsLocation(e.currentTarget.value)}
+                    size="sm"
+                  />
+
+                  <Textarea
+                    label={t("Description")}
+                    placeholder={t("Optional notes")}
+                    value={icsDescription}
+                    onChange={(e) => setIcsDescription(e.currentTarget.value)}
+                    size="sm"
+                    rows={2}
+                    autosize
+                    maxRows={4}
+                  />
+                </Stack>
+              </Paper>
+            )}
           </Box>
         </Stack>
 
@@ -316,7 +478,7 @@ export function ComposeMailModal({
           </Button>
           <Button
             type="submit"
-            disabled={parseRecipients(to).length === 0}
+            disabled={parseRecipients(to).length === 0 || !inviteValid}
             loading={sendMutation.isPending}
           >
             {t("Send")}

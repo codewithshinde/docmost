@@ -36,6 +36,20 @@ export interface IMailMessageSummary {
   seen: boolean;
 }
 
+export interface IMailCalendarInvite {
+  uid: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  organizerEmail: string | null;
+  attendeeEmails: string[];
+  meetingUrl: string | null;
+  method: string;
+}
+
 export interface IMailMessageDetail {
   uid: number;
   messageId: string | null;
@@ -45,6 +59,7 @@ export interface IMailMessageDetail {
   date: string | null;
   html: string | null;
   text: string | null;
+  calendarInvite: IMailCalendarInvite | null;
 }
 
 export interface IListMailMessages {
@@ -66,6 +81,7 @@ export interface ISendMailMessage {
   text?: string;
   inReplyTo?: string;
   references?: string[];
+  icsAttachment?: string;
 }
 
 export interface IMailUnreadCount {
