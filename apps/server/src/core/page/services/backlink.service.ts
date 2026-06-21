@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { BacklinkRepo } from '@likh/db/repos/backlink/backlink.repo';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 
 export type BacklinkDirection = 'incoming' | 'outgoing';
 

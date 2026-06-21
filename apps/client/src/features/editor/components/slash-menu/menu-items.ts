@@ -21,6 +21,7 @@ import {
   IconMenu4,
   IconPageBreak,
   IconCalendar,
+  IconClock,
   IconAppWindow,
   IconSitemap,
   IconColumns3,
@@ -475,6 +476,25 @@ const CommandGroups: SlashMenuGroupedItemsType = {
       },
     },
     {
+      title: "Time",
+      description: "Insert current time",
+      searchTerms: ["time", "now", "clock"],
+      icon: IconClock,
+      command: ({ editor, range }: CommandProps) => {
+        const currentTime = new Date().toLocaleTimeString(i18n.language, {
+          hour: "numeric",
+          minute: "numeric",
+        });
+
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent(currentTime)
+          .run();
+      },
+    },
+    {
       title: "Status",
       description: "Insert inline status badge.",
       searchTerms: ["status", "badge", "label", "lozenge"],
@@ -767,18 +787,34 @@ export const getSuggestionItems = ({
   for (const [group, items] of Object.entries(CommandGroups)) {
     const filteredItems = items.filter((item) => {
       if (excludeItems?.has(item.title)) return false;
+      const translatedTitle = i18n.t(item.title);
+      const translatedDescription = i18n.t(item.description);
       return (
         fuzzyMatch(search, item.title) ||
+        fuzzyMatch(search, translatedTitle) ||
         item.description.toLowerCase().includes(search) ||
+        translatedDescription.toLowerCase().includes(search) ||
         (item.searchTerms &&
-          item.searchTerms.some((term: string) => term.includes(search)))
+          item.searchTerms.some(
+            (term: string) =>
+              term.includes(search) ||
+              i18n.t(term).toLowerCase().includes(search),
+          ))
       );
     });
 
     if (filteredItems.length) {
       filteredGroups[group] = filteredItems.sort((a, b) => {
-        const aTitle = a.title.toLowerCase().includes(search) ? 0 : 1;
-        const bTitle = b.title.toLowerCase().includes(search) ? 0 : 1;
+        const aTitle =
+          a.title.toLowerCase().includes(search) ||
+          i18n.t(a.title).toLowerCase().includes(search)
+            ? 0
+            : 1;
+        const bTitle =
+          b.title.toLowerCase().includes(search) ||
+          i18n.t(b.title).toLowerCase().includes(search)
+            ? 0
+            : 1;
         return aTitle - bTitle;
       });
     }

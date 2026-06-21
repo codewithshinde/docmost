@@ -1,9 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, type JSX } from "react";
 import {
   EditorMenuProps,
   ShouldShowProps,
 } from "@/features/editor/components/table/types/types.ts";
-import { isCellSelection } from "@docmost/editor-ext";
+import { isCellSelection } from "@likh/editor-ext";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import {
   IconBoxMargin,

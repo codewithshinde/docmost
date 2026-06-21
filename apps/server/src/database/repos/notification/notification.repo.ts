@@ -4,13 +4,13 @@ import { KyselyDB } from '../../types/kysely.types';
 import {
   InsertableNotification,
   Notification,
-} from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
+} from '@likh/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { executeWithCursorPagination } from '@likh/db/pagination/cursor-pagination';
 import { ExpressionBuilder } from 'kysely';
-import { DB } from '@docmost/db/types/db';
+import { DB } from '@likh/db/types/db';
 import { jsonObjectFrom } from 'kysely/helpers/postgres';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
 import {
   NotificationTab,
   NotificationType,

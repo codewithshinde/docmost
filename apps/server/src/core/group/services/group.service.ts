@@ -6,18 +6,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateGroupDto, DefaultGroup } from '../dto/create-group.dto';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 import { UpdateGroupDto } from '../dto/update-group.dto';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { Group, InsertableGroup, User } from '@docmost/db/types/entity.types';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { GroupRepo } from '@likh/db/repos/group/group.repo';
+import { GroupUserRepo } from '@likh/db/repos/group/group-user.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
+import { Group, InsertableGroup, User } from '@likh/db/types/entity.types';
+import { CursorPaginationResult } from '@likh/db/pagination/cursor-pagination';
 import { GroupUserService } from './group-user.service';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
-import { executeTx } from '@docmost/db/utils';
+import { WatcherRepo } from '@likh/db/repos/watcher/watcher.repo';
+import { FavoriteRepo } from '@likh/db/repos/favorite/favorite.repo';
+import { executeTx } from '@likh/db/utils';
 import { InjectKysely } from 'nestjs-kysely';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import { diffAuditTrackedFields } from '../../../common/helpers';

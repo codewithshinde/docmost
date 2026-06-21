@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
-import { AuditRepo } from '@docmost/db/repos/audit/audit.repo';
-import { InsertableAudit } from '@docmost/db/types/entity.types';
+import { AuditRepo } from '@likh/db/repos/audit/audit.repo';
+import { InsertableAudit } from '@likh/db/types/entity.types';
 import {
   AuditLogPayload,
   ActorType,

@@ -3,7 +3,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
-import { MailAccountRepo } from '@docmost/db/repos/mail-account/mail-account.repo';
+import { MailAccountRepo } from '@likh/db/repos/mail-account/mail-account.repo';
 import { EncryptionService } from '../../integrations/crypto/encryption.service';
 import {
   GetMailMessageDto,

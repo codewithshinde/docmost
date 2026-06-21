@@ -6,12 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateSpaceDto } from '../dto/create-space.dto';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { SpaceRepo } from '@docmost/db/repos/space/space.repo';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { Space, User } from '@docmost/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { SpaceRepo } from '@likh/db/repos/space/space.repo';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { Space, User } from '@likh/db/types/entity.types';
 import { UpdateSpaceDto } from '../dto/update-space.dto';
-import { executeTx } from '@docmost/db/utils';
+import { executeTx } from '@likh/db/utils';
 import { InjectKysely } from 'nestjs-kysely';
 import { Feature } from '../../../common/features';
 import { SpaceMemberService } from './space-member.service';
@@ -19,9 +19,9 @@ import { SpaceRole } from '../../../common/helpers/types/permission';
 import { QueueJob, QueueName } from 'src/integrations/queue/constants';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
+import { CursorPaginationResult } from '@likh/db/pagination/cursor-pagination';
+import { ShareRepo } from '@likh/db/repos/share/share.repo';
+import { WorkspaceRepo } from '@likh/db/repos/workspace/workspace.repo';
 import { LicenseCheckService } from '../../../integrations/environment/license-check.service';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import { diffAuditTrackedFields } from '../../../common/helpers';
@@ -48,6 +48,7 @@ export class SpaceService {
     workspaceId: string,
     createSpaceDto: CreateSpaceDto,
     trx?: KyselyTransaction,
+    options?: { isPersonal?: boolean },
   ): Promise<Space> {
     let space = null;
 
@@ -59,6 +60,7 @@ export class SpaceService {
           workspaceId,
           createSpaceDto,
           trx,
+          options,
         );
 
         await this.spaceMemberService.addUserToSpace(
@@ -91,6 +93,7 @@ export class SpaceService {
         after: {
           name: space.name,
           slug: space.slug,
+          ...(space.isPersonal ? { isPersonal: true } : {}),
         },
       },
     });
@@ -103,6 +106,7 @@ export class SpaceService {
     workspaceId: string,
     createSpaceDto: CreateSpaceDto,
     trx?: KyselyTransaction,
+    options?: { isPersonal?: boolean },
   ): Promise<Space> {
     const slugExists = await this.spaceRepo.slugExists(
       createSpaceDto.slug,
@@ -122,6 +126,7 @@ export class SpaceService {
         creatorId: userId,
         workspaceId: workspaceId,
         slug: createSpaceDto.slug,
+        isPersonal: options?.isPersonal ?? false,
         teamId: createSpaceDto.teamId,
       },
       trx,

@@ -61,6 +61,9 @@ export class UpdateWorkspaceDto extends PartialType(CreateWorkspaceDto) {
   @IsBoolean()
   allowMemberTemplates: boolean;
 
+  @IsBoolean()
+  allowPersonalSpaces: boolean;
+
   @IsOptional()
   @IsHexColor()
   brandPrimaryColor: string;

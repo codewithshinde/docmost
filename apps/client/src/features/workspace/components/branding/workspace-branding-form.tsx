@@ -94,7 +94,7 @@ export default function WorkspaceBrandingForm() {
       <Textarea
         mt="sm"
         label={t("Custom CSS")}
-        placeholder=":root { --docmost-brand-primary-color: #2f6fed; }"
+        placeholder=":root { --likh-brand-primary-color: #2f6fed; }"
         variant="filled"
         minRows={5}
         autosize

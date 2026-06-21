@@ -4,17 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
-import { AuthProviderRepo } from '@docmost/db/repos/auth-provider/auth-provider.repo';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
+import { AuthProviderRepo } from '@likh/db/repos/auth-provider/auth-provider.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
+import { GroupUserRepo } from '@likh/db/repos/group/group-user.repo';
 import { WorkspaceService } from '../workspace/services/workspace.service';
 import {
   AuthProvider,
   User,
   Workspace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { isUserDisabled, nanoIdGen } from '../../common/helpers';
 import { validateAllowedEmail } from '../auth/auth.util';
 import {

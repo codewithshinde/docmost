@@ -8,15 +8,15 @@ import {
 import {
   PagePermissionRepo,
   PagePermissionMember,
-} from '@docmost/db/repos/page/page-permission.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
+} from '@likh/db/repos/page/page-permission.repo';
+import { PageRepo } from '@likh/db/repos/page/page.repo';
 import {
   InsertablePagePermission,
   Page,
   User,
   Workspace,
-} from '@docmost/db/types/entity.types';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
+} from '@likh/db/types/entity.types';
+import { CursorPaginationResult } from '@likh/db/pagination/cursor-pagination';
 import SpaceAbilityFactory from '../../casl/abilities/space-ability.factory';
 import {
   SpaceCaslAction,

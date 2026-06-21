@@ -6,9 +6,9 @@ import {
   InsertableWorkspace,
   UpdatableWorkspace,
   Workspace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { ExpressionBuilder, sql } from 'kysely';
-import { DB, Workspaces } from '@docmost/db/types/db';
+import { DB, Workspaces } from '@likh/db/types/db';
 
 @Injectable()
 export class WorkspaceRepo {
@@ -244,6 +244,26 @@ export class WorkspaceRepo {
       .set({
         settings: sql`COALESCE(settings, '{}'::jsonb)
                 || jsonb_build_object('templates', COALESCE(settings->'templates', '{}'::jsonb)
+                || jsonb_build_object('${sql.raw(prefKey)}', ${sql.lit(prefValue)}))`,
+        updatedAt: new Date(),
+      })
+      .where('id', '=', workspaceId)
+      .returning(this.baseFields)
+      .executeTakeFirst();
+  }
+
+  async updateSpaceSettings(
+    workspaceId: string,
+    prefKey: string,
+    prefValue: string | boolean,
+    trx?: KyselyTransaction,
+  ) {
+    const db = dbOrTx(this.db, trx);
+    return db
+      .updateTable('workspaces')
+      .set({
+        settings: sql`COALESCE(settings, '{}'::jsonb)
+                || jsonb_build_object('spaces', COALESCE(settings->'spaces', '{}'::jsonb)
                 || jsonb_build_object('${sql.raw(prefKey)}', ${sql.lit(prefValue)}))`,
         updatedAt: new Date(),
       })

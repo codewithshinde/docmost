@@ -276,9 +276,9 @@ export default function SettingsSidebar() {
             size="sm"
             c="dimmed"
             component="a"
-            href="mailto:help@docmost.com"
+            href="mailto:help@likh.app"
           >
-            help@docmost.com
+            help@likh.app
           </Text>
         </div>
       )}

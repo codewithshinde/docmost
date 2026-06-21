@@ -7,24 +7,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LicenseCheckService } from '../../../integrations/environment/license-check.service';
-import { UserSessionRepo } from '@docmost/db/repos/session/user-session.repo';
+import { UserSessionRepo } from '@likh/db/repos/session/user-session.repo';
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from '../dto/update-workspace.dto';
 import { SpaceService } from '../../space/services/space.service';
 import { CreateSpaceDto } from '../../space/dto/create-space.dto';
 import { SpaceRole, UserRole } from '../../../common/helpers/types/permission';
 import { SpaceMemberService } from '../../space/services/space-member.service';
-import { WorkspaceRepo } from '@docmost/db/repos/workspace/workspace.repo';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { executeTx } from '@docmost/db/utils';
+import { WorkspaceRepo } from '@likh/db/repos/workspace/workspace.repo';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { executeTx } from '@likh/db/utils';
 import { InjectKysely } from 'nestjs-kysely';
 import { Feature } from '../../../common/features';
-import { User } from '@docmost/db/types/entity.types';
-import { GroupUserRepo } from '@docmost/db/repos/group/group-user.repo';
-import { GroupRepo } from '@docmost/db/repos/group/group.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { User } from '@likh/db/types/entity.types';
+import { GroupUserRepo } from '@likh/db/repos/group/group-user.repo';
+import { GroupRepo } from '@likh/db/repos/group/group.repo';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 import { UpdateWorkspaceUserRoleDto } from '../dto/update-workspace-user-role.dto';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
 import { EnvironmentService } from '../../../integrations/environment/environment.service';
 import { DomainService } from '../../../integrations/environment/domain.service';
 import { jsonArrayFrom } from 'kysely/helpers/postgres';
@@ -39,11 +39,11 @@ import {
   generateRandomSuffixNumbers,
   diffAuditTrackedFields,
 } from '../../../common/helpers';
-import { isPageEmbeddingsTableExists } from '@docmost/db/helpers/helpers';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { WatcherRepo } from '@docmost/db/repos/watcher/watcher.repo';
-import { FavoriteRepo } from '@docmost/db/repos/favorite/favorite.repo';
+import { isPageEmbeddingsTableExists } from '@likh/db/helpers/helpers';
+import { CursorPaginationResult } from '@likh/db/pagination/cursor-pagination';
+import { ShareRepo } from '@likh/db/repos/share/share.repo';
+import { WatcherRepo } from '@likh/db/repos/watcher/watcher.repo';
+import { FavoriteRepo } from '@likh/db/repos/favorite/favorite.repo';
 import { AuditEvent, AuditResource } from '../../../common/events/audit-events';
 import {
   AUDIT_SERVICE,
@@ -343,7 +343,8 @@ export class WorkspaceService {
       typeof updateWorkspaceDto.mcpEnabled !== 'undefined' ||
       typeof updateWorkspaceDto.restrictApiToAdmins !== 'undefined' ||
       typeof updateWorkspaceDto.allowMemberTemplates !== 'undefined' ||
-      typeof updateWorkspaceDto.isScimEnabled !== 'undefined'
+      typeof updateWorkspaceDto.isScimEnabled !== 'undefined' ||
+      typeof updateWorkspaceDto.allowPersonalSpaces !== 'undefined'
     ) {
       const ws = await this.db
         .selectFrom('workspaces')
@@ -368,6 +369,18 @@ export class WorkspaceService {
           throw new ForbiddenException(
             'This feature requires a valid license',
           );
+        }
+      }
+
+      if (typeof updateWorkspaceDto.allowPersonalSpaces !== 'undefined') {
+        if (
+          !this.licenseCheckService.hasFeature(
+            ws.licenseKey,
+            Feature.PERSONAL_SPACES,
+            ws.plan,
+          )
+        ) {
+          throw new ForbiddenException('This feature requires a valid license');
         }
       }
 
@@ -510,6 +523,20 @@ export class WorkspaceService {
         );
       }
 
+      if (typeof updateWorkspaceDto.allowPersonalSpaces !== 'undefined') {
+        const prev = settingsBefore?.spaces?.allowPersonal ?? false;
+        if (prev !== updateWorkspaceDto.allowPersonalSpaces) {
+          before.allowPersonalSpaces = prev;
+          after.allowPersonalSpaces = updateWorkspaceDto.allowPersonalSpaces;
+        }
+        await this.workspaceRepo.updateSpaceSettings(
+          workspaceId,
+          'allowPersonal',
+          updateWorkspaceDto.allowPersonalSpaces,
+          trx,
+        );
+      }
+
       if (typeof updateWorkspaceDto.brandPrimaryColor !== 'undefined') {
         const prev = settingsBefore?.branding?.primaryColor ?? null;
         if (prev !== updateWorkspaceDto.brandPrimaryColor) {
@@ -573,6 +600,7 @@ export class WorkspaceService {
       delete updateWorkspaceDto.mcpEnabled;
       delete updateWorkspaceDto.allowMemberTemplates;
       delete updateWorkspaceDto.aiChat;
+      delete updateWorkspaceDto.allowPersonalSpaces;
       delete updateWorkspaceDto.brandPrimaryColor;
       delete updateWorkspaceDto.brandFaviconUrl;
       delete updateWorkspaceDto.brandCustomCss;
@@ -884,7 +912,7 @@ export class WorkspaceService {
       await this.userRepo.updateUser(
         {
           name: 'Deleted user',
-          email: v4() + '@deleted.docmost.com',
+          email: v4() + '@deleted.likh.app',
           avatarUrl: null,
           settings: null,
           deletedAt: new Date(),

@@ -18,6 +18,7 @@ const enterpriseFeatures = [
   "Confluence Import",
   "PDF & DOCX Import",
   "Templates",
+  "Personal Spaces"
 ];
 
 export default function OssDetails() {
@@ -73,11 +74,11 @@ export default function OssDetails() {
         <Text size="sm" c="dimmed">
           Get an enterprise trial key at{" "}
           <a
-            href="https://customers.docmost.com/"
+            href="https://likh.app/customers/"
             target="_blank"
             rel="noopener noreferrer"
           >
-            customers.docmost.com
+            likh.app/customers
           </a>
           .
         </Text>
@@ -85,17 +86,17 @@ export default function OssDetails() {
         <Text size="sm" c="dimmed">
           Visit{" "}
           <a
-            href="https://docmost.com/pricing"
+            href="https://likh.app/pricing"
             target="_blank"
             rel="noopener noreferrer"
           >
-            docmost.com/pricing
+            likh.app/pricing
           </a>{" "}
           to purchase an enterprise license.
         </Text>
         <Text size="sm" c="dimmed">
           For inquiries, contact{" "}
-          <a href="mailto:sales@docmost.com">sales@docmost.com</a>
+          <a href="mailto:sales@likh.app">sales@likh.app</a>
         </Text>
       </Stack>
     </Stack>

@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { SearchDTO, SearchSuggestionDTO } from './dto/search.dto';
 import { SearchResponseDto } from './dto/search-response.dto';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import { sql } from 'kysely';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { ShareRepo } from '@docmost/db/repos/share/share.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
+import { PageRepo } from '@likh/db/repos/page/page.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
+import { ShareRepo } from '@likh/db/repos/share/share.repo';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const tsquery = require('pg-tsquery')();

@@ -1,7 +1,8 @@
 {
-  "name": "@docmost/editor-ext",
-  "homepage": "https://docmost.com",
+  "name": "@likh/editor-ext",
+  "homepage": "https://likh.app",
   "private": true,
+  "sideEffects": false,
   "scripts": {
     "build": "tsc --build",
     "dev": "tsc --watch"

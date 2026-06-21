@@ -1,12 +1,12 @@
 import { BubbleMenu as BaseBubbleMenu } from "@tiptap/react/menus";
 import { posToDOMRect, findParentNode } from "@tiptap/react";
 import { Node as PMNode } from "@tiptap/pm/model";
-import React, { useCallback } from "react";
+import React, { useCallback, type JSX } from "react";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Editor } from "@tiptap/core";
-import { isEditorReady } from "@docmost/editor-ext";
+import { isEditorReady } from "@likh/editor-ext";
 
 interface SubpagesMenuProps {
   editor: Editor;

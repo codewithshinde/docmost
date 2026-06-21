@@ -89,7 +89,7 @@ export function AppHeader() {
           <Link to="/home" className={classes.brand} aria-label="Likh">
             <Box hiddenFrom="sm" className={classes.brandIcon}>
               <img
-                src="/icons/favicon-32x32.png"
+                src="/icons/likh-logo.svg"
                 alt="Likh"
                 width={22}
                 height={22}

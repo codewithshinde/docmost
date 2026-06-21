@@ -1,5 +1,5 @@
 import { IsDateString, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 
 export class AuditLogParamsDto extends PaginationOptions {
   @IsOptional()

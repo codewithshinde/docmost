@@ -8,16 +8,16 @@ import {
   IWebhookDeliveryJob,
 } from '../constants/queue.interface';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
+import { KyselyDB } from '@likh/db/types/kysely.types';
+import { BacklinkRepo } from '@likh/db/repos/backlink/backlink.repo';
 import {
   WatcherRepo,
   WatcherType,
-} from '@docmost/db/repos/watcher/watcher.repo';
-import { InsertableWatcher } from '@docmost/db/types/entity.types';
+} from '@likh/db/repos/watcher/watcher.repo';
+import { InsertableWatcher } from '@likh/db/types/entity.types';
 import { processBacklinks } from '../tasks/backlinks.task';
-import { WebhookRepo } from '@docmost/db/repos/webhook/webhook.repo';
-import { WebhookDeliveryRepo } from '@docmost/db/repos/webhook/webhook-delivery.repo';
+import { WebhookRepo } from '@likh/db/repos/webhook/webhook.repo';
+import { WebhookDeliveryRepo } from '@likh/db/repos/webhook/webhook-delivery.repo';
 import { EncryptionService } from '../../crypto/encryption.service';
 import { createHmac } from 'node:crypto';
 
@@ -124,11 +124,11 @@ export class GeneralQueueProcessor
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'user-agent': 'Docmost-Webhooks/1.0',
-          'x-docmost-event': delivery.event,
-          'x-docmost-delivery': delivery.id,
-          'x-docmost-timestamp': timestamp,
-          'x-docmost-signature': `sha256=${signature}`,
+          'user-agent': 'Likh-Webhooks/1.0',
+          'x-likh-event': delivery.event,
+          'x-likh-delivery': delivery.id,
+          'x-likh-timestamp': timestamp,
+          'x-likh-signature': `sha256=${signature}`,
         },
         body,
       });

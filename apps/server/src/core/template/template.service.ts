@@ -4,10 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TemplateRepo } from '@docmost/db/repos/template/template.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { Page, Template, User, Workspace } from '@docmost/db/types/entity.types';
+import { TemplateRepo } from '@likh/db/repos/template/template.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { Page, Template, User, Workspace } from '@likh/db/types/entity.types';
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import {

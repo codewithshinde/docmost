@@ -403,7 +403,7 @@ export class EnvironmentService {
   getVapidSubject(): string {
     return this.configService.get<string>(
       'VAPID_SUBJECT',
-      `mailto:support@docmost.com`,
+      `mailto:support@likh.app`,
     );
   }
 

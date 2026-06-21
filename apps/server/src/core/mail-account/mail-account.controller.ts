@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { User } from '@docmost/db/types/entity.types';
+import { User } from '@likh/db/types/entity.types';
 import { MailAccountService } from './mail-account.service';
 import {
   GetMailMessageDto,

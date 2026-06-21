@@ -7,7 +7,7 @@ import {
 import * as jwt from 'jsonwebtoken';
 import type * as OpenIdClient from 'openid-client';
 import { EnvironmentService } from '../../integrations/environment/environment.service';
-import { AuthProvider } from '@docmost/db/types/entity.types';
+import { AuthProvider } from '@likh/db/types/entity.types';
 import { loadOpenIdClient } from './oidc-client.loader';
 
 const OIDC_SCOPE = 'openid email profile';

@@ -14,7 +14,7 @@ export default function ShareBranding() {
         variant="default"
         component="a"
         target="_blank"
-        href="https://docmost.com?ref=public-share"
+        href="https://likh.app?ref=public-share"
       >
         Powered by Likh
       </Button>

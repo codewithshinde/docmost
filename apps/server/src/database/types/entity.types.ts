@@ -60,7 +60,7 @@ import {
   CalendarEventAttendees,
   UserMailAccounts,
 } from './db';
-import { PageEmbeddings } from '@docmost/db/types/embeddings.types';
+import { PageEmbeddings } from '@likh/db/types/embeddings.types';
 
 // AI Chat
 export type AiChat = Selectable<AiChats>;

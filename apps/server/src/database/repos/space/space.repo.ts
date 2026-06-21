@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB, KyselyTransaction } from '@docmost/db/types/kysely.types';
-import { dbOrTx } from '@docmost/db/utils';
+import { KyselyDB, KyselyTransaction } from '@likh/db/types/kysely.types';
+import { dbOrTx } from '@likh/db/utils';
 import {
   InsertableSpace,
   Space,
   UpdatableSpace,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 import { ExpressionBuilder, sql } from 'kysely';
 import { PaginationOptions } from '../../pagination/pagination-options';
-import { executeWithCursorPagination } from '@docmost/db/pagination/cursor-pagination';
-import { DB } from '@docmost/db/types/db';
+import { executeWithCursorPagination } from '@likh/db/pagination/cursor-pagination';
+import { DB } from '@likh/db/types/db';
 import { validate as isValidUUID } from 'uuid';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from '../../../common/events/event.contants';
@@ -54,6 +54,22 @@ export class SpaceRepo {
       .$if(opts?.includeMemberCount, (qb) => qb.select(this.withMemberCount))
       .where(sql`LOWER(slug)`, '=', sql`LOWER(${slug})`)
       .where('workspaceId', '=', workspaceId)
+      .executeTakeFirst();
+  }
+
+  async findPersonalSpace(
+    userId: string,
+    workspaceId: string,
+    trx?: KyselyTransaction,
+  ): Promise<Space | undefined> {
+    const db = dbOrTx(this.db, trx);
+    return db
+      .selectFrom('spaces')
+      .selectAll('spaces')
+      .where('workspaceId', '=', workspaceId)
+      .where('creatorId', '=', userId)
+      .where('isPersonal', '=', true)
+      .where('deletedAt', 'is', null)
       .executeTakeFirst();
   }
 

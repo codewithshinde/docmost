@@ -6,22 +6,22 @@ import {
 } from '@nestjs/common';
 import { CreatePageDto, ContentFormat } from '../dto/create-page.dto';
 import { ContentOperation, UpdatePageDto } from '../dto/update-page.dto';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { InsertablePage, Page, User } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { PageRepo } from '@likh/db/repos/page/page.repo';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
+import { InsertablePage, Page, User } from '@likh/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 import {
   CursorPaginationResult,
   executeWithCursorPagination,
-} from '@docmost/db/pagination/cursor-pagination';
+} from '@likh/db/pagination/cursor-pagination';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import { generateJitteredKeyBetween } from 'fractional-indexing-jittered';
 import { MovePageDto } from '../dto/move-page.dto';
 import { generateSlugId } from '../../../common/helpers';
 import { getPageTitle } from '../../../common/helpers';
-import { executeTx } from '@docmost/db/utils';
-import { AttachmentRepo } from '@docmost/db/repos/attachment/attachment.repo';
+import { executeTx } from '@likh/db/utils';
+import { AttachmentRepo } from '@likh/db/repos/attachment/attachment.repo';
 import { v7 as uuid7 } from 'uuid';
 import {
   createYdocFromJson,
@@ -51,7 +51,7 @@ import {
   INTERNAL_LINK_REGEX,
   extractPageSlugId,
 } from '../../../integrations/export/utils';
-import { markdownToHtml } from '@docmost/editor-ext';
+import { markdownToHtml } from '@likh/editor-ext';
 import { WatcherService } from '../../watcher/watcher.service';
 import { sql } from 'kysely';
 import { TransclusionService } from '../transclusion/transclusion.service';

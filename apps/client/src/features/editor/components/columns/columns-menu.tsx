@@ -19,8 +19,8 @@ import {
   IconCopy,
   IconTrash,
 } from "@tabler/icons-react";
-import { isEditorReady, isTextSelected } from "@docmost/editor-ext";
-import type { WidthMode, ColumnsLayout } from "@docmost/editor-ext";
+import { isEditorReady, isTextSelected } from "@likh/editor-ext";
+import type { WidthMode, ColumnsLayout } from "@likh/editor-ext";
 import { useTranslation } from "react-i18next";
 import classes from "../common/toolbar-menu.module.css";
 
@@ -69,7 +69,7 @@ export function ColumnsMenu({ editor }: EditorMenuProps) {
   const { t } = useTranslation();
   const [isCountOpen, setIsCountOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const nodesWithMenus = [
     "callout",

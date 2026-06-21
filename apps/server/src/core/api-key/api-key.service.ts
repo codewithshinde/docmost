@@ -4,9 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiKeyRepo } from '@docmost/db/repos/api-key/api-key.repo';
-import { ApiKey, User, Workspace } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
+import { ApiKeyRepo } from '@likh/db/repos/api-key/api-key.repo';
+import { ApiKey, User, Workspace } from '@likh/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
 import { TokenService } from '../auth/services/token.service';
 import WorkspaceAbilityFactory from '../casl/abilities/workspace-ability.factory';
 import {

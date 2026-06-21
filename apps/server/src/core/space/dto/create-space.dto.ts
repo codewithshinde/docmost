@@ -1,7 +1,7 @@
 import {
-  IsAlphanumeric,
   IsOptional,
   IsString,
+  Matches,
   IsUUID,
   MaxLength,
   MinLength,
@@ -21,7 +21,10 @@ export class CreateSpaceDto {
 
   @MinLength(2)
   @MaxLength(100)
-  @IsAlphanumeric()
+  @Matches(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, {
+    message:
+      'Space slug must start with a letter or number and may contain hyphens and underscores',
+  })
   slug: string;
 
   @IsOptional()

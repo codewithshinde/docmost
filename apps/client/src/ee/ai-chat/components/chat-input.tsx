@@ -7,7 +7,7 @@ import { EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { CharacterCount } from "@tiptap/extensions";
 import { StarterKit } from "@tiptap/starter-kit";
-import { Mention, LinkExtension } from "@docmost/editor-ext";
+import { Mention, LinkExtension } from "@likh/editor-ext";
 import EmojiCommand from "@/features/editor/extensions/emoji-command";
 import mentionRenderItems from "@/features/editor/components/mention/mention-suggestion";
 import MentionView from "@/features/editor/components/mention/mention-view";
@@ -177,7 +177,7 @@ export default function ChatInput({
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (!editor || isStreaming) return;
+    if (!editor || editor.isDestroyed || isStreaming) return;
     const json = editor.getJSON();
     const text = editorJsonToText(json).trim();
     const readyAttachments = pendingAttachments.filter((a) => !a.uploading);
@@ -264,7 +264,7 @@ export default function ChatInput({
   });
 
   useEffect(() => {
-    if (editor && autofocus) {
+    if (editor && !editor.isDestroyed && autofocus) {
       editor.commands.focus();
     }
   }, [editor]);

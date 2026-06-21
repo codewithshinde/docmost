@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as path from 'path';
 import { jsonToText } from '../../../collaboration/collaboration.util';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import {
   extractZip,
   FileImportSource,
@@ -17,8 +17,8 @@ import { promises as fs } from 'fs';
 import { generateSlugId } from '../../../common/helpers';
 import { v7 } from 'uuid';
 import { generateJitteredKeyBetween } from 'fractional-indexing-jittered';
-import { FileTask, InsertablePage } from '@docmost/db/types/entity.types';
-import { markdownToHtml } from '@docmost/editor-ext';
+import { FileTask, InsertablePage } from '@likh/db/types/entity.types';
+import { markdownToHtml } from '@likh/editor-ext';
 import { getProsemirrorContent } from '../../../common/helpers/prosemirror/utils';
 import { formatImportHtml } from '../utils/import-formatter';
 import {
@@ -26,11 +26,11 @@ import {
   collectMarkdownAndHtmlFiles,
   encodeFilePath,
   extractNotionPartialId,
-  readDocmostMetadata,
+  readLikhMetadata,
   stripNotionID,
 } from '../utils/import.utils';
-import { executeTx } from '@docmost/db/utils';
-import { BacklinkRepo } from '@docmost/db/repos/backlink/backlink.repo';
+import { executeTx } from '@likh/db/utils';
+import { BacklinkRepo } from '@likh/db/repos/backlink/backlink.repo';
 import { ImportAttachmentService } from './import-attachment.service';
 import { ModuleRef } from '@nestjs/core';
 import { PageService } from '../../../core/page/services/page.service';
@@ -81,13 +81,13 @@ export class FileImportTaskService {
     }
 
     const { path: tmpZipPath, cleanup: cleanupTmpFile } = await tmp.file({
-      prefix: 'docmost-import',
+      prefix: 'likh-import',
       postfix: '.zip',
       discardDescriptor: true,
     });
 
     const { path: tmpExtractDir, cleanup: cleanupTmpDir } = await tmp.dir({
-      prefix: 'docmost-extract-',
+      prefix: 'likh-extract-',
       unsafeCleanup: true,
     });
 
@@ -164,7 +164,7 @@ export class FileImportTaskService {
     const isNotion = fileTask.source === FileImportSource.Notion;
     const allFiles = await collectMarkdownAndHtmlFiles(extractDir);
     const attachmentCandidates = await buildAttachmentCandidates(extractDir);
-    const docmostMetadata = await readDocmostMetadata(extractDir);
+    const likhMetadata = await readLikhMetadata(extractDir);
 
     const space = await this.db
       .selectFrom('spaces')
@@ -182,7 +182,7 @@ export class FileImportTaskService {
       const ext = path.extname(relPath).toLowerCase();
 
       const encodedPath = encodeFilePath(relPath);
-      const pageMetadata = docmostMetadata?.pages[encodedPath];
+      const pageMetadata = likhMetadata?.pages[encodedPath];
 
       pagesMap.set(relPath, {
         id: v7(),
@@ -291,7 +291,7 @@ export class FileImportTaskService {
 
         if (!matched) {
           const encodedMdPath = encodeFilePath(mdPath);
-          const placeholderMetadata = docmostMetadata?.pages[encodedMdPath];
+          const placeholderMetadata = likhMetadata?.pages[encodedMdPath];
           pagesMap.set(mdPath, {
             id: v7(),
             slugId: generateSlugId(),
@@ -337,7 +337,7 @@ export class FileImportTaskService {
     });
 
     const encodedPathsMap = new Map<string, string>();
-    if (docmostMetadata) {
+    if (likhMetadata) {
       pagesMap.forEach((_, filePath) => {
         encodedPathsMap.set(filePath, encodeFilePath(filePath));
       });
@@ -345,12 +345,12 @@ export class FileImportTaskService {
 
     // Sort siblings by metadata position if available, otherwise alphabetically
     const sortSiblings = (siblings: ImportPageNode[]) => {
-      if (docmostMetadata) {
+      if (likhMetadata) {
         siblings.sort((a, b) => {
           const posA =
-            docmostMetadata.pages[encodedPathsMap.get(a.filePath)]?.position;
+            likhMetadata.pages[encodedPathsMap.get(a.filePath)]?.position;
           const posB =
-            docmostMetadata.pages[encodedPathsMap.get(b.filePath)]?.position;
+            likhMetadata.pages[encodedPathsMap.get(b.filePath)]?.position;
           if (posA && posB) {
             // Use direct comparison to match PostgreSQL collation 'C' (byte order)
             if (posA < posB) return -1;

@@ -1,6 +1,6 @@
 # Storage integrations
 
-Docmost supports the built-in local storage driver and S3-compatible object
+Likh supports the built-in local storage driver and S3-compatible object
 storage for production attachments.
 
 ## Local

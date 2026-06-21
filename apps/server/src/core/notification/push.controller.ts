@@ -9,9 +9,9 @@ import {
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../common/decorators/auth-workspace.decorator';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@likh/db/types/entity.types';
 import { WebPushService } from '../../integrations/webpush/webpush.service';
-import { PushSubscriptionRepo } from '@docmost/db/repos/notification/push-subscription.repo';
+import { PushSubscriptionRepo } from '@likh/db/repos/notification/push-subscription.repo';
 import { SubscribePushDto, UnsubscribePushDto } from './dto/push-subscription.dto';
 
 @UseGuards(JwtAuthGuard)

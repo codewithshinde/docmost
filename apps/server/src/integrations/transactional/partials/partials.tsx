@@ -30,7 +30,7 @@ export function MailBody({ children }: MailBodyProps) {
 export function MailHeader() {
   return (
     <Section style={logo}>
-      {/* <Heading style={h1}>docmost</Heading> */}
+      {/* <Heading style={h1}>likh</Heading> */}
     </Section>
   );
 }

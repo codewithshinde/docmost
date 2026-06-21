@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { EditorProvider } from "@tiptap/react";
 import { mainExtensions } from "@/features/editor/extensions/extensions";
 import { Document } from "@tiptap/extension-document";
-import { Heading, UniqueID } from "@docmost/editor-ext";
+import { Heading, UniqueID } from "@likh/editor-ext";
 import { Text } from "@tiptap/extension-text";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { useAtom } from "jotai";
@@ -15,6 +15,7 @@ interface PageEditorProps {
   title: string;
   content: any;
   pageId?: string;
+  printMode?: boolean;
   /**
    * When rendering inside a public share, pass the share's id (or key). Lookups
    * for transclusion content then resolve against the share graph instead of
@@ -28,6 +29,7 @@ export default function ReadonlyPageEditor({
   title,
   content,
   pageId,
+  printMode = false,
   shareId,
 }: PageEditorProps) {
   const [, setReadOnlyEditor] = useAtom(readOnlyEditorAtom);
@@ -48,8 +50,12 @@ export default function ReadonlyPageEditor({
   }, []);
 
   const extensions = useMemo(() => {
+    const excludedExtensions = new Set([
+      "uniqueID",
+      ...(printMode ? ["tableHeaderPin", "tableReadonlySort"] : []),
+    ]);
     const filteredExtensions = mainExtensions.filter(
-      (ext) => ext.name !== "uniqueID",
+      (ext) => !excludedExtensions.has(ext.name),
     );
 
     return [
@@ -59,7 +65,7 @@ export default function ReadonlyPageEditor({
         updateDocument: false,
       }),
     ];
-  }, []);
+  }, [printMode]);
 
   const titleExtensions = [
     Document.extend({

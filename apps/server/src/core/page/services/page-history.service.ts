@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PageHistoryRepo } from '@docmost/db/repos/page/page-history.repo';
-import { PageHistory } from '@docmost/db/types/entity.types';
-import { PaginationOptions } from '@docmost/db/pagination/pagination-options';
-import { CursorPaginationResult } from '@docmost/db/pagination/cursor-pagination';
+import { PageHistoryRepo } from '@likh/db/repos/page/page-history.repo';
+import { PageHistory } from '@likh/db/types/entity.types';
+import { PaginationOptions } from '@likh/db/pagination/pagination-options';
+import { CursorPaginationResult } from '@likh/db/pagination/cursor-pagination';
 
 @Injectable()
 export class PageHistoryService {

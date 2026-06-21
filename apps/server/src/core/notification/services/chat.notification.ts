@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import { NotificationService } from '../notification.service';
 import { NotificationType } from '../notification.constants';
 import { WebPushService } from '../../../integrations/webpush/webpush.service';
-import { ChannelMemberRepo } from '@docmost/db/repos/chat/channel-member.repo';
+import { ChannelMemberRepo } from '@likh/db/repos/chat/channel-member.repo';
 
 const MESSAGE_PREVIEW_LENGTH = 140;
 

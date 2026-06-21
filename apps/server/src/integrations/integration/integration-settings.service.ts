@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IntegrationSettingsRepo } from '@docmost/db/repos/integration/integration-settings.repo';
+import { IntegrationSettingsRepo } from '@likh/db/repos/integration/integration-settings.repo';
 import { EncryptionService } from '../crypto/encryption.service';
 import { EnvironmentService } from '../environment/environment.service';
 import {

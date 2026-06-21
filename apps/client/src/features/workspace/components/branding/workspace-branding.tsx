@@ -13,7 +13,7 @@ export default function WorkspaceBranding({
   }
 
   const primaryColorCss = branding.primaryColor
-    ? `:root { --docmost-brand-primary-color: ${branding.primaryColor}; }`
+    ? `:root { --likh-brand-primary-color: ${branding.primaryColor}; }`
     : "";
 
   return (

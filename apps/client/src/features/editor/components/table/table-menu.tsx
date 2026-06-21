@@ -1,6 +1,6 @@
 import { posToDOMRect, findParentNode } from "@tiptap/react";
 import { Node as PMNode } from "@tiptap/pm/model";
-import React, { useCallback } from "react";
+import React, { useCallback, type JSX } from "react";
 import {
   EditorMenuProps,
   ShouldShowProps,
@@ -18,7 +18,7 @@ import {
   IconTrashX,
 } from "@tabler/icons-react";
 import { BubbleMenu } from "@tiptap/react/menus";
-import { isCellSelection, isEditorReady, isTextSelected } from "@docmost/editor-ext";
+import { isCellSelection, isEditorReady, isTextSelected } from "@likh/editor-ext";
 import { useTranslation } from "react-i18next";
 import classes from "../common/toolbar-menu.module.css";
 

@@ -4,7 +4,7 @@ import { AddReactionDto, RemoveReactionDto } from './dto/reaction.dto';
 import { AuthUser } from '../../../common/decorators/auth-user.decorator';
 import { AuthWorkspace } from '../../../common/decorators/auth-workspace.decorator';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { User, Workspace } from '@docmost/db/types/entity.types';
+import { User, Workspace } from '@likh/db/types/entity.types';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reactions')

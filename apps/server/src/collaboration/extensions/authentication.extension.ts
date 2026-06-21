@@ -6,11 +6,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TokenService } from '../../core/auth/services/token.service';
-import { UserRepo } from '@docmost/db/repos/user/user.repo';
-import { PageRepo } from '@docmost/db/repos/page/page.repo';
-import { SpaceMemberRepo } from '@docmost/db/repos/space/space-member.repo';
-import { PagePermissionRepo } from '@docmost/db/repos/page/page-permission.repo';
-import { findHighestUserSpaceRole } from '@docmost/db/repos/space/utils';
+import { UserRepo } from '@likh/db/repos/user/user.repo';
+import { PageRepo } from '@likh/db/repos/page/page.repo';
+import { SpaceMemberRepo } from '@likh/db/repos/space/space-member.repo';
+import { PagePermissionRepo } from '@likh/db/repos/page/page-permission.repo';
+import { findHighestUserSpaceRole } from '@likh/db/repos/space/utils';
 import { SpaceRole } from '../../common/helpers/types/permission';
 import { isUserDisabled } from '../../common/helpers';
 import { getPageId } from '../collaboration.util';

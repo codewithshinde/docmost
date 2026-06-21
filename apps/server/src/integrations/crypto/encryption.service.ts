@@ -20,8 +20,8 @@ export class EncryptionService {
   constructor(private readonly environmentService: EnvironmentService) {
     const secret =
       this.environmentService.getAppSecret() ||
-      'docmost-default-insecure-app-secret';
-    this.key = scryptSync(secret, 'docmost-integration-secrets', 32);
+      'likh-default-insecure-app-secret';
+    this.key = scryptSync(secret, 'likh-integration-secrets', 32);
   }
 
   encrypt(plain: string): string {

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectKysely } from 'nestjs-kysely';
-import { KyselyDB } from '@docmost/db/types/kysely.types';
+import { KyselyDB } from '@likh/db/types/kysely.types';
 import {
   InsertablePushSubscription,
   PushSubscription,
-} from '@docmost/db/types/entity.types';
+} from '@likh/db/types/entity.types';
 
 @Injectable()
 export class PushSubscriptionRepo {
